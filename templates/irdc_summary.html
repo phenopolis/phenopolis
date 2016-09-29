@@ -1,0 +1,419 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1> 
+</h1>
+
+<link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
+<link rel="stylesheet"  type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
+<style>
+    svg path {
+        -webkit-transition: fill 0.8s; /* Safari */
+        transition: fill 0.8s;
+    }
+/* disable text selection */
+      svg *::selection {
+         background : transparent;
+      }
+     
+      svg *::-moz-selection {
+         background:transparent;
+      } 
+     
+      svg *::-webkit-selection {
+         background:transparent;
+      }
+      rect.selection {
+        stroke          : #333;
+        stroke-dasharray: 4px;
+        stroke-opacity  : 0.5;
+        fill            : transparent;
+      }
+
+      rect.cell-border {
+        stroke: #eee;
+        stroke-width:0.3px;   
+      }
+
+      rect.cell-selected {
+        stroke: rgb(51,102,153);
+        stroke-width:0.5px;   
+      }
+
+      rect.cell-hover {
+        stroke: #F00;
+        stroke-width:0.3px;   
+      }
+
+      text.mono {
+        font-size: 7pt;
+        font-family: Consolas, courier;
+        fill: #aaa;
+      }
+
+      text.text-selected {
+        fill: #000;
+      }
+
+      text.text-highlight {
+        fill: #c00;
+      }
+      text.text-hover {
+        fill: #00C;
+      }
+      #tooltip {
+        position: absolute;
+        width: 200px;
+        height: auto;
+        padding: 10px;
+        background-color: white;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+      }
+
+      #tooltip.hidden {
+        display: none;
+      }
+
+      #tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 12px;
+        line-height: 20px;
+      }
+    .popover {
+        text-align: center;
+    }
+    .node:hover {
+        cursor:pointer;
+    }
+    div.copy {
+        height: 200px;
+        width: 300px;
+    }
+    img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    div.hpo {
+        height: 700px;
+    }
+   </style>
+
+<script type="text/javascript">
+{# window.variants = {{individual.variants|tojson|safe}}; #}
+window.variants = [];
+</script>
+<h2>UKIRDC Summary</h2>
+<ul class="nav nav-tabs" role="tablist">
+    <li class="active"><a href="#tab1" class="tab-li" role="tab" data-toggle="tab" id="hpo-tab">Phenotype</a></li> 
+    <li><a href="#tab2" role="tab" class="tab-li" data-toggle="tab" id="empty-tab">Nothing yet</a></li>
+</ul>
+<div class="tab-content">
+    <!--hom-comp-->
+    <div id="tab1" role="tabpanel" class="tab-pane active">
+        <div class='row'>
+            <div class='col-md-offset-1'>
+                <br/>
+                <form role="form" id="choice-form">
+                    <label class="radio-inline">
+                        <input type="radio" name="optradio" value="centre" checked>Break down on centre
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optradio" value="sex">Break down on sex
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optradio" value="solved">Break down on solved status
+                    </label>
+                </form>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='hpo col-md-10 col-md-offset-1' id='hpo-dot'> </div>
+        </div>
+    </div>
+    <!--het-->
+    <div id='tab2' role="tabpanel" class='tab-pane'>
+        <div id="tooltip" class="hidden">
+            <p><span id="value"></p>
+        </div>
+        Order: 
+        <select id="order">
+            <option value="hclust">by cluster</option>
+            <option value="probecontrast">by patient id and hpo name</option>
+            <option value="probe">by patient id</option>
+            <option value="contrast">by hpo name</option>
+            <option value="custom">by if observed</option>
+        </select>
+        <div class='row'>
+            <div class='col-md-10 col-md-offset-1' style='overflow:auto;' id='hpo-heatmap'></div>
+        </div>
+    </div>
+</div>
+<!--modal to show genes on omim page-->
+<div class="modal fade" id="hpo-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <p id='hpo-modal-p'>
+                        
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default refresh" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
+<script src="/static/bower_components/requirejs/require.js"></script>
+<script src="/static/binomial.js"></script>
+<script src="/static/hpo_dot.js"></script>
+<script src="/static/hpo_heatmap.js"></script>
+<script type="text/javascript">
+
+requirejs.config({
+    //By default load any module IDs from js/lib
+    baseUrl: 'js',
+    //except, if the module ID starts with "app",
+    //load it from the js/app directory. paths
+    //config is relative to the baseUrl, and
+    //never includes a ".js" extension since
+    //the paths config could be for a directory.
+    paths: {
+        d3: '/static/bower_components/d3/d3',
+       // "dot-checker": '/static/bower_components/graphviz-d3-renderer/dist/dot-checker',
+        "layout-worker": '/static/bower_components/graph-viz-d3-js/dist/layout-worker',
+        worker: '/static/bower_components/requirejs-web-workers/src/worker',
+        renderer: '/static/bower_components/graph-viz-d3-js/dist/renderer'
+    }
+});
+var hpo_freq = {{ hpo_freq|safe }};
+var hpo_dot_source = {{ hpo_dot|safe }};
+// draw hpo heatmap
+//draw_hpo_heatmap(hpo_dot_source, hpo_freq,'hpo-heatmap');
+// draw hpo_dot
+var hpo_dot = convert_to_dot(hpo_dot_source.result, 'wedged');
+require(["renderer"],
+    function (renderer) {
+        // initialize svg stage
+        zoomFunc = renderer.init({element:"#hpo-dot", extend:[0.1, 10]});
+        // update stage with new dot source
+        renderer.render({source:hpo_dot, raw:hpo_dot_source.result, labelAttributer: myLabelAttributer, callBack:callback});
+        $('input:radio').change(
+            function(){
+                var chosen = $('input[name=optradio]:checked').val();
+                if (chosen == 'centre'){
+                    $('.node').find('path').remove();
+                    renderer.render({source:hpo_dot, raw:hpo_dot_source.result, labelAttributer: myLabelAttributer, callBack:callback});
+                } else {
+                    var new_dot = convert_to_others(hpo_dot_source.result, chosen);
+                    $('.node').find('path').remove();
+                    console.log(new_dot);
+                    renderer.render({source:new_dot, raw:hpo_dot_source.result, labelAttributer: myLabelAttributer, callBack:callback});
+                }
+        });
+        var transitions = {
+              new: "Save",
+                    home: "Save",
+                          fiddle: "Update",
+                                gallery: "Fork"
+                                        };
+        
+});
+function convert_to_others(data, mode){
+    // convert data to dot string for visulisation
+    var dot = 'digraph {\nsize="6,4";\n';//ratio=fill;\n';
+    // set up pie colour
+    var color = {};
+    if (mode == 'sex'){
+        var color = {'M':{'color':'steelblue'},'F':{'color':'pink'},'U':{'color':'brown'}};
+    } else if (mode == 'solved'){
+        var color = {'solved':{'color':'green'},'unsolv':{'color':'orange'}};
+    }
+    // draw legend
+    $.each(color,function(k,e){
+        dot = dot +'"' + k + '" [style="filled", fixedsized="true", fontsize="90", shape="square", width="3", fillcolor="'+e.color+'",label="'+k+'",color="transparent"];\n';
+    });
+    // draw nodes
+    $.each(data, function(key,d){
+        d.label = d.name;
+        if (d.width < 0.4){
+            d.label = '';
+        }
+        if (d.p_value == 0){
+            d.width = 0.001
+        }
+        if (d.q_value <= 0.01){
+            d.label = d.name + '**';
+        }else if (d.q_value <= 0.05){
+            d.label = d.name + '*';
+        }
+        var fillcolor = [];
+        // get color propotion
+        $.each(color,function(k,e){
+            var total = d.observed_freq.split('/')[0];
+            if (k == 'solved'){
+                //just need to do this one, no need to calculate unsolved
+                var n = 0;
+                $.each(d.patients, function(p,v){
+                    if (v.solved){
+                        n = n + 1;
+                    }
+                });
+                var propotion = n/total;
+                fillcolor.push(e.color+';'+propotion+':'+color.unsolv.color+';'+(1-propotion));
+                // break out of loop
+                return false;
+            } else {
+                // sex
+                var n = 0;
+                $.each(d.patients, function(p,v){
+                    if (v.sex == k){
+                        n = n + 1;
+                    }
+                });
+                var propotion = n/total;
+                fillcolor.push(e.color+';'+propotion);
+            }
+        });
+
+        dot = dot + '"' + d.id +  '" [style="wedged", fixedsize="true", fontsize="6", shape="doublecircle", width="' + d.width +'", fillcolor="' + fillcolor.join(':') +'", label="' + d.label +'", id="' + d.id + '", color="transparent"];\n';
+        //dot = dot + '"' + d.id +  '" [style="wedged", fixedsize="true", fontsize="6", shape="circle", width="' + d.width +'", fillcolor="red;0.3:green;0.6:orange", label="' + d.label +'", id="' + d.id + '", color="transparent"];\n';
+    });
+    // add links
+    $.each(data, function(key,value){
+        if ('is_a' in value){
+            $.each(value['is_a'], function(i, is_a){
+                dot = dot + '"' + is_a + '" -> "' + key +'" [color=grey, lty="solid"];\n';
+            });
+        }
+    });
+    return dot + '}';
+}
+// define callback
+var callback = function (data){
+    svg = d3.select('svg');
+    all_g = svg.select('g').select('g').selectAll('g.node');
+    all_g
+        .on('mouseover', showTooltip)
+        .on('mouseout', removeTooltip);
+    $('.node').on('click',function(d) {
+            // get the HPO id
+        var this_node = $(this);
+        var id = this_node.find('title').text();
+
+        // populate modal
+        $('#myModalLabel').html("<a href='/hpo/"+id+"'>"+id+', '+data[id].name+"</a>");
+        var modal_content = '<ul>';
+        // get patients in order
+        var patients = $.map(data[id]['patients'], function(v,k){return k;});
+        $.each(patients, function(i,p){
+            modal_content = modal_content + '<li><a href="/individual/'+p+'" class="tip" title="';
+            $.each(data[id]['patients'][p].hpo, function(i,v){
+                modal_content = modal_content + v + '<br/>';
+            });
+            modal_content = modal_content + '">' + p + '</a><small>['+data[id]['patients'][p].sex+']</small><ul>';
+            $.each(data[id]['patients'][p]['candidate_genes'], function(k,v){
+                modal_content = modal_content + '<li>' + v+ '</li>';
+            });
+
+            modal_content = modal_content + '</ul></li>'
+        $('#hpo-modal-p').html( modal_content );
+        $('#hpo-modal').modal('show');
+        $('.tip').tooltip({html:true});
+        //window.location.href = "https://uclex.cs.ucl.ac.uk/hpo/" + id;
+        });
+    });
+}
+//Hide the tooltip when the mouse moves away
+function removeTooltip(d) {
+
+    //Hide tooltip
+    $('.popover').each(function() {
+        $(this).remove();
+    }); 
+
+}//function removeTooltip
+//Show the tooltip on the hovered over slice
+var centres = ['OXF','LON','LDS','MAN'];
+function showTooltip(d) {
+    //Define and show the tooltip
+    $(this).popover({
+            placement: 'auto top',
+            container: '#hpo-dot',
+            trigger: 'manual',
+            position: 'fixed',
+            html : true,
+            title: function() { return d.id; },
+            content: function() {
+                // looking for corresponding data in my_data
+                var thisData = hpo_dot_source.result[d.id];
+                var content = '<b>Name:</b> '+thisData.name;
+                $.each(centres,function(i,e){
+                    content = content + '<br><b>'+e+':</b> '+thisData[e];
+                });
+                content = content +'<br><b>Exp_Freq:</b> '+thisData.expect_freq
+                    +'<br><b>Obs_Freq:</b> '+thisData.observed_freq
+                    +'<br><b>p_value:</b> '+Fixed(thisData.p_value,8,5)
+                    +'<br><b>q_value:</b> '+Fixed(thisData.q_value,8,5);
+                return content; 
+            }
+    });
+    $(this).popover('show');
+
+
+}//function showTooltip
+// custom labelAttributer
+var myLabelAttributer = function() {
+    this
+        .attr("x", function (d) {
+                return d.x;
+                })
+        .attr('y', function(d,i){
+                var pData = d3.select(this.parentNode).datum().labels;
+                return -d.y - 7*(i - pData.length/2 + 1);
+                })
+        .text(function (d) {
+                return d.text;
+                });
+
+    this.each(function(d) {
+            var self = d3.select(this);
+            d.style.map(function(e) {
+                switch (e.key) {
+                case "stroke":
+                return {key: "color", value: e.value};
+                case "font-size":
+                return {key: e.key, value: e.value + "px"};
+                default:
+                return e;
+                }
+                }).forEach(function(e) {
+                    self.style(e.key, e.value);
+                    });
+            });
+};
+function draw_hpo(my_data, mode, exac, cadd){
+
+    var returned = transform(my_data,hpo_freq,mode,exac,cadd,false);
+    var num_of_patients = returned[0];
+    var num_of_vars = returned[1];
+    var result = returned[2];
+    $('#dot-'+mode+'-pNum').text(num_of_patients);
+    $('#dot-'+mode+'-vNum').text(num_of_vars);
+    var dot = convert_to_dot(result,'filled');
+
+
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta charset='utf-8'>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<title>OpenSPP--[% entries.Name %]</title>
+
+		<!-- Bootstrap -->
+		<link href='[% bootstrap_css %]' rel='stylesheet'>
+
+		<link href='[% main_css %]' rel='stylesheet'>
+
+		<!-- Prettify -->
+		<link rel="stylesheet" href="[% prettify_css %]">
+		<style>
+			#container {
+				padding-bottom: 65px;
+			}
+			.footer {
+				position: fixed;
+				width: 100%;
+			}
+			.row.content {
+				padding-bottom: 10px;
+			}
+			[% IF !session.logged_in %]
+
+			@media (min-width: 768px) and (max-width: 991px) {
+				.blank {
+					height: 50px;
+				}
+			}
+
+			[% END %]
+		</style>
+	</head>
+ <body data-spy='scroll' data-target='.bs-docs-sidebar'>
+	<div class='blank'></div>
+	<div class='navbar navbar-inverse navbar-fixed-top'>
+		<div class='container'>
+			<div class='navbar-header'>
+				<button type="button" class="navbar-toggle" data-toggle="collapse" 
+				data-target=".navbar-collapse">
+            		<span class="sr-only">Toggle navigation</span>
+            		<span class="icon-bar"></span>
+  	          		<span class="icon-bar"></span>
+            		<span class="icon-bar"></span>
+          		</button>
+				<a href='[% home %]' class='navbar-brand'>OpenSPP</a>
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+ 					<li class='dropdown'>
+ 						<a href='#' class="dropdown-toggle" data-toggle="dropdown">
+ 							Databases <span class="caret"></span>
+ 						</a>
+ 						<ul class='dropdown-menu' role='menu'>
+ 							<li><a href="[% strain %]">Strain</a></li>
+		 					<li><a href="[% plasmid %]">Plasmid</a></li>
+		 					<li><a href="[% primer %]">Primer</a></li>
+ 						</ul>
+ 					</li>
+ 					<li><a href='[% protocols %]'>Protocols</a></li>
+ 					<li  class='active'><a href='[% tools %]'>Tools</a></li>
+ 				</ul>
+ 				[% IF session.user %]
+ 				<ul id='userIcon' class='nav navbar-nav'>
+ 					<li class='dropdown'>
+ 						<a href='#' class='dropdown-toggle' data-toggle='dropdown'>
+ 							[% session.user %] <span class="caret"></span>
+ 						</a>
+ 						<ul class='dropdown-menu' role='menu'>
+ 							[% IF session.role == 3 %]
+ 								<li><a href='[% admin_url %]'>Admin panel</a></li>
+ 							[% END %]
+							<li><a href='[% control_url %]'>Control panel</a></li>
+ 							<li><a href='[% logout_url %]'>Log out</a></li>
+ 						</ul>
+ 					</li>
+ 				</ul>
+ 				[% ELSE %]
+          		<form method='post' action='[% login_url %]' class="navbar-form navbar-right" role="form">
+            		<div class="form-group">
+              			<input type="text" name='username' placeholder="User name" 
+              			class="form-control" value="[% session.input_name %]" />
+            		</div>
+            		<div class="form-group">
+              			<input type="password" name='password' placeholder="Password" 
+              			class="form-control" />
+            		</div>
+            		<input type='hidden' name='path' value='/strain/[% entries.ID %]' />
+           			<button type="submit" class="btn btn-default" id='signin'>Sign in</button>
+          		</form>
+          		[% END %]
+        	</div><!--/.navbar-collapse -->
+		</div>
+	</div><!--navbar-->
+	<div class='container' id='container'>
+		<span id="output">[% result %]</span>
+	</div><!--container-->
+ 
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src='[% jquery %]'></script>
+  <!-- Include all compiled plugins (below), or include individual files -->
+  <script src='[% bootstrap_js %]'></script>
+  <!--prettify code-->
+  <script src="[% prettify_js %]"></script>
+  <script src="[% main_js %]"></script>
+  <script src="/javascripts/dragtable.js"></script>
+
+  <script type="text/javascript">
+
+  	$('#topcontainer').css('height',$(window).height());
+  	$('h1#title').css('margin-top',$(window).height()/3.1);
+  	
+  	
+  </script>
+  
+ </body>
+</html>

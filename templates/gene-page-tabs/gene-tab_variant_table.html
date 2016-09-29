@@ -1,0 +1,26 @@
+ <div id="gene-tab_variant_table" class="tab-pane">
+
+<div class='row'>
+    <div class='col-md-12'>
+    <table id="gene-variants-table" class="table-sorter">
+       <thead>
+          <tr>
+           {% for h in table_headers %}
+                <th>{{ h }}</th>
+           {% endfor %}
+          </tr>
+        </thead>
+        <tbody id="gene_variants_table_body">
+            {% set variant_type="gene" %} 
+            {% set genes_pubmed=[] %} 
+            {% for v in gene.variants %}
+                {% include "gene-page-tabs/gene_variant_row.tmpl" %}
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+</div>
+
+

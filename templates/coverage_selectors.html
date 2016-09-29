@@ -1,0 +1,80 @@
+<span style="float:right;" class="hidden-xs">
+
+    <span style="float: right;">
+        <label for="coverage_metric_group">
+            Coverage metric:
+        </label>
+        <span class="btn-group" data-toggle="buttons" id="coverage_metric_group">
+        <button class="btn btn-primary coverage_metric_buttons" id="covered_mean_covmet_button" data-tooltip="Per-base depth of &#xa;coverage. Capped at 100X">
+               <input type="radio">Average</input>
+        </button>
+        <button class="btn btn-primary coverage_metric_buttons" id="covered_covmet_button" data-tooltip="Fraction of individuals with&#xa;coverage above X at each base.&#xa;Use drop down below to select X.">
+                <input type="radio">Individuals over X</input>
+        </button>
+        <button class="btn btn-primary active coverage_metric_buttons" id="covered_mean_covmet_button" data-tooltip="-log10(P-value) &#xa;threshold. Capped at 20">
+                <input type="radio">-log10(P-value)</input>
+        </button>
+        <button class="btn btn-primary coverage_metric_buttons" id="covered_covmet_button" data-tooltip="Odds ratio calculated using GLM.">
+                <input type="radio">Odds Ratio</input> 
+        </button>
+        </span>
+    </span>
+    </span>
+
+    <br/>
+
+    <div class="coverage_subcat_selectors" id="over_x_select_container" style="display: none; float:right;">
+        <label for="over_x_select"> Individuals over: </label>
+        <select id="over_x_select">
+            <option>1X</option>
+            <option>5X</option>
+            <option>10X</option>
+            <option>15X</option>
+            <option>20X</option>
+            <option>25X</option>
+            <option selected>30X</option>
+            <option>50X</option>
+            <option>100X</option>
+        </select>
+    </div>
+
+    <div class="coverage_subcat_selectors" id="average_select_container" style="float:right;">
+        <label for="average_select"> Metric: </label>
+        <select id="average_select">
+            <option selected>mean</option>
+            <option>median</option>
+        </select>
+    </div>
+
+    <label for="coverage_metric_group"> Association statistic: </label>
+    <div class="coverage_subcat_selectors" id="over_x_select_container" style="display: none; float:right;">
+        <label for="over_x_select" style = "display : none">
+            Odds Ratio
+        </label>
+        <select id="over_x_select" style = "display : none">
+            <option selected>odds_ratio</option>
+        </select>
+    </div>
+
+    <div  class="coverage_subcat_selectors" id="average_select_container" style="display: none; float:right;">
+    <label for="average_select" style = "display : none">
+        -log10(P-value):
+    </label>
+    <select id="average_select" style = "display : none">
+        <option selected>-log10pvalue</option>
+    </select>
+    </div>
+
+    <div  class="coverage_subcat_selectors" id="average_select_container" style="display: none; float:right;">
+    <label for="average_select" style = "display : none">
+        Log Odds ratio:
+    </label>
+   <select id="average_select" style = "display : none">
+        <option selected>log_odds_ratio</option>
+        <option>odds_ratio</option>
+    </select>
+    </div>  
+
+</span>
+
+</span>

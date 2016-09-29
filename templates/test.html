@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% block body %}
+<style>
+            /*
+             * Base structure
+             */
+
+            /* Move down content because we have a fixed navbar that is 50px tall */
+            body {
+              padding-top: 50px;
+            }
+
+            path.link {
+              fill: none;
+              stroke: #ccc;
+              stroke-width: 1.5px;
+            }
+        </style>
+<div id='data'>
+        
+    </div>
+<script type="text/javascript">
+var relations = {{ relations|safe }}, 
+    genes = {{ genes|safe }}, 
+    omims = {{ omims|safe }};
+var diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.x, d.y]; });
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 960 - margin.left - margin.right,
+    height = 30*omims.length - margin.top - margin.bottom,
+    radius = 5;
+var svg = d3.select('#data').append('svg')
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+//draw genes
+var gene_g = svg.selectAll('g.gene')
+    .data(genes)
+  .enter()
+    .append('g')
+    .attr('class','gene')
+    .attr("transform", function(d, i) {
+         return "translate( 10," + i*30 + ")"; 
+    });
+var gene_circle = gene_g.append('circle')
+    .attr("r", function (d) { return radius; })
+    .style("fill", function(d) { return 'green'; });
+
+//draw omims
+var omim_g = svg.selectAll('g.omim')
+    .data(omims)
+  .enter()
+    .append('g')
+    .attr('class','omim')
+    .attr("transform", function(d, i) {
+         return "translate( 800," + i*30 + ")"; 
+    });
+var omim_circle = omim_g.append('circle')
+    .attr("r", function (d) { return radius; })
+    .style("fill", function(d) { return 'orange'; });
+omim_g.append('text')
+    .attr("text-anchor", "middle")
+    .text(function(d,i){return ''})
+
+//draw relations
+var path = svg.selectAll('path.link')
+    .data(relations)
+  .enter()
+    .append('path')
+    .attr('class','link')
+    .attr("d", function(d) {
+        source = {x:10, y:30*genes.indexOf(d[0])};
+        target = {x:800, y:30*omims.indexOf(d[1])};
+        return diagonal({source: source, target: target});
+      })
+</script>
+{% endblock %}

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <title>pubmedBatch</title>
+
+        <!-- Bootstrap -->
+        <link href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' rel='stylesheet'>
+        <!--link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel='stylesheet'-->
+        <link href="{{ url_for('static', filename='css/main.css') }}" rel='stylesheet'>
+
+        <!-- Prettify -->
+        <style>
+            /*
+             * Base structure
+             */
+
+            /* Move down content because we have a fixed navbar that is 50px tall */
+            body {
+              padding-top: 50px;
+            }
+
+
+            /*
+             * Global add-ons
+             */
+
+            .sub-header {
+              padding-bottom: 10px;
+              border-bottom: 1px solid #eee;
+            }
+
+            /*
+             * Top navigation
+             * Hide default border to remove 1px line.
+             */
+            .navbar-fixed-top {
+              border: 0;
+            }
+
+            /*
+             * Sidebar
+             */
+
+            /* Hide for mobile, show later */
+            .sidebar {
+              display: none;
+            }
+            @media (min-width: 768px) {
+              .sidebar {
+                    position: fixed;
+                    top: 51px;
+                    bottom: 0;
+                    left: 0;
+                    z-index: 1000;
+                    display: block;
+                    padding: 20px;
+                    overflow-x: hidden;
+                    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+                    background-color: #f5f5f5;
+                    border-right: 1px solid #eee;
+              }
+            }
+
+            /* Sidebar navigation */
+            .nav-sidebar {
+              margin-right: -21px; /* 20px padding + 1px border */
+              margin-bottom: 20px;
+              margin-left: -20px;
+            }
+            .nav-sidebar > li > a {
+              padding-right: 20px;
+              padding-left: 20px;
+            }
+            .nav-sidebar > .active > a,
+            .nav-sidebar > .active > a:hover,
+            .nav-sidebar > .active > a:focus {
+              color: #fff;
+              background-color: #428bca;
+            }
+            .mini {
+                    font-size: 10px;
+            }
+
+            /*
+             * Main content
+             */
+            .main {
+              padding: 20px;
+            }
+            @media (min-width: 768px) {
+              .main {
+                    padding-right: 40px;
+                    padding-left: 40px;
+              }
+            }
+            .main .page-header {
+              margin-top: 0;
+            }
+
+
+            /*
+             * Placeholder dashboard ideas
+             */
+
+            .placeholders {
+              margin-bottom: 30px;
+              text-align: center;
+            }
+            .placeholders h4 {
+              margin-bottom: 0;
+            }
+            .placeholder {
+              margin-bottom: 20px;
+            }
+            .placeholder img {
+              display: inline-block;
+              border-radius: 50%;
+            }
+            div#progressbar, #tablehead-div {
+                    margin-top: 15px;
+                    margin-bottom: 10px;
+                    display: none;
+            }
+            #progress-text {
+                    margin-top: 10px;
+            }
+            #tablehead-div {
+                    margin-top: 15px;
+                    margin-bottom: 15px;
+            }
+            @media (min-width: 768px) and (max-width: 991px) {
+                    .blank {
+                            height: 50px;
+                    }
+            }
+            table th {
+                    background-color: rgb(240,240,240);
+                    font-size: 80%;
+            }
+            .retnet-mode {
+                color: red;
+                font-family: "Comic Sans MS", cursive, sans-serif;
+                background-color: #F0F0F0;
+            }
+            hr {
+                line-height: 2px;
+                margin: 4px;
+            }
+            #search-term {
+                display: hide;
+            }
+        </style>
+    </head>
+ <body>
+    <div class='blank'></div>
+    <div class='navbar navbar-inverse navbar-fixed-top'>
+        <div class='container'>
+            <div class='navbar-header'>
+                <button type="button" class="navbar-toggle" data-toggle="collapse" 
+                    data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href='{{ home_pubmedbatch }}' class='navbar-brand'>pubmedBatch</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul id='userIcon' class='nav navbar-nav'>
+                    <li><a href='#'>{{ user }}</a></li>
+                </ul>
+            </div><!--/.navbar-collapse -->
+        </div>
+    </div><!--navbar-->
+    <div class='container-fluid'>
+        <div class='row'>
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    <li class="active"><b>{{ folder }}</b></li>
+                    <form name="myform" method='POST' action="/pubmedbatch_folderdel/{{ folder }}">
+                        <a href="javascript: warning()">Delete folder</a>
+                        <input type='hidden' name='user' value='{{ folder }}' />
+                    </form>
+                </ul>
+                <ul class="nav nav-sidebar mini" id='side-list'>
+                {% for d in files %}                    
+                    <li><button class='btn btn-xs btn-danger del' type='button' style='position:absolute;margin-top:8px;z-index:1000;'>x</button><a class='saved-data-list' href="#"  title = "{{ d }}">{{ d }}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <div class='row'>
+                    <div id='form'>
+                        <form role='form' method='POST' action='' id='main-form' enctype="multipart/form-data">
+                            <div class='row' style='margin-top:40px'>
+                                <div class='col-md-3'>
+                                    <div class='form-group'>
+                                        <label for='column' class='tip' title='eg. 4<sup>th</sup> column, then type <b>4</b> in the field'>Column to search</label> 
+                                        <input type='text' name='column' class='form-control' id='column' value='{{ COLUMN }}' />
+                                    </div>
+                                </div><!--col-md-3-->
+                                <div class='col-md-9'>
+                                    <div class='form-group'>
+                                        <label for='terms'>Terms to search</label> (separated by space)
+                                        <div class='row'>
+                                            <div class='col-md-4'>
+                                                <div class='input-group'>
+                                                    <div class="input-group-addon">AND</div><input type='text' name='AND' class='form-control' id='and' value='{{ AND }}' placeholder = 'dominant'/>
+                                                    </div>
+                                                </div>
+                                                <div class='col-md-8'>
+                                                    <div class='input-group'>
+                                                    <div class="input-group-addon">OR</div><input type='text' name='OR' class='form-control' id='or' value='{{ OR }}'/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--col-md-9-->
+                            </div><!--row-->
+                            <div class='row'>
+                                <div class='col-md-3'>
+                                    <div class='form-group'>
+                                        <label for='email'>Your email</label>
+                                        <input type='email' name='email' class='form-control' id='email' value='{{ EMAIL }}' />
+                                    </div>
+                                </div><!--col-md-3-->
+                                <div class='col-md-3'>
+                                    <div class='form-group'>
+                                        <label for='csv-upload'>CSV (with a header) to upload</label>
+                                        <input type='file' name='csv_upload' class='form-control' />
+                                    </div>
+                                </div><!--col-md-3-->
+                                <div class='col-md-2'>
+                                    <div class='form-group'>
+                                        <label for='pred' class='tip' title='Please check the document'>Pred cutoff</label>
+                                        <input type='text' name='pred' id='pred' value='1' />
+                                    </div>
+                                </div>
+                                <div class='col-md-2'>
+                                    <div class="form-group">
+                                        <br/>
+                                        <label style='margin-top: 10px'>
+                                            <input type="checkbox" name='verbose' value='1' checked> <span  class='tip' title='Pulling all the results?'>Verbose</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div><!--row-->
+                            <div class='row'>
+                                <div class='col-md-3'>
+                                    <div class='form-group'>
+                                        <label for='known_genes'>Genes to highlight</label>
+                                        <input type='file' name='known_genes' class='form-control' />
+                                    </div>
+                                </div><!--col-md-3-->
+                                <div class='col-md-3'>
+                                    <div class='form-group'>
+                                        <label for='mask_genes'>Genes to mask</label>
+                                        <input type='file' name='mask_genes' class='form-control' />
+                                    </div>
+                                </div><!--col-md-3-->
+                            </div><!--last form row-->
+                            <input type='hidden' name='rid' id='rid' />
+                            <div class='row'>
+                                <div class='col-md-3'>
+                                    <button type='submit' class='btn btn-success' id='submit'>Submit to pubmed</button>
+                                </div>
+                            </div><!--row-->
+                        </form>
+                    </div><!--form-->
+
+                    <div id='uploadPercentage'></div>
+                    <div class='row'><div class='col-md-12' id='progress-text'></div></div>
+                    <div id="progressbar" class="progress progress-striped active">
+                        <div class="progress-bar" style="width: 0%;"></div>
+                    </div>
+                    <div class='row' id='tablehead-div'>
+                        <div class='col-md-2'>
+                            <a href='#' id='export' type='button' class='btn btn-success'>Export to CSV</a>
+                        </div>
+                        <form class='form-inline' role='form' id='rename-form'>
+                            <div class="form-group">
+                                <input type="text" name='new-name' placeholder="rename" class="form-control" />
+                            </div>
+                            <input type='hidden' name='old-name' id='old-name' />
+                            <button class='btn btn-success' type="submit" id='rename-submit' class="btn btn-default">Rename record</button> 
+                        </form>
+                    </div>
+                    <p id='search-term'></p>
+                    <div id='table-content'></div>
+                </div>
+            </div>
+        </div><!--main row-->
+    </div><!--container-->
+    <!-- Modal -->
+    <!--warn to delete-->
+    <div class="modal fade" id="warning-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Warning</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                            Are you sure to delete this folder?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" data-dismiss="modal" id='proceed'>Proceed</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--error to rename-->
+    <div class="modal fade" id="message-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Message</h4>
+                </div>
+                <div class="modal-body">
+                    <p id='message-p'>
+                            
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default refresh" data-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src='https://code.jquery.com/jquery-2.2.0.min.js'></script>
+  <!--script src="{{ url_for('static', filename='jquery.js') }}"--></script>
+  <!-- Include all compiled plugins (below), or include individual files -->
+  <script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'></script>
+  <!--script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script-->
+  <script src="{{ url_for('static', filename='d3.v3.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='jquery.tablesorter.js') }}"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+
+  <script type="text/javascript">
+
+$('#topcontainer').css('height',$(window).height());
+$('h1#title').css('margin-top',$(window).height()/3.1);
+//set random id
+var rid = makeid(8);
+$('#rid').val(rid);
+//on saved data
+save_data = function(){
+    $('.saved-data-list').on('click', function(){
+            //get the saved file's name
+            var th = $(this);
+            th.children().remove();
+            var file = th.html();
+        
+            //dehighlight all
+            $('.saved-data-list').parent().removeClass('active');
+        
+            //get the data
+            $.post('{{ folder }}/' + file, function(data){
+                    //empty the table content
+                    $('#table-content').empty();
+                
+                    //show submit button
+                    $('#submit').show(); 
+                    data = $.parseJSON(data);
+                    // show the search term
+                    $('#search-term').html('<b>Search term: </b>' + data[2]);
+                    $('#search-term').show();
+                    
+                    // display the data
+                    displayPubmedTable(data);
+                
+                    //highlight selection
+                    th.parent().addClass('active');
+                
+                    //populate file name in the renaming form
+                    $('#old-name').val(file);
+            });
+    });
+}
+//rename 
+rename_data = function(){
+    $('#rename-submit').on('click', function(e){
+            e.preventDefault();
+            $.post('/pubmedbatch_rename/{{ folder }}', 
+                    $('#rename-form').serialize(),
+                    function(data, status) {
+                            $("#message-p").html(data);
+                            $('#message-modal').modal('show');
+    });
+    });
+}
+
+//del saved data
+delete_data = function(){
+    $('.del').on('click', function(){
+            var th = $(this);
+            var file = th.next().html();
+            $.post('/pubmedbatch_del/{{ folder }}/' + file, function(data){
+                    if (data != 1){
+                            //failed
+                            alert('Deletion failed: ' + data);
+                    } else {
+                            th.parent().remove();
+                    }
+            });
+    });
+}
+//-->
+function checkProgress(name, displayCallback) {
+        $.getJSON('/pubmedbatch_progress_bar/' + rid, function(data) {
+            displayCallback(data);
+            if ( data.status == 'done' ) {
+                $('#progressbar').removeClass('progress-striped active');
+                $('#table-content').show();
+                setTimeout(function() {
+                        //$('#main-form').hide('slow');
+                        $('#progress-text').hide('slow');
+                        $('#progressbar').hide('slow');
+                        $('.progress-bar').width(0 + '%');
+                        $('#progress-text').html('');
+                }, 500);
+                return;
+            }
+            var progress = Math.round((data.count / data.total ) * 100);
+            $('#progress').html(data.messages + ' ' + progress + '%');
+            setTimeout(function() { checkProgress(name, displayCallback) }, 400);
+        })
+}
+$('input[name="csv_upload"]').change(function(){
+        var file = this.files[0];
+        if(file.name.length < 1) {
+        }
+        //else if(file.type != 'text/csv'){
+        //      alert("Not a csv file");
+        //      $(":file").val('');
+        //}
+});
+
+$('#submit').click(function(e){
+    e.preventDefault();
+    $('#table-content').empty();
+    // hide the search term
+    $('#search-term').hide();
+    $('#search-term').html('');
+    if($(":file").val() == '' || $('#column').val() == '' || ($('#and').val() == '' && $('#or').val() == '') || $('#email').val() == ''){
+            alert("All fields (except for 'Genes to hightlight' and 'Genes to mask') must be supplied");
+            return false;
+    }
+    $('#progress-text').show();
+    $('#progressbar').show();
+    $('#progressbar').addClass('progress-striped active');
+    var formData = new FormData($('#main-form')[0]);
+            //hide submit button
+            //('#submit').hide(); 
+
+
+    $.ajax({
+        url: '',  //server script to process data
+        type: 'POST',
+        
+        xhr: function() {  // custom xhr
+            var xhr = $.ajaxSettings.xhr();
+            //Upload progress
+                            xhr.upload.addEventListener("progress", function(evt){
+                                if (evt.lengthComputable) {
+                                    //empty the table content
+                                    $('#table-content').empty();
+                                            var percentComplete = evt.loaded / evt.total;
+                                            //Do something with upload progress
+                                             $("#uploadPercentage").html('upload in progress: ' + percentComplete*100 + '%');
+                                }
+                            }, false);
+                            xhr.upload.addEventListener('load', function(e) {
+                                            // the transfer has completed and the server closed the connection.
+                                            $("#uploadPercentage").hide();
+                                            // wait a second to ensure the first call arrives
+                                            // first, then start monitoring the progress
+                                            setTimeout(function() {
+                                                    checkProgress('progress', function(data) {
+                                                       var progress = Math.round((data.count / data.total ) * 100);
+                                                       $('#progress-text').html(data.message + ' ' + progress + '%');
+                                                       $('.progress-bar').width(progress + '%');
+                                                    });
+                                            }, 1000);
+                                
+                            });
+            return xhr;
+        },
+        
+        //Ajax events
+        success: completeHandler = function(data) {
+            // data[0] are titles, data[1] is the array of data. 
+            // data[2] is the search term, data[3] is the file name.
+            //show submit button\
+            $('#submit').show(); 
+            data = $.parseJSON(data)
+                        
+            // show the search term
+            $('#search-term').html('<b>Search term: </b>' + data[2]);
+            $('#search-term').show();
+            
+            // show the table
+            displayPubmedTable(data);
+            
+            //update side list
+            $('#side-list').append("<li><button class='btn btn-xs btn-danger del' type='button' style='position:absolute;margin-top:8px;z-index:1000;'>x</button><a class='saved-data-list' href='#'  title = " +
+                data[3] + ">" + data[3] + "</a></li>");
+            save_data();rename_data();delete_data();
+        },
+        error: errorHandler = function(jqXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+        },
+        // Form data
+        data: formData,
+        //Options to tell JQuery not to process data or worry about content-type
+        cache: false,
+        contentType: false,
+        processData: false
+    }, 'json');
+
+});
+
+save_data();rename_data();delete_data();
+
+
+//warning to del user
+function warning(){
+        $('#warning-modal').modal('show');
+}
+
+//del user
+$('#proceed').on('click', function (){
+        document.myform.submit();
+});
+
+//refresh the page
+$('.refresh').on('click', function (){
+        location.reload();
+});
+
+function makeid(j)
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < j; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+    </script>
+  
+ </body>
+</html>

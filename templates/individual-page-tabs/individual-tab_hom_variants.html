@@ -1,0 +1,36 @@
+<!-- homozygous variants -->
+<div id="individual-tab_hom_variants" class="tab-pane">
+    <div class="row search-term">
+        <div class='col-md-12'>
+            <form class='form-inline'>
+                <div class='form-group'>
+                    <label>Pubmed Search term: </label> <input type='text' class='re-search-input' size="80" value='{% if 'pubmed_key' in patient %}{{ patient.pubmed_key }}{% endif %}' />
+                </div>
+                <button class='btn btn-primary btn-sm re-search'>Re-search</button>
+                <span class='updating'>updating</span>
+            </form>
+        </div>
+    </div>
+    <div id='hom-variants-div'>
+        <div class='row' class='export-row'>
+            <a href='#' type='button' class='export btn btn-success'>Export to CSV</a>
+        </div>
+            <table id="hom-variants" class="table-sorter">
+            <thead>
+                <tr>
+                    {% for h in  table_headers %}
+                    <th>{{ h }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody id="hom-variants_table_body">
+                    {% set variant_type="hom" %} 
+                    {% for v in patient.homozygous_variants %}
+                        {% include "individual-page-tabs/individual_variant_row.tmpl" %}
+                    {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

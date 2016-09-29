@@ -1,0 +1,824 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1> 
+</h1>
+<link rel="stylesheet"  type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
+<link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
+<style>
+    svg path {
+        -webkit-transition: fill 0.8s; /* Safari */
+        transition: fill 0.8s;
+    }
+    .popover {
+        text-align: center;
+    }
+    .node:hover {
+        cursor:pointer;
+    }
+    div.copy {
+        height: 200px;
+        width: 300px;
+    }
+    img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    div.hpo {
+        height: 700px;
+    }
+    h3.grey {
+        color: grey;
+    }
+    div.panel-like {
+        border: 1px grey solid;
+        border-radius: 20px;
+    }
+    span.pointer {
+        color: #3366BB;
+    }
+    span.pointer:hover {
+        cursor: pointer;
+    }
+    tr.highlight {
+       background-color: #ffa !important;
+    }
+   </style>
+
+<script type="text/javascript">
+{# window.variants = {{individual.variants|tojson|safe}}; #}
+window.variants = [];
+</script>
+
+
+<div class="row">
+    <!-- <div class="col-md-4 col-xs-10 col-xs-offset-1 col-md-offset-0"> -->
+        <dl class="dl-horizontal">
+            <dt>{{ gene.gene_name }}</dt>
+            <dd>{{ gene.full_gene_name }}</dd>
+            <dt>Number of variants</dt>
+            <dd><span id="number_of_variants"> {{ gene.variants|length }}</span></dd>
+{#                    <dt>Number of LoF variants</dt>#}
+{#                    <dd><span id="number_of_lof_variants"></span> (Including filtered: {{ lof_variants_in_gene|length }})</dd>#}
+{#                    <dt>LoF rate</dt>#}
+{#                    <dd>{{ '%0.4g' % composite_lof_frequency }}</dd>#}
+
+            <dt>Ensembl Browser</dt>
+            <dd class="hidden-xs">
+                <a href="http://grch37.ensembl.org/Homo_sapiens/Gene/Summary?g={{ gene.gene_id }}" target="_blank">
+                    {{gene.gene_id}}
+                    <i class="fa fa-external-link"></i>
+                </a>
+            </dd>
+            <dt class="hidden-xs">UCSC Browser</dt>
+            <dd class="hidden-xs">
+                <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ gene.chrom }}%3A{{ gene.start - 1 }}-{{ gene.stop - 1 }}" target="_blank">
+                    {{ gene.chrom }}:{{ gene.start - 1 }}-{{ gene.stop - 1 }}
+                    <i class="fa fa-external-link"></i>
+                </a>
+            </dd>
+            <dt class="hidden-xs">ExAC Browser</dt>
+            <dd class="hidden-xs">
+            <a href="http://exac.broadinstitute.org/gene/{{gene.gene_id}}" target="_blank">
+                    {{gene.gene_name}}
+                    <i class="fa fa-external-link"></i>
+                </a>
+            </dd>
+            <dt class="hidden-xs">GeneCards</dt>
+            <dd class="hidden-xs">
+                <a href="http://www.genecards.org/cgi-bin/carddisp.pl?gene={{ gene.gene_name }}" target="_blank">
+                    {{ gene.gene_name }}
+                    <i class="fa fa-external-link"></i>
+                </a>
+            </dd>
+            {% if gene.omim_accession %}
+                <dt>OMIM</dt>
+                <dd>
+                    <a href="http://omim.org/entry/{{ gene.omim_accession }}" target="_blank">
+                        {{ gene.gene_name }}
+                        <i class="fa fa-external-link"></i>
+                    </a>
+                </dd>
+            {% endif %}
+            <dt>Other</dt>
+            <dd>
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="external_ref_dropdown" data-toggle="dropdown">
+                        External References
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="external_ref_dropdown">
+                        <li role="presentation" class="visible-xs-block">
+                            <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ gene.chrom }}%3A{{ gene.start - 1 }}-{{ gene.stop - 1 }}" target="_blank">
+                                UCSC Browser
+                                <i class="fa fa-external-link"></i>
+                            </a>
+                        </li>
+                        <li role="presentation" class="visible-xs-block">
+                            <a href="http://www.genecards.org/cgi-bin/carddisp.pl?gene={{ gene.gene_name }}" target="_blank">
+                                GeneCards
+                                <i class="fa fa-external-link"></i>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="http://en.wikipedia.org/{{ gene.gene_name }}" target="_blank">
+                                Wikipedia <i class="fa fa-external-link"></i>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="http://www.ncbi.nlm.nih.gov/pubmed?term={{ gene.gene_name }}" target="_blank">
+                                PubMed Search <i class="fa fa-external-link"></i>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="http://www.wikigenes.org/?search={{ gene.gene_name }}" target="_blank">
+                                Wikigenes <i class="fa fa-external-link"></i>
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="http://www.gtexportal.org/home/gene/{{ gene.gene_name }}" target="_blank">
+                                GTEx (Expression) <i class="fa fa-external-link"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </dd>
+        </dl>
+        <!-- </div> -->
+</div>
+
+<div class='row'>
+    <div class="col-md-5 col-md-offset-1">
+        {% if constraint %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="padding-top: 4px;">Constraint <br/>from ExAC</th>
+                        <th style="padding-top: 4px; width=50%;">Expected <br/>no. variants</th>
+                        <th style="padding-top: 4px;" class="tooltip-table-header" data-tooltip="Note that these numbers only consider &#xa; rare (AF < 0.001) variation &#xa; Not all variants in the table &#xa; below may be included">Observed <br/>no. variants</th>
+                        <th style="padding-top: 4px;" class="tooltip-table-header" data-tooltip="Constraint Metric for each &#xa; category (see FAQ) &#xa; synonymous: Z score &#xa; missense: Z score&#xa; LoF: pLI">Constraint<br/>Metric</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Synonymous</td>
+                        <td>{{ "%0.1f" % constraint.exp_syn }}</td>
+                        <td>{{ "%0.0f" % constraint.n_syn }}</td>
+                        <td>z = {% if constraint.syn_z > 3.71 %}
+                            <span class="label label-danger" data-tooltip="Synonymous constraint may indicate error mode (see FAQ)">{{ "%0.2f" % constraint.syn_z }}</span>
+                            {% else %}
+                                {{ "%0.2f" % constraint.syn_z }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Missense</td>
+                        <td>{{ "%0.1f" % constraint.exp_mis }}</td>
+                        <td>{{ "%0.0f" % constraint.n_mis }}</td>
+                        <td>z = {% if constraint.mis_z > 3.09 %}
+                            <span class="label label-warning">{{ "%0.2f" % constraint.mis_z }}</span>
+                            {% else %}
+                                {{ "%0.2f" % constraint.mis_z }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tooltip-table-header" data-tooltip="Stop-gained and essential splice site">LoF</td>
+                        <td>{{ "%0.1f" % constraint.exp_lof }}</td>
+                        <td>{{ "%0.0f" % constraint.n_lof }}</td>
+                        <td class="tooltip-table-header" data-tooltip="Probability of LoF intolerance (see FAQ)">{% if constraint.pLI > 0.9 %}
+                                <span class="label label-warning">pLI</span>
+                            {% else %}
+                                pLI
+                            {% endif %} =
+                            {{ "%0.2f" % constraint.pLI }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div><!--end of row-->
+
+
+<ul class="nav nav-tabs" role="tablist">
+    <li class="active">
+    <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">HPO hom/compound-het</a>
+    </li> 
+    <li><a href="#gene-tab_het" role="tab" class="tab-li" data-toggle="tab" id="het-tab">HPO graph het</a></li>
+    <li><a href="#gene-tab_tables" role="tab" class="tab-li" data-toggle="tab" id="table-tab">HPO tables</a></li>
+    <li><a href="#gene-tab_variant_table" role="tab" class="tab-li" data-toggle="tab">variant table</a></li>
+    {# <li><a href="#gene-tab_transcript_display" role="tab" class="tab-li" data-toggle="tab">transcript display</a></li> #}
+    <li><a href="#gene-tab_hpo" role="tab" class="tab-li" data-toggle="tab">OMIM HPO terms</a></li>
+</ul>
+<div class="tab-content">
+<!-- tab 1 -->
+{% include "gene-page-tabs/gene-tab_comp.html" %}
+<!-- tab 2 -->
+{% include "gene-page-tabs/gene-tab_het.html" %}
+<!-- tab 3 -->
+{% include "gene-page-tabs/gene-tab_tables.html" %}
+<!-- tab 4 -->
+{% include "gene-page-tabs/gene-tab_variant_table.html" %}
+<!-- tab 5 -->
+{# {% include "gene-page-tabs/gene-tab_transcript_display.html" %} #}
+<!-- tab 6 -->
+{% include "gene-page-tabs/gene-tab_hpo.html" %}
+</div>
+<!--modal to show genes on omim page-->
+<div class="modal fade" id="hpo-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <p id='hpo-modal-p'>
+                        
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default refresh" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
+<script type="text/javascript" src="/static/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/static/jquery.tablesorter.widgets.js"></script>
+<script src="/static/bower_components/requirejs/require.js"></script>
+<script src="/static/binomial.js"></script>
+<script src="/static/fisher.js"></script>
+<script src="/static/hpo.js"></script>
+<script type="text/javascript">
+// tooltip
+$('.tip').tooltip({html:true});
+// ExAC/CADD_slider
+$(".slider").slider();
+
+requirejs.config({
+    //By default load any module IDs from js/lib
+    baseUrl: 'js',
+    //except, if the module ID starts with "app",
+    //load it from the js/app directory. paths
+    //config is relative to the baseUrl, and
+    //never includes a ".js" extension since
+    //the paths config could be for a directory.
+    paths: {
+        d3: '/static/bower_components/d3/d3',
+       // "dot-checker": '/static/bower_components/graphviz-d3-renderer/dist/dot-checker',
+        "layout-worker": '/static/bower_components/graph-viz-d3-js/dist/layout-worker',
+        worker: '/static/bower_components/requirejs-web-workers/src/worker',
+        renderer: '/static/bower_components/graph-viz-d3-js/dist/renderer'
+    }
+});
+var hpo_terms = {{ hpo_terms_json|safe }};
+var hom = {{ dot_hom_comp|safe }};
+var het = {{ dot_het|safe }};
+var hpo_freq = {{ hpo_freq|safe }};
+// draw hom first. can't draw two on the same page
+if ('version' in hom){
+    hom = hom.data;
+}
+if ('version' in het){
+    het = het.data;
+}
+draw_hpo(hom, 'hom_comp', 0.01, 0, false);
+$('.tab-li').on('click',function(){
+    var tabID = $(this).attr('href');
+    $('svg').remove();
+    if (tabID == '#gene-tab_comp'){
+        // get exac and cadd values
+        var exac = $('#hom_comp_exac_slider').val();
+        var cadd = $('#hom_comp_cadd_slider').val();
+        draw_hpo(hom, 'hom_comp', exac, cadd, false); 
+    } else if (tabID == '#gene-tab_het'){
+        // get remove_hom
+        var remove_hom = false;
+        if ($('#graph-remove-hom').is(':checked')){
+            remove_hom = true;
+        }
+        // get exac and cadd values
+        var exac = $('#het_exac_slider').val();
+        var cadd = $('#het_cadd_slider').val();
+        var temp = jQuery.extend(true,{}, het);
+        draw_hpo(temp, 'het', exac, cadd, remove_hom);
+    }
+});
+// draw table
+var columns = ['id','phi','p_value','pat_h','patient_size'];
+$.each(['hom_comp','het'],function(i,v){
+    if (v == 'hom_comp'){
+        getTable(hom,v,0.01,0,false);
+    }else{
+        getTable(het,v,0.001,0,false);
+    }
+});
+// update on slide on graph
+$.each(['#hom_comp','#het'],function(i,v){
+    $.each(['_exac','_cadd'],function(j,val){
+        $(v+val+"_slider").on("slide", function(slideEvt) {
+            $(v+val+"SliderVal").text(slideEvt.value);
+        });
+        $(v+val+'_slider').on('slideStop', function(slideEvt){
+            $(v+val+"SliderVal").text(slideEvt.value);
+            var exac = $(v+'_exac_slider').val();
+            var cadd = $(v+'_cadd_slider').val();
+            $('svg').remove();
+            if (v=='#hom_comp'){
+                draw_hpo(hom, 'hom_comp', exac, cadd, false);
+            } else if (v=='#het'){
+                var remove_hom = false;
+                if ($('#graph-remove-hom').is(':checked')){
+                    remove_hom = true;
+                }
+                var temp = jQuery.extend(true,{}, het);
+                draw_hpo(temp, 'het', exac, cadd, remove_hom);
+            }
+        });
+    });
+});
+// update on slide on table
+$.each(['#hom_comp','#het'],function(i,v){
+    $.each(['_exac','_cadd'],function(j,val){
+        $(v+'_table'+val+"_slider").on("slide", function(slideEvt) {
+            $(v+'_table'+val+"SliderVal").text(slideEvt.value);
+        });
+        $(v+'_table'+val+'_slider').on('slideStop', function(slideEvt){
+            $(v+'_table_body').empty();
+            $(v+'_table'+val+"SliderVal").text(slideEvt.value);
+            var exac = $(v+'_table_exac_slider').val();
+            var cadd = $(v+'_table_cadd_slider').val();
+            var remove_hom = false;
+            if ($('#graph-remove-hom').is(':checked')){
+                remove_hom = true;
+            }
+            if (v=='#hom_comp'){
+                getTable(hom,'hom_comp',exac,cadd,false);
+            } else if (v=='#het'){
+                var temp = jQuery.extend(true,{}, het);
+                getTable(temp,'het',exac,cadd,remove_hom);
+            }
+        });
+    });
+});
+
+// remove hom-comp
+$('#graph-remove-hom').on('click',function(){
+    $('svg').remove();
+    var exac = $('#het_exac_slider').val();
+    var cadd = $('#het_cadd_slider').val();
+    if($(this).is(':checked')){
+        var temp = jQuery.extend(true,{}, het);
+        draw_hpo(temp, 'het', exac, cadd, true);
+    }else{
+        draw_hpo(het, 'het', exac, cadd, false);
+    }
+});
+$('#table-remove-hom').on('click',function(){
+    $('#het_table_body').empty();
+    var exac = $('#het_table_exac_slider').val();
+    var cadd = $('#het_table_cadd_slider').val();
+    if($(this).is(':checked')){
+        var temp = jQuery.extend(true,{}, het);
+        getTable(temp, 'het', exac, cadd, true);
+    }else{
+        getTable(het, 'het', exac, cadd, false);
+    }
+});
+function draw_hpo(my_data, mode, exac, cadd, remove_hom){
+
+    var returned = transform(my_data,hpo_freq,mode,exac,cadd,remove_hom);
+    var num_of_patients = returned.pat_g;
+    var num_of_vars = returned.num_of_vars;
+    var result = returned.data;
+    $('#dot-'+mode+'-pNum').text(num_of_patients);
+    $('#dot-'+mode+'-vNum').text(num_of_vars);
+    var dot = convert_to_dot(result,'filled',hpo_terms);
+    var callback = function (data){
+        svg = d3.select('svg');
+        all_g = svg.select('g').select('g').selectAll('g.node');
+        all_g
+            .on('mouseover', showTooltip)
+            .on('mouseout', removeTooltip);
+        $('.node').on('click',function(d) {
+                // get the HPO id
+            var this_node = $(this);
+            var id = this_node.find('title').text();
+
+            // populate modal
+            $('#myModalLabel').html("<a href='/hpo/"+id+"'>"+id+', '+data[id].name+"</a>");
+            var modal_content = '<ul>';
+            // get patients in order
+            var patients = $.map(data[id]['data'], function(v,k){return k;});
+            $.each(patients, function(i,p){
+                if (p.match("^obfuscated")){
+                    modal_content = modal_content + '<li><span class="tip" title="';
+                } else {
+                    modal_content = modal_content + '<li><a href="/individual/'+p+'" class="tip" title="';
+                }
+                $.each(data[id]['data'][p].hpo, function(i,v){
+                    modal_content = modal_content + v + '<br/>';
+                });
+                modal_content = modal_content + '">' + p;
+                if (p.match("^obfuscated")){
+                modal_content = modal_content + '</span><ul>';
+                } else {
+                    modal_content = modal_content + '</a><ul>';
+                }
+                $.each(data[id]['data'][p]['var'], function(k,v){
+                    modal_content = modal_content + '<li><span class="tip" title="<b>ExAF:</b> ' + Fixed(v.exac,8,5) + '<br/><b>CADD_phred:</b> ' + v.cadd; //+ '"><a href="/variant/' + v.variant_id + '">'+ v.variant_id + '</a></span></li>';
+                    if (v.variant_id.match("hidden")){
+                        modal_content = modal_content + '">' + v.variant_id + '</span></li>';
+                    } else {
+                        modal_content = modal_content + '"><a href="/variant/' + v.variant_id + '">'+ v.variant_id + '</a></span></li>';
+
+                    }
+                });
+
+                modal_content = modal_content + '</ul></li>'
+            $('#hpo-modal-p').html( modal_content );
+            $('#hpo-modal').modal('show');
+            $('.tip').tooltip({html:true});
+            //window.location.href = "https://uclex.cs.ucl.ac.uk/hpo/" + id;
+            });
+        });
+    }
+    require(["renderer"],
+        function (renderer) {
+            // initialize svg stage
+            zoomFunc = renderer.init({element:"#dot-"+mode, extend:[0.1, 10]});
+            // update stage with new dot source
+            if (mode == 'hom_comp'){
+                renderer.render({source:dot, raw:result, labelAttributer: myLabelAttributer, callBack:callback});
+            // export image
+                $('#copy-hom-comp').on('click', function(){
+                    $('#copy-hom-comp-div').html(renderer.getImage({reset:true, zoomFunc:zoomFunc}));
+                });  
+            } else {
+                renderer.render({source:dot, raw:result, labelAttributer: myLabelAttributer, callBack:callback});
+                $('#copy-het').on('click', function(){
+                    $('#copy-het-div').html(renderer.getImage({reset:true, zoomFunc:zoomFunc}));
+                });  
+            }
+            // highlight matching hpo terms
+            $('.node').each(function(d){
+                console.log(d);
+            });
+    });
+
+
+    //Hide the tooltip when the mouse moves away
+    function removeTooltip(d) {
+        // look for the colour
+        var colour = my_data[d.id]['fillcolor']
+        //Fade out the circle to normal opacity
+        d3.select(this).select('path')
+            .attr('style', 'stroke:rgba(255,255,254,1);fill:'+colour);
+
+        //Hide tooltip
+        $('.popover').each(function() {
+            $(this).remove();
+        }); 
+
+    }//function removeTooltip
+    //Show the tooltip on the hovered over slice
+    function showTooltip(d) {
+        //Define and show the tooltip
+        $(this).popover({
+                placement: 'auto top',
+                container: '#dot-'+mode,
+                trigger: 'manual',
+                position: 'fixed',
+                html : true,
+                title: function() { return d.id; },
+                content: function() {
+                    // looking for corresponding data in my_data
+                    var thisData = my_data[d.id];
+                    var content = '<b>Name:</b> '+thisData.name
+                        +'<br><b>Exp_Freq:</b> '+thisData.expected_freq
+                        +'<br><b>Obs_Freq:</b> '+thisData.observed_freq
+                        +'<br><b>p_value:</b> '+Fixed(thisData.p_value,8,5)
+                        +'<br><b>q_value:</b> '+Fixed(thisData.q_value,8,5)
+                        +'<br><b>phi:</b>' + Fixed(thisData.phi,8,5);
+                    return content; 
+                }
+        });
+        $(this).popover('show');
+
+        //highlight
+        d3.select(this).select('path')
+            .attr("style", 'stroke:rgba(255,255,254,1);fill:#58FAF4');
+
+    }//function showTooltip
+    // custom labelAttributer
+    var myLabelAttributer = function() {
+        this
+            .attr("x", function (d) {
+                    return d.x;
+                    })
+            .attr('y', function(d,i){
+                    var pData = d3.select(this.parentNode).datum().labels;
+                    return -d.y - 7*(i - pData.length/2 + 1);
+                    })
+            .text(function (d) {
+                    return d.text;
+                    });
+
+        this.each(function(d) {
+                var self = d3.select(this);
+                d.style.map(function(e) {
+                    switch (e.key) {
+                    case "stroke":
+                    return {key: "color", value: e.value};
+                    case "font-size":
+                    return {key: e.key, value: e.value + "px"};
+                    default:
+                    return e;
+                    }
+                    }).forEach(function(e) {
+                        self.style(e.key, e.value);
+                        });
+                });
+    };
+}
+// table functions
+function getTable(input,mode,exac,cadd,remove_hom){
+    // draw the d3 table
+    returned = transform(input,hpo_freq,mode,exac,cadd,remove_hom);
+    var data = returned.data;
+    data = dictToArray(data,'p_value');
+    var table = d3.select('#'+mode+'_table_body');
+    var tr = table.selectAll('tr')
+        .data(data)
+        .enter()
+        .append('tr')
+        .attr('class',function(d){
+            if (hpo_terms.indexOf(d.id) != -1){
+                //highlight
+                return 'highlight';
+            }
+            return '';
+        });
+    var td = tr.selectAll('td')
+        .data(function(row){
+            return columns.map(function(column) {
+                if (column == 'id'){
+                    return {column: column, value: row.name, id: row[column]};
+                } else {
+                    return {column: column, value: row[column]};
+                }
+            });
+        })
+        .enter()
+        .append('td')
+        .html(function(d){
+            if (d.column == 'id'){
+                return "<a href='/hpo/" + d.id + "'>" + d.value + "</a>";
+            }else{
+                return d.value;
+            }
+        });
+    $('#'+mode+'_small').text('(Pat_a:'+returned.pat_a+', Pat_g:'+returned.pat_g+')');
+    drawTable('gene-hpo-'+mode+'-table');
+}
+// call the tablesorter plugin
+function drawTable(id){
+    $('#'+id).tablesorter({
+        theme : 'bootstrap',
+        headerTemplate : '{content}{icon}',
+        // hidden filter input/selects will resize the columns, so try to minimize the change
+        widthFixed : true,
+        // initialize zebra striping and filter widgets
+        widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
+        widgetOptions : {
+            zebra : ["even", "odd"],
+            // Use the $.tablesorter.storage utility to save the most recent filters
+            //filter_saveFilters : true,
+            // jQuery selector string of an element used to reset the filters
+            filter_reset : 'button.reset',
+            filter_columnFilters : true,
+            textSorter: {
+                 3: $.tablesorter.sortNatural,
+            }
+        }
+    });
+}
+// transfrom dict to array in order to be drawn by drawTable. Sort by p value by default
+function dictToArray(dict,sortedBy){
+    result = [];
+    $.each(dict, function(k,v){
+        // format phi and p_value
+        v.phi = formatFloat(v.phi,4);
+        v.p_value = formatFloat(v.p_value,4);
+        result.push(v);
+    });
+    //sort
+    result.sort(function(a,b){return ((a[sortedBy] < b[sortedBy]) ? -1 : ((a[sortedBy] > b[sortedBy]) ? 1 : 0));});
+    return result;
+}
+
+// format float
+function formatFloat(v,n){
+    var str = v.toExponential();
+    var [b,e] = str.split('e');
+    b = (+b).toFixed(n-1);
+    var result = b+'e'+e;
+    return +result;
+}
+</script>
+<!-- <link rel="stylesheet"  type=text/css href="/static/css/theme.blue.css"> -->
+<!-- tablesorter plugin -->
+<!--script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'></script-->
+
+<!-- not in use for now
+<script type=text/javascript>
+var tooltip = d3.select("body").append("div")
+    .attr("class", "venntooltip");
+var force_lof_het = {{ force_test|safe }};
+var width = 1080,
+    height = 1000;
+
+var color = d3.scale.category20();
+
+var force = d3.layout.force()
+    .charge(-120)
+    .linkDistance(function(d){
+            return 100/d.value;
+            })
+    .size([width, height]);
+
+var svg = d3.select("#force-lof-hom-comp").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+draw_force(force_lof_het);
+function draw_force(graph) {
+  force
+      .nodes(graph.nodes)
+      .links(graph.links)
+      .start();
+
+  var link = svg.selectAll(".link")
+      .data(graph.links)
+    .enter().append("line")
+      .attr("class", "link")
+      .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+  var node = svg.selectAll(".node")
+      .data(graph.nodes)
+    .enter().append("circle")
+      .attr("class", "node")
+      .attr("r", function(d) { return d.radius; })
+      .style("fill", function(d) { return color(d.group); })
+      .call(force.drag);
+
+  node.append("title")
+      .text(function(d) { return d.name; });
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+  });
+
+};
+// remove annoying titles
+svg.selectAll('circle').select('title')
+    .text('');
+// add tip
+svg.selectAll("circle")
+    .on("mouseover", function(d, i) {
+        // Display a tooltip with the current size
+        var max_length=d.name.length + 5;
+        text = d.hpo.map(function(obj){
+            max_length = max_length > obj[1].length ? max_length: obj[1].length;
+            return obj[1];
+        });
+        tooltip.style('height', function(){
+                return (d.hpo.length+1) * 23 + 'px';
+            })
+            .style('width', max_length * 8 + 'px')
+            .style('left', (d3.event.pageX) + 30 + 'px')
+            .transition().duration(400).style("opacity", .9);
+            tooltip.html('<b>' + d.name + '</b><br />' + text.join('<br /> '));
+
+        // highlight the current path
+        var selection = d3.select(this).transition("tooltip").duration(400);
+        selection.select("circle")
+            .style("stroke-width", 3)
+            .style("fill-opacity", .4)
+            .style("stroke-opacity", 1);
+    })
+
+    .on("mousemove", function() {
+        tooltip.style("left", (d3.event.pageX) + 30 + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+    })
+
+    .on("mouseout", function(d, i) {
+        tooltip.transition().duration(400)
+            .style('width', 0)
+            .style("opacity", 0);
+        var selection = d3.select(this).transition("tooltip").duration(400);
+    });
+</script>
+-->
+
+<script type="text/javascript" src="/static/individual_pubmed.js"></script>
+
+<script type="text/javascript">
+$('.table-sorter').tablesorter({
+    theme : 'bootstrap',
+    headerTemplate : '{content}{icon}',
+    // hidden filter input/selects will resize the columns, so try to minimize the change
+    widthFixed : true,
+    // initialize zebra striping and filter widgets
+    widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
+    widgetOptions : {
+        zebra : ["even", "odd"],
+        // Use the $.tablesorter.storage utility to save the most recent filters
+        //filter_saveFilters : true,
+        // jQuery selector string of an element used to reset the filters
+        filter_reset : 'button.reset',
+        filter_columnFilters : true,
+        textSorter: {
+             3: $.tablesorter.sortNatural,
+        }
+        // add custom selector elements to the filter row
+        /*filter_formatter : {
+            // (jQuery selector added v2.17.0)
+            // Allele Count
+            'th:contains("Allele Count")' : function($cell, indx){
+            return $.tablesorter.filterFormatter.uiSlider( $cell, indx, {
+                delayed : true,
+                valueToHeader : false,
+                exactMatch : false,
+                allText : 'all', // this is ignored when compare is not empty
+                compare : [ '=', '>=', '<=' ],
+                selected : 1,
+                // jQuery UI slider options
+                value : 1,
+                  min : 1,
+                  max : 5000
+                });
+            }
+        }*/
+    }
+});
+$('.pop').popover({html:true});
+
+// get variant_id in real time
+$('.variant_id').hover(function(){
+    // get variant_id
+    var span = $(this);
+    var id = span.text();
+    $.get('/variant_json/' + id,
+        function(data){
+            var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
+            $.each(data.result.hom_samples.sort(), function(i,v){
+                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
+            });
+            content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
+            $.each(data.result.het_samples.sort(), function(i,v){
+                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
+            });
+            content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
+            span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a>');
+            span.attr('data-content', content);
+    });
+});
+
+
+// get variant_id in real time
+$('.individual_id').hover(function(){
+    // get variant_id
+    var span = $(this);
+    var id = span.text();
+    var variantids=span.attr('variantids');
+    $.get('/individual_json/' + id,
+        function(data){
+        var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
+        content += '<p><b>Features:</b>'
+        $.each(data.result.features.sort(), function(i,v){
+                content += v.label+'<br/>';
+        });
+        content += '</p>';
+        content += '<p> <b>Variants:</b> <br> '+variantids+'</p>';
+            span.attr('data-original-title', '<a href="/individual/' + id + '">Link to individual</a>');
+            span.attr('data-content', content);
+    });
+});
+
+
+
+
+</script>
+
+
+
+{% endblock %}

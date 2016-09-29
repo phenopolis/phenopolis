@@ -1,0 +1,21 @@
+<!-- Venn gene-hpo diagram -->
+<div id="individual-tab_hpo_omim" class="tab-pane active">
+    <div id='venn'></div>
+    <div class='row' style='margin-top: 10px;'>
+        <div class='col-md-5'>
+            {% if patient.solved.status == 'solved' %}
+            <p class='success'><b>SOLVED GENE: </b> <a href="/gene/{{patient.solved.gene}}">{{ patient.solved.gene }}</a> </p>
+            {% else %}
+                {% if patient.genes %}
+                    <p class='success'><b> Candidate Genes: </b>
+                    {% for g in patient.genes %}
+                        <a href="/gene/{{g.gene}}">{{g.gene}}</a> 
+                    {% endfor %}
+                    </p>
+                 {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+

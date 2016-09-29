@@ -1,0 +1,35 @@
+<!-- rare variants -->
+<div id="individual-tab_rare_variants" class="tab-pane">
+    <div class="row search-term">
+        <div class='col-md-12'>
+            <form class='form-inline'>
+                <div class='form-group'>
+                    <label>Pubmed Search term: </label> <input class='re-search-input' type='text' size="80" value='{% if 'pubmed_key' in patient %}{{ patient.pubmed_key }}{% endif %}' />
+                </div>
+                <button class='btn btn-primary btn-sm re-search'>Re-search</button>
+                <span class='updating'>updating</span>
+            </form>
+        </div>
+    </div>
+    <div class='row' id='export-row'>
+        <a href='#' type='button' class='export btn btn-success'>Export to CSV</a>
+    </div>
+    <div id='gene-table-div'>
+        <table style="table-layout: fixed; width: 100%" class="table-sorter">
+            <thead>
+                  <tr>
+                        {% for h in table_headers %}
+                        <th>{{ h }}</th>
+                        {% endfor %}
+                  </tr>
+            </thead>
+            <tbody id="variants_table">
+                    {% set variant_type="rare" %} 
+                    {% for v in patient.rare_variants %}
+                        {% include "individual-page-tabs/individual_variant_row.tmpl" %}
+                    {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+

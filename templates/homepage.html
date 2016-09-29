@@ -1,0 +1,236 @@
+{% extends "layout.html" %}
+{% block body %}
+    <script>
+        $('#navbar_form_container').hide();
+    </script>
+    <style>
+        svg path {
+            -webkit-transition: fill 0.8s; /* Safari */
+            transition: fill 0.8s;
+        }
+        .popover {
+            text-align: center;
+        }
+        .node:hover {
+            cursor:pointer;
+        }
+
+    </style>
+<div class="tabs">
+<ul class="nav nav-tabs" role="tablists">
+    <li class="active"><a href="#tab1" role="tab" data-toggle="tab">Search Page</a></li>
+    <li><a href="#tab2" role="tab" data-toggle="tab">HPO Browser</a></li>
+    <li><a href="#tab3" role="tab" data-toggle="tab">Stats</a></li>
+</ul>
+
+<div class="container">
+  <h1 id="home-title"><a href="/about" style="color: black;">&Phi;enopolis</a></h1>
+  <div class="tab-content">
+
+            <div id="tab1" class="tab-pane active">
+                <div class="row">
+                <div class="col-md-12">
+                    <div id="home-searchbox">
+                        <form action="/awesome">
+                            <input type="submit" style="display: none;"/>
+                            <input id="home-searchbox-input" name="query" class="form-control input-lg awesomebar" type="text" placeholder="Search for a phenotype, patient, gene, variant or region"/>
+                            <input type="submit" style="position: absolute; left: -9999px"/>
+                        </form>
+                        <p class="text-muted">
+                            Examples - HPO: <a href="/awesome?query=HP:0000639">HP:0000639</a>,
+                            Individual: <a href="/individual/WebsterURMD_Sample_GV4344">WebsterURMD_Sample_GV4344</a>,
+                            Gene: <a href="/awesome?query=PCSK9">PCSK9</a>,
+                            Transcript: <a href="/transcript/ENST00000407236">ENST00000407236</a>,
+                            Variant: <a href="/variant/22-38212762-A-G">22-38212762-A-G</a>,
+                            Multi-allelic variant: <a href="/awesome?query=rs1800234">rs1800234</a>,
+                            Region: <a href="/region/22-46615715-46615880">22:46615715-46615880</a>
+                        </p>
+                    </div>
+                </div>
+                </div>
+                <div class="row" style="font-size: 16px;">
+                    <div class="col-md-8">
+                        <h3 align="center"> <a href="/about" style="color: black;">About &Phi;enopolis</a></h3>
+                        <div>
+                            <p>
+                                The <a href="/about">&Phi;enopolis</a>  is a coalition of investigators seeking to aggregate and harmonize exome sequencing data and phenotypes.
+                            The Principal Investigators and groups that have contributed data to the current release are listed <a href="/about">here</a>.
+                            </p>
+
+                            <h3 align="center"> <a href="/about" style="color: black;">Samples</a></h3>
+                            <p>
+                            The current release of Phenopolis contains {{ total_patients }} patients ({{ male_patients }} male,
+                            {{ female_patients }} female, and {{ unknown_patients }} unknown)
+                            sequenced as part of various disease-specific genetic studies.
+                            </p>
+
+                            <h3 align="center"> <a href="/about" style="color: black;">Variants</a></h3>
+                            <p>
+                            There is a total of {{ '{0:,}'.format(total_variants) }} variants.
+                            {{ '{0:,}'.format(pass_variants) }} variants pass the GATK filter
+                            of which {{ '{0:,}'.format(pass_nonexac_variants) }} are not in ExAC.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 align="center">Recent News</h3>
+                        <h4>December 1, 2015</h4> - First launch.
+                        <h4>February 8, 2016</h4> - Demo at UKIRDC Oxford meeting
+                        <h4>April 19, 2016</h4> - Demo at the UKIRDC Leeds meeting.
+                        <h4>April 26, 2016</h4> - Demo at HPO day at UCL.
+                        <h4>June 22, 2016</h4> - Demo at Curating the Clinical Genome.
+                    </div>
+                </div>
+             </div>
+
+             <div id="tab2" class="tab-pane">
+                <div class="row" id="graph"> </div>
+             </div>
+
+             <div id="tab3" class="tab-pane">
+                 <div>
+                    {{image|safe}}
+                 </div>
+                 <table>
+                     <tbody>
+                     <tr> <td> all variants </td> <td> {{total_variants}} </td> </tr>
+                     <tr> <td> all pass variants </td> <td> {{pass_variants}} </td> </tr>
+                     <tr> <td> pass variants ExAC </td> <td> {{pass_exac_variants}} </td> </tr>
+                     <tr> <td> pass variants not ExAC </td> <td> {{pass_nonexac_variants}} </td> </tr>
+                     <tr> <td> all non-pass variants </td> <td> {{nonpass_variants}} </td> </tr>
+                     <tr> <td> non-pass variants in ExAC </td> <td> {{nonpass_exac_variant}}</td> </tr>
+                     <tr> <td> non-pass variants not in ExAC </td> <td>{{nonpass_nonexac_variant}}</td> </tr>
+                     </tbody>
+
+                 </table>
+            </div>
+
+  </div>
+</div>
+
+<script src="/static/bower_components/requirejs/require.js"></script>
+<script type="text/javascript">
+
+requirejs.config({
+    //By default load any module IDs from js/lib
+    baseUrl: 'js',
+    //except, if the module ID starts with "app",
+    //load it from the js/app directory. paths
+    //config is relative to the baseUrl, and
+    //never includes a ".js" extension since
+    //the paths config could be for a directory.
+    paths: {
+        d3: '/static/bower_components/d3/d3',
+       // "dot-checker": '/static/bower_components/graphviz-d3-renderer/dist/dot-checker',
+        "layout-worker": '/static/bower_components/graph-viz-d3-js/dist/layout-worker',
+        worker: '/static/bower_components/requirejs-web-workers/src/worker',
+        renderer: '/static/bower_components/graph-viz-d3-js/dist/renderer'
+    }
+});
+require(["renderer"],
+function (renderer) {
+    var DOTstring=' {{DOT|safe}} ';
+    // initialize svg stage
+    zoomFunc = renderer.init({element:"#graph", extend:[0.1, 10]});
+    // update stage with new dot source
+    renderer.render({source:DOTstring, labelAttributer: myLabelAttributer, callBack:callback});
+});
+//Hide the tooltip when the mouse moves away
+function removeTooltip() {
+
+    //Fade out the circle to normal opacity
+    d3.select(this).select('path')
+        .attr('style', 'stroke:rgba(255,255,254,1);fill:rgba(176,224,230,1)');
+
+    //Hide tooltip
+    $('.popover').each(function() {
+        $(this).remove();
+    }); 
+
+}//function removeTooltip
+
+//Show the tooltip on the hovered over slice
+function showTooltip(d) {
+
+    //Define and show the tooltip
+    $(this).popover({
+            placement: 'auto top',
+            container: '#graph',
+            trigger: 'manual',
+            position: 'fixed',
+            html : true,
+            title: function() { return d.labels[d.labels.length - 1].text; },
+            content: function() {
+            var content = '';
+            $.each(d.labels, function(i, e){
+                if(i){
+                if (i < d.labels.length - 1){
+                content = content + "<br/><span style='font-size: 11px;'>"
+                +  e.text + "</span>";
+                }
+                }else{
+                content = "<span style='font-size: 11px;'>"
+                +  e.text + "</span>"
+                }   
+                }); 
+            return content; 
+            }
+    });
+    $(this).popover('show');
+
+    //highlight
+    d3.select(this).select('path')
+        .attr("style", 'stroke:rgba(255,255,254,1);fill:#58FAF4');
+
+}//function showTooltip
+
+// shrink the fucking texts
+callback = function (){
+    svg = d3.select('#graph').select('svg');
+    all_g = svg.select('g').select('g').selectAll('g.node');
+    all_g.selectAll('text')
+        .style('font-size', '7px');
+    all_g
+        .on('mouseover', showTooltip)
+        .on('mouseout', removeTooltip);
+    $('.node').on('click',function() {
+            // get the HPO id
+            var this_node = $(this);
+            var id = this_node.children().last().html();
+            window.location.href = "https://uclex.cs.ucl.ac.uk/hpo/" + id;
+            });
+}
+// custom labelAttributer
+var myLabelAttributer = function() {
+    this
+        .attr("x", function (d) {
+                return d.x;
+                })
+    .attr('y', function(d,i){
+            var pData = d3.select(this.parentNode).datum().labels;
+            //console.log(pData.length);
+            return -d.y - 7*(i - pData.length/2 + 1);
+            })
+    .text(function (d) {
+            return d.text;
+            });
+
+    this.each(function(d) {
+            var self = d3.select(this);
+            d.style.map(function(e) {
+                switch (e.key) {
+                case "stroke":
+                return {key: "color", value: e.value};
+                case "font-size":
+                return {key: e.key, value: e.value + "px"};
+                default:
+                return e;
+                }
+                }).forEach(function(e) {
+                    self.style(e.key, e.value);
+                    });
+            });
+};
+</script>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+<!--hom-comp-->
+<div id="gene-tab_comp" class="tab-pane active">
+    <div class='row'>
+        <div class='col-md-5 col-md-offset-1'>
+            <h3>Number of affected patients: <span id='dot-hom_comp-pNum'></span><br>
+                Number of matching variants: <span id='dot-hom_comp-vNum'></span>
+            </h3>
+            <div class='row'>
+                <input id="hom_comp_exac_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.01" data-slider-step="0.0001" data-slider-value="0.01"/>
+                &nbsp;&nbsp;<span id="hom_comp_exacCurrentSliderValLabel">ExAC_AF cutoff: <span id="hom_comp_exacSliderVal">0.01</span></span>
+                <button class='btn btn-success' id='copy-hom-comp'>Convert to png</button>
+            </div>
+            <div class='row'>
+                <input id="hom_comp_cadd_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="0"/>
+                &nbsp;&nbsp;<span id="hom_comp_caddCurrentSliderValLabel">CADD Phred cutoff: <span id="hom_comp_caddSliderVal">0</span></span>
+            </div>
+        </div>
+        <div class='copy col-md-5' id='copy-hom-comp-div'></div>
+    </div>
+    <div class='row'>
+        <div class='hpo col-md-10 col-md-offset-1' id='dot-hom_comp'> </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,15 @@
+
+<div id="gene-tab_hpo" class="tab-pane">
+
+    <div class='col-md-12'>
+     <table>
+        {% for hpo in hpo_terms %}
+            <tr> <td>{{ hpo }}</td> <td>{{ hpo_terms[hpo]['name']}}</td> </tr>
+        {% endfor %}
+    </table>
+    </div>
+
+</div>
+
+
+

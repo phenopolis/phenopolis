@@ -1,0 +1,36 @@
+<div id="gene-tab_transcript_display" class="tab-pane">
+
+<div class="col-md-1 hidden-xs">
+    <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="transcript_dropdown" data-toggle="dropdown">
+                Transcripts
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="transcript_dropdown">
+                {% for transcript in gene.transcripts %}
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href="/transcript/{{ transcript.transcript_id }}" target="_blank">
+                            {{ transcript.transcript_id }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+
+ <div class="col-md-10 col-md-offset-1">
+      <h3>Gene summary</h3>
+      {#
+      <!-- <h4>(<span class="hidden-xs">Coverage shown for </span><a href="http://www.ensembl.org/Help/Glossary?id=346" target="_blank">canonical transcript</a>: {{ transcript.transcript_id }})</h4> -->
+      <!-- <h4>(<span class="hidden-xs">Coverage shown for transcript with the most variants </span>: {{ transcript.transcript_id }})</h4> -->
+      #}
+    <div class="row">
+        {% with plot_id = gene.gene_name %}
+             {% include 'transcript_display.html' %}
+        {% endwith %}
+    </div>
+ </div>
+</div>
+
+

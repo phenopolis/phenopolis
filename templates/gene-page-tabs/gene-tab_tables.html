@@ -1,0 +1,74 @@
+
+<div id="gene-tab_tables" class="tab-pane">
+    <div class='row'>
+        <div class='col-md-6 panel-like'>
+            <div class='row'>
+                <div class='col-md-11 col-md-offset-1'>
+                    <h3 class='grey'>Homozygous/Compound_het <small id='hom_comp_small'></small></h3>
+                    <div class='row'>
+                        <input id="hom_comp_table_exac_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.01" data-slider-step="0.0001" data-slider-value="0.01"/>
+                        &nbsp;&nbsp;<span id="hom_comp_table_exacCurrentSliderValLabel">ExAC_AF cutoff: <span id="hom_comp_table_exacSliderVal">0.01</span></span>
+                    </div>
+                    <div class='row'>
+                        <input id="hom_comp_table_cadd_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="0"/>
+                        &nbsp;&nbsp;<span id="hom_comp_table_caddCurrentSliderValLabel">CADD Phred cutoff: <span id="hom_comp_table_caddSliderVal">0</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <table id="gene-hpo-hom_comp-table" class="table-sorter">
+                        <thead>
+                            <tr>
+                                <th>HPO</th>
+                                <th title='correlation score'>Phi</th>
+                                <th title='fisher test'>p value</th>
+                                <th title='number of patients having the HPO term'>Pat_h</th>
+                                <th title='number of patients having both the HPO term and the genotype'>Pat_gh</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hom_comp_table_body">
+                        </tbody>
+                    </table>
+                </div>
+            </div><!--table row-->
+        </div><!--hom table col-->
+        <div class='col-md-6 panel-like'>
+            <div class='row'>
+                <div class='col-md-11 col-md-offset-1'>
+                    <h3 class='grey'>Heterozygous <small id='het_small'></small></h3>
+                    <div class='row'>
+                        <input id="het_table_exac_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.001" data-slider-step="0.0001" data-slider-value="0.001"/>
+                        &nbsp;&nbsp;<span id="het_table_exacCurrentSliderValLabel">ExAC_AF cutoff: <span id="het_table_exacSliderVal">0.001</span></span>
+                    </div>
+                    <div class='row'>
+                        <input id="het_table_cadd_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="0"/>
+                        &nbsp;&nbsp;<span id="het_table_caddCurrentSliderValLabel">CADD Phred cutoff: <span id="het_table_caddSliderVal">0</span></span>
+                        <label>
+                          <input id='table-remove-hom' type="checkbox"> Remove hom-comp
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <table id="gene-hpo-het-table" class="table-sorter">
+                        <thead>
+                            <tr>
+                                <th>HPO</th>
+                                <th title='correlation score'>Phi</th>
+                                <th title='fisher test'>p value</th>
+                                <th title='number of patients having the HPO term'>Pat_h</th>
+                                <th title='number of patients having both the HPO term and the genotype'>Pat_gh</th>
+                            </tr>
+                        </thead>
+                        <tbody id="het_table_body">
+                        </tbody>
+                    </table>
+                </div>
+            </div><!--table row-->
+        </div><!--het table col-->
+    </div><!--both table rows-->
+</div><!--tab3-->
+
+

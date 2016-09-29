@@ -1,0 +1,108 @@
+
+
+<!-- filter cell -->
+{% if v.filter == 3 %}
+<tr class='table-gene error' 
+{% elif v.filter == "FAIL" %}
+<tr class='table-gene fail' 
+{% elif v.filter.startswith('VQSRTrancheSNP') %}
+<tr class='table-gene warn' 
+{% elif v.filter=='PASS' %}
+ <tr style="table-gene word-wrap; break-word"
+{% else %}
+ <tr style="table-gene word-wrap; break-word"
+{% endif %}
+ id='{{variant_type}}-{{ v.HUGO|upper }}'>
+
+
+<!-- variant_id cell -->
+<td class="variant_id-cell">
+    <span style='word-break: break-all;' data-placement='right' class='pop pointer variant_id'>{{ v.variant_id }}</span><br/>
+    {% if v.ID.startswith('rs') %}
+        <a href='http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{v.ID}}'><small>{{ v.ID }}</small></a> <br/>
+    {% endif %}
+    <a href='/sequence?variant_id={{ v.variant_id }}&symbol={{ v.HUGO }}&build=grch37'><small>Primer design</small></a>
+</td>
+
+
+
+<!-- UCLex allele_freq -->
+<td class='allele-freq-cell'>
+<span class='tip' title='{{ v.allele_count~'/'~v.allele_num }}<br /><b>Missing cases: </b>{{ v.MISS_COUNT }}'>{{'%0.4f' % v.allele_freq|float }}</span>
+</td>
+
+
+<!-- ExAC allele_freq -->
+<td class='ExAC_freq-cell'>
+    {% if v.EXAC %}
+        <span class='tip' title="{% for k in v.EXAC|sort %}
+               <b>{{k}}: </b> {{'%0.2f' % v.EXAC[k]|float }}<br />
+            {% endfor %}
+            ">{{'%0.6f' % v.EXAC['AF'] }}</span>
+    {% else %}
+        <b>Not in ExAC</b>
+    {% endif %}
+</td> 
+
+<!-- kaviar -->
+<td class='kaviar-cell'>
+{% if v.kaviar %}
+    <span class='tip'>{{'%0.6f' % v.kaviar|float }}</span>
+{% else %}
+    <b>Not in Kaviar</b>
+{% endif %}
+</td>
+
+<!-- consequence -->
+<td class=most_severe_consequence-cell>
+    {{v.most_severe_consequence}}
+</td>
+
+<!-- protein change cell -->
+<td class="hgvsp-cell">
+<span class='tip' title="{{v.transcripts|length}}"> <b></b> </span>
+{{v.canonical_hgvsc}}
+{{ v.canonical_hgvsp }}
+</td>
+
+<!-- cadd score cell -->
+<td class="canonical_cadd-cell">
+{{ v.canonical_cadd[0] }}
+</td>
+
+
+<!-- first 10 het individuals -->
+<td class="het_individuals-cell">
+{% for s in v.het_samples[:10]|sort %}
+<!-- <span class='tip' title='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'> -->
+{% if individuals[s]|length > 1 %}
+<!-- <b> <a href="/individual/{{ s }}">{{s}}</a> </b> -->
+<b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+{% else %}
+<!-- <a href="/individual/{{ s }}">{{s}}</a> -->
+<span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+{% endif %}
+<!-- </span> -->
+{% endfor %}
+</td>
+
+<!-- first 10 hom individuals -->
+<td class="hom_individuals-cell">
+{% for s in v.hom_samples[:10]|sort %}
+<!-- <span class='tip' title='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'> -->
+{% if individuals[s]|length > 1 %}
+<!-- <b> <a href="/individual/{{ s }}">{{s}}</a> </b> -->
+<b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+{% else %}
+<!-- <a href="/individual/{{ s }}">{{s}}</a> -->
+<span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+{% endif %}
+<!-- </span> -->
+{% endfor %}
+</td>
+
+
+
+</tr>
+
+

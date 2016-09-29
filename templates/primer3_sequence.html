@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% block body %}
+<style>
+    /*
+     * Base structure
+     */
+
+    /* Move down content because we have a fixed navbar that is 50px tall */
+
+    path.link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+
+    .highlight {
+        color: red;
+    }
+    .primer {
+        color: green;
+    }
+    div.seq{
+        word-wrap: break-word;
+    }
+    h2{
+        text-align: center;
+    }
+</style>
+<div class='row'>
+    <h2>Primer3 design for {{ result.var_id }}, {{ result.symbol }}<br />
+        <small>Left flank: {{ result.margins }}, Right flank: {{ result.margins }}</small></h2> 
+    <hr />
+    <div class='col-md-6 col-md-offset-1 seq'>
+        {{ result.seq|safe }}   
+    </div>
+    <div class='col-md-5'>
+        <label>Left primer: </label><span class='tip' title='<b>GC: </b>{{ result.left_gc }}%<br/> <b>TM: </b>{{ result.left_tm }} ºC'>{{ result.left }}</span><br />
+        <label>Right primer: </label><span class='tip' title='<b>GC: </b>{{ result.right_gc }}%<br/> <b>TM: </b>{{ result.right_tm }} ºC'>{{ result.right }}</span><br />
+        <label>Product length: </label><span>{{ result.product_length }}</span>
+    </div>
+</div><!--end of row-->
+<hr />
+<h2> Primer design Customise form </h2>
+<form method="get" action="" role="form" enctype="multipart/form-data">
+    <div class='row'>
+        <div class="form-group col-md-5 col-md-offset-1">
+            <label>Variant ID: </label><input name='variant_id' placeholder='12-345567-CG-G' class="form-control" value='{{ result.var_id }}' />
+        </div>
+        <div class="form-group col-md-2">
+            <label class='tip' title='left/right regions (bp) to include in the sequencing'>Paddings: </label><input name='paddings' value="{{ result.paddings }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label class='tip' title='length of sequence to retrieve on the left/right of the target for primer-design template'>Margins: </label><input name='margins' value="{{ result.margins }}"  class="form-control" />
+        </div>
+        <div class="col-md-1"><button style="position:relative;top:25px;" type='submit' class='btn btn-success'>Redesign</button></div>
+    </div>
+    <div class='row'>
+        <div class="form-group col-md-2 col-md-offset-1">
+            <label class='tip' >Optimum GC%: </label><input name='gc_opt' value="{{ result.gc_opt }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label class='tip' >Max GC%: </label><input name='gc_max' value="{{ result.gc_max }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label class='tip' >Min GC%: </label><input name='gc_min' value="{{ result.gc_min }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label>Build: </label>
+            <div class="radio">
+                <label>
+                      <input type="radio" name="build" value="grch37" checked>
+                      grch37
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                      <input type="radio" name="build" value="grch38">
+                      grch38
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class='row'>
+        <div class="form-group col-md-2 col-md-offset-1">
+            <label>Primer opt size: </label><input name='primer_size_opt' value="{{ result.primer_size_opt }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label>Primer min size: </label><input name='primer_size_min' value="{{ result.primer_size_min }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label>Primer max size: </label><input name='primer_size_max' value="{{ result.primer_size_max }}"  class="form-control" />
+        </div>
+    </div>
+    <div class='row'>
+        <div class="form-group col-md-2 col-md-offset-1">
+            <label>Primer opt TM: </label><input name='primer_tm_opt' value="{{ result.primer_tm_opt }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label>Primer min TM: </label><input name='primer_tm_min' value="{{ result.primer_tm_min }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label>Primer max TM: </label><input name='primer_tm_max' value="{{ result.primer_tm_max }}"  class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label>PCR product size range: </label><input name='PCR_size_range' value="{{ result.PCR_size_range }}"  class="form-control" />
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+$('.tip').tooltip({html:true});
+</script>
+{% endblock %}

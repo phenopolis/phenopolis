@@ -1,0 +1,97 @@
+<html lang='en'>
+	<head>
+		<meta charset='utf-8'>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<title>pubmedBatch</title>
+
+		<!-- Bootstrap -->
+		<link href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' rel='stylesheet'>
+
+		<link href="{{ url_for('static', filename='css/main.css') }}" rel='stylesheet'>
+
+		<style>
+			#container {
+				padding-bottom: 65px;
+			}
+			.footer {
+				position: fixed;
+				width: 100%;
+			}
+			.row.content {
+				padding-bottom: 10px;
+			}
+			.centered {
+				float: none;
+				margin: 0 auto;
+			}
+			.round-button{
+				margin-top: 20px;
+			}
+
+		</style>
+	</head>
+ <body data-spy='scroll' data-target='.bs-docs-sidebar'>
+	<div class='blank'></div>
+	<div class='navbar navbar-inverse navbar-fixed-top'>
+		<div class='container'>
+			<div class='navbar-header'>
+				<button type="button" class="navbar-toggle" data-toggle="collapse" 
+				data-target=".navbar-collapse">
+            		<span class="sr-only">Toggle navigation</span>
+            		<span class="icon-bar"></span>
+  	          		<span class="icon-bar"></span>
+            		<span class="icon-bar"></span>
+          		</button>
+				<a href='{{ home_pubmedbatch }}' class='navbar-brand'>pubmedBatch</a>
+			</div>
+			<div class="navbar-collapse collapse">
+				
+ 				
+ 				<ul id='userIcon' class='nav navbar-nav'>
+ 					<li><a href='#'>{{ user }}</a></li>
+ 				</ul>
+ 				
+        	</div><!--/.navbar-collapse -->
+		</div>
+	</div><!--navbar-->
+	<div class='container' id='container'>
+		<div class="jumbotron">
+			<div class='col-md-6 centered'>
+			<form class='form-inline' role='form' method='POST' action='/pubmedbatch/' id='main-form' enctype="multipart/form-data">
+				<div class="form-group">
+					<label for='create-user'>Create a new folder</label>
+					<input type="text" name='create-folder' placeholder="Folder name" class="form-control" />
+				</div>
+				<button class='btn btn-success' type="submit" class="btn btn-default" id='submit'>Create</button>	
+			</form>
+			</div>
+		</div>
+		<div class='row' style='margin-top:50px'>
+			<div class='col-md-3 centered'>
+				<h2>Available folders</h2>
+			</div>
+            {% for d in folders %}
+			<div class="col-md-2">
+                <button class="round-button" style="font-size:15px;" id="{{ d }}">{{ d }}</button>
+        	</div>
+            {% endfor %}
+		<div>
+	</div>
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src='https://code.jquery.com/jquery-2.2.0.min.js'></script>
+  <!-- Include all compiled plugins (below), or include individual files -->
+  <script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+
+  <script type="text/javascript">
+
+  	$('#topcontainer').css('height',$(window).height());
+  	$('h1#title').css('margin-top',$(window).height()/3.1);
+  	$('.round-button').on('click', function(){
+  		location.href =  $(this).html();
+  	});
+  </script>
+  
+ </body>
+</html>

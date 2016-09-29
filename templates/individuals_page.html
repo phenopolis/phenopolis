@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<h1>  My Patients </h1>
+
+<!-- jQuery UI for range slider -->
+<link rel="stylesheet"  type=text/css href="/static/jquery-ui.min.css">
+<script  type="text/javascript" src="/static/jquery-ui.min.js"></script>
+<!-- <link rel="stylesheet"  type=text/css href="/static/css/theme.blue.css"> -->
+<!-- tablesorter plugin -->
+<link rel=stylesheet type=text/css href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<script  type="text/javascript" src="/static/jquery.tablesorter.js"></script>
+<script  type="text/javascript" src="/static/jquery.tablesorter.widgets.js"></script>
+<!-- filter formatter code -->
+<link rel="stylesheet"  type=text/css href="/static/css/filter.formatter.css">
+<link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
+<style>
+    #individuals_table {
+        margin-top: 20px;
+    }
+</style>
+
+
+<div class="tabs">
+
+    <div id="tab3" class="tab-pane">
+    <table id="individuals_table" class="tablesorter">
+        <thead>
+              <tr>
+                  <th>Individual (total: {{individuals|length}})</th>
+                  <th>Gender</th>
+                  <th>Phenotype</th>
+                  <th>Rare Hom</th>
+                  <th>Rare Comp Het</th>
+                  <th>Rare</th>
+                  <th>All</th>
+                  <th>Candidate Genes</th>
+              </tr>
+        </thead>
+        <tbody id="individuals_table_body">
+        {% for ind in individuals %}
+        <tr>
+            <td><a href="/individual/{{ ind.external_id }}">{{ ind.external_id }}</a></td>
+            <td>{{ind.sex}}</td>
+            <td>{{ ind.features|map('get_attributes','id','label')|map('map_format', '<a href="/hpo/{0}">{1}</a>')|join(', ')|safe }}</td>
+            <td id="{{ind.external_id}}_variant_count">{{ind.rare_homozygous_variants_count}}</td>
+            <td> {{ind.rare_compound_hets_count}} </td>
+            <td>{{ ind.rare_variants_count}}</td>
+            <td>{{ ind.all_variants_count}}</td>
+            <td>
+            {% for g in ind.genes %}
+                {{ '<a href="/gene/%s">%s</a>'|format(g,g)|safe  }}
+            {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+</div>
+
+</div>
+
+
+
+<script type=text/javascript>
+
+var individuals={{individuals|map(attribute='external_id')|list|tojson|safe}};
+var i=0;
+
+
+render_table();
+// calls getData if more data left to fetch
+// otherwise calls finish to group downloaded variants
+// by gene
+function handleData(data) {
+    r=data.result;
+    //console.log(i);
+    //console.log(r);
+    //console.log(r.external_id+"_variant_count");
+    document.getElementById(r.external_id+"_variant_count").appendChild(document.createTextNode(r.variant_count));
+    if ((i+1)<individuals.length) {
+        getData(++i);
+        //$(individuals_table).trigger('update');
+    }
+    else {
+        $(individuals_table).trigger('update');
+    }
+}
+
+
+
+// fetches the chunk specified by i
+function getData(i) {
+    $.ajax( {
+                type : 'GET',
+                url : '/private_variant_count', 
+                data : {external_id: individuals[i]},
+                success : handleData,
+                dataType :  "json"
+        } );
+}
+
+
+function render_table() {
+    // call the tablesorter plugin
+    $(individuals_table).tablesorter({
+        theme : 'bootstrap',
+        headerTemplate : '{content}{icon}',
+        // hidden filter input/selects will resize the columns, so try to minimize the change
+        widthFixed : true,
+        // initialize zebra striping and filter widgets
+        widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
+        widgetOptions : {
+            zebra : ["even", "odd"],
+            // Use the $.tablesorter.storage utility to save the most recent filters
+            //filter_saveFilters : true,
+            // jQuery selector string of an element used to reset the filters
+            filter_reset : 'button.reset',
+            filter_columnFilters : true
+            // add custom selector elements to the filter row
+        }
+    });
+}
+
+//render_table();
+//$(individuals_table).tablesorter();
+
+//getData(0);
+
+</script>
+
+
+
+{% endblock %}

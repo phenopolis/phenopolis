@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container">
+        <h1>About Phenopolis</h1>
+        <div class="row" style="font-size: 16px;">
+            <div>
+                <p>
+                    The Phenopolis is a coalition of investigators seeking to aggregate and harmonize sequencing and phenotype data using the Human Phenotype Ontology.
+                </p>
+                <p>
+                    The data set provided on this website spans <span class="number_samples">{{ total_patients }}</span> individuals sequenced 
+                    All of the raw data from these projects have been reprocessed through the same pipeline, and jointly variant-called to increase consistency across projects.
+                </p>
+                <p>
+                    A list of the Principal Investigators and groups that have contributed data to the current release is available below.
+                </p>
+                <p>
+                </p>
+                <p>
+                </p>
+                <p>
+                </p>
+            </div>
+            <p>
+            </p>
+            <p>
+            Please send feedback to: <a href="mailto:n.pontikos@ucl.ac.uk">email</a>
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <h4>Principal Investigators</h4>
+                <ul>
+                    <li>Tony Segal</li>
+                    <li>Andrew Webster</li>
+                    <li>Alison Hardcastle</li>
+                    <li>Tom Vulliamy</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h4>Contributing projects</h4>
+                <ul>
+                    <li>Institue of Ophthalmology</li>
+                    <li>Tony Segal Lab</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h4>Production team</h4>
+                <ul>
+                    <li>Vincent Plagnol</li>
+                    <li>Nikolas Pontikos</li>
+                </ul>
+                <h4>Analysis team</h4>
+                <ul>
+                    <li>Nikolas Pontikos</li>
+                    <li>Vincent Plagnol</li>
+                    <li>Cian Murphy</li>
+                    <li>Doug Speed</li>
+                    <li>Jing Yu</li>
+                </ul>
+            </div>
+            <div class="col-md-2">
+                <h4>Website team</h4>
+                <ul>
+                    <li>Jing Yu</li>
+                    <li>Nikolas Pontikos</li>
+                </ul>
+                <h4>Ethics team</h4>
+                <ul>
+                    <li>Elena Schiff</li>
+                </ul>
+                <h4>UCL Computer Science Cluster</h4>
+                <ul>
+                    <li>Tristan Clarck</li>
+                    <li>David Gregory</li>
+                </ul>
+                <br>
+                <h4>Funding</h4>
+                <ul>
+                    <li> (PI: Vincent Plagnol)</li>
+                    <li> (PI: Alison Hardcastle)</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
