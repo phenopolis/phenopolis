@@ -200,7 +200,9 @@ window.variants = [];
     </div>
 </div><!--end of row-->
 
-
+<label class='tip' title='individuals relatedness is calculated using KINSHIP'>
+  <input id='remove-related' type="checkbox" checked> Remove relatedness
+</label>&nbsp;
 <ul class="nav nav-tabs" role="tablist">
     <li class="active">
     <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">HPO hom/compound-het</a>
@@ -272,18 +274,13 @@ requirejs.config({
         renderer: '/static/bower_components/graph-viz-d3-js/dist/renderer'
     }
 });
+var unrelated_flag = false;
 var hpo_terms = {{ hpo_terms_json|safe }};
 var hom = {{ dot_hom_comp|safe }};
 var het = {{ dot_het|safe }};
 var hpo_freq = {{ hpo_freq|safe }};
 // draw hom first. can't draw two on the same page
-if ('version' in hom){
-    hom = hom.data;
-}
-if ('version' in het){
-    het = het.data;
-}
-draw_hpo(hom, 'hom_comp', 0.01, 0, false);
+draw_hpo(hom, 'hom_comp', 0.01, 15, false);
 $('.tab-li').on('click',function(){
     var tabID = $(this).attr('href');
     $('svg').remove();
@@ -306,12 +303,12 @@ $('.tab-li').on('click',function(){
     }
 });
 // draw table
-var columns = ['id','phi','p_value','pat_h','patient_size'];
+var columns = ['id','phi','p_value','pat_h','pat_gh'];
 $.each(['hom_comp','het'],function(i,v){
     if (v == 'hom_comp'){
-        getTable(hom,v,0.01,0,false);
+        getTable(hom,v,0.01,15,false);
     }else{
-        getTable(het,v,0.001,0,false);
+        getTable(het,v,0.001,15,false);
     }
 });
 // update on slide on graph
@@ -386,15 +383,56 @@ $('#table-remove-hom').on('click',function(){
         getTable(het, 'het', exac, cadd, false);
     }
 });
-function draw_hpo(my_data, mode, exac, cadd, remove_hom){
-
-    var returned = transform(my_data,hpo_freq,mode,exac,cadd,remove_hom);
+// unrelatedness
+$('#remove-related').on('click',function(){
+    $('svg').remove();
+    // which tab is active?
+    var me = $('.tab-pane.active');
+    var id = me.attr('id');
+    if (id == 'gene-tab_comp'){
+        // get exac and cadd values
+        var exac = $('#hom_comp_exac_slider').val();
+        var cadd = $('#hom_comp_cadd_slider').val();
+        draw_hpo(hom, 'hom_comp', exac, cadd, false); 
+    } else if (id == 'gene-tab_het'){
+        // get remove_hom
+        var remove_hom = false;
+        if ($('#graph-remove-hom').is(':checked')){
+            remove_hom = true;
+        }
+        // get exac and cadd values
+        var exac = $('#het_exac_slider').val();
+        var cadd = $('#het_cadd_slider').val();
+        var temp = jQuery.extend(true,{}, het);
+        draw_hpo(temp, 'het', exac, cadd, remove_hom);
+    } else if (id == 'gene-tab_tables'){
+        $('#hom_comp_table_body').empty();
+        $('#het_table_body').empty();
+        var hom_exac = $('#hom_comp_table_exac_slider').val();
+        var hom_cadd = $('#hom_comp_table_cadd_slider').val();
+        var het_exac = $('#het_table_exac_slider').val();
+        var het_cadd = $('#het_table_cadd_slider').val();
+        var remove_hom = false;
+        if ($('#graph-remove-hom').is(':checked')){
+            remove_hom = true;
+        }
+        getTable(hom,'hom_comp',hom_exac,hom_cadd,false);
+        getTable(het,'het',het_exac,het_cadd,remove_hom);
+    }
+});
+function draw_hpo(temp, mode, exac, cadd, remove_hom){
+    var unrelated_flag = false;
+    if ($('#remove-related').is(':checked')){
+        unrelated_flag = true;
+    }
+    var my_data = jQuery.extend(true,{}, temp);
+    var returned = transform(my_data,hpo_freq,mode,exac,cadd,remove_hom, unrelated_flag, hpo_terms);
     var num_of_patients = returned.pat_g;
     var num_of_vars = returned.num_of_vars;
     var result = returned.data;
     $('#dot-'+mode+'-pNum').text(num_of_patients);
     $('#dot-'+mode+'-vNum').text(num_of_vars);
-    var dot = convert_to_dot(result,'filled',hpo_terms);
+    var dot = convert_to_dot(result,'filled');
     var callback = function (data){
         svg = d3.select('svg');
         all_g = svg.select('g').select('g').selectAll('g.node');
@@ -543,9 +581,14 @@ function draw_hpo(my_data, mode, exac, cadd, remove_hom){
     };
 }
 // table functions
-function getTable(input,mode,exac,cadd,remove_hom){
+function getTable(temp,mode,exac,cadd,remove_hom){
+    unrelated_flag = false;
+    if ($('#remove-related').is(':checked')){
+        unrelated_flag = true;
+    }
     // draw the d3 table
-    returned = transform(input,hpo_freq,mode,exac,cadd,remove_hom);
+    var input = jQuery.extend(true,{}, temp);
+    returned = transform(input,hpo_freq,mode,exac,cadd,remove_hom,unrelated_flag,hpo_terms);
     var data = returned.data;
     data = dictToArray(data,'p_value');
     var table = d3.select('#'+mode+'_table_body');
@@ -794,14 +837,19 @@ $('.variant_id').hover(function(){
 });
 
 
-// get variant_id in real time
-$('.individual_id').hover(function(){
+// get individual_id in real time
+$('.individual_id').on('click',function(){
     // get variant_id
     var span = $(this);
     var id = span.text();
     var variantids=span.attr('variantids');
     $.get('/individual_json/' + id,
         function(data){
+            if ($('h3.popover-title').text() == 'loading...'){
+                $('div.popover.in').remove();
+                span.trigger('click');
+                span.trigger('click');
+            }
         var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
         content += '<p><b>Features:</b>'
         $.each(data.result.features.sort(), function(i,v){

@@ -322,7 +322,6 @@
 <script type="text/javascript" src="/static/node_modules/venn.js/venn.js"></script>
 
 <script type=text/javascript>
-
 // venn diagram
 var solved_genes = [
     {% if patient.solved.status == 'solved' %}
@@ -491,12 +490,17 @@ $('span.button-more').on('click', function(){
 });
 
 // get variant_id in real time
-$('.variant_id').hover(function(){
+$('.variant_id').on('click',function(){
     // get variant_id
     var span = $(this);
     var id = span.text();
     $.get('/variant_json/' + id,
         function(data){
+            if ($('h3.popover-title').text() == 'loading...'){
+                $('div.popover.in').remove();
+                span.trigger('click');
+                span.trigger('click');
+            }
             var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
             $.each(data.result.hom_samples.sort(), function(i,v){
                 content += '<a href="/individual/' + v + '">' + v + '</a><br />'
@@ -653,6 +657,56 @@ $('.variant_status').on('click',function() {
                 }
             });
 });
+
+
+// get variant_id in real time
+$('.variant_id').hover(function(){
+    // get variant_id
+    var span = $(this);
+    var id = span.text();
+    $.get('/variant_json/' + id,
+        function(data){
+            var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
+            $.each(data.result.hom_samples.sort(), function(i,v){
+                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
+            });
+            content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
+            $.each(data.result.het_samples.sort(), function(i,v){
+                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
+            });
+            content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
+            span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a>');
+            span.attr('data-content', content);
+    });
+});
+
+
+// get individual_id in real time
+$('.individual_id').on('click',function(){
+    // get variant_id
+    var span = $(this);
+    var id = span.text();
+    var variantids=span.attr('variantids');
+    $.get('/individual_json/' + id,
+        function(data){
+            if ($('h3.popover-title').text() == 'loading...'){
+                $('div.popover.in').remove();
+                span.trigger('click');
+                span.trigger('click');
+            }
+        var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
+        content += '<p><b>Features:</b>'
+        $.each(data.result.features.sort(), function(i,v){
+                content += v.label+'<br/>';
+        });
+        content += '</p>';
+        content += '<p> <b>Variants:</b> <br> '+variantids+'</p>';
+            span.attr('data-original-title', '<a href="/individual/' + id + '">Link to individual</a>');
+            span.attr('data-content', content);
+    });
+});
+
+
 
 </script>
 

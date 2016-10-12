@@ -33,7 +33,6 @@
                   <th>Rare Hom</th>
                   <th>Rare Comp Het</th>
                   <th>Rare</th>
-                  <th>All</th>
                   <th>Candidate Genes</th>
               </tr>
         </thead>
@@ -46,7 +45,6 @@
             <td id="{{ind.external_id}}_variant_count">{{ind.rare_homozygous_variants_count}}</td>
             <td> {{ind.rare_compound_hets_count}} </td>
             <td>{{ ind.rare_variants_count}}</td>
-            <td>{{ ind.all_variants_count}}</td>
             <td>
             {% for g in ind.genes %}
                 {{ '<a href="/gene/%s">%s</a>'|format(g,g)|safe  }}

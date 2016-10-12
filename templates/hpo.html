@@ -14,7 +14,7 @@
     <li class="active"><a href="#tab1" role="tab" data-toggle="tab" id="individuals_loaded">Individuals ({{individuals|length}})</a></li> 
     <li><a href="#tab2" role="tab" data-toggle="tab">Literature genes ({{lit_genes|length}})</a></li>
     <li><a href="#tab3" role="tab" data-toggle="tab" id="variants_loaded">All Shared LOF Genes ({{obs_genes|length}})</a></li>
-   <li><a href="#tab4" role="tab" data-toggle="tab" id="genes_loaded">SimReg </a></li>
+   <li><a href="#tab4" role="tab" data-toggle="tab" id="genes_loaded">Gene Burden </a></li>
 </ul>
 
 <div class="tab-content">
@@ -25,7 +25,7 @@
         {% for ind in individuals %}
             <tr>
                 <td class="omit_csv">
-                    <a href="/individual/{{ ind }}" target="_blank"> {{ind}} </href>
+                    <a href="/individual/{{ ind }}" target="_blank"> {{ind}} </a>
                 </td>
             </tr>
         {% endfor %}
@@ -39,8 +39,8 @@
         <tbody>
         {% for g in lit_genes %}
             <tr>
-                <td class="omit_csv">
-                    <a href="/gene/{{ g['gene_id'] }}?hpo={{hpo_id}}" target="_blank"> {{ g['gene_name'] }} </href>
+                <td>
+                    <a href="/gene/{{ g['gene_id'] }}?hpo={{hpo_id}}" target="_blank"> {{ g['gene_name'] }} </a>
                 </td>
             </tr>
         {% endfor %}
@@ -54,7 +54,7 @@
         {% for g in obs_genes %}
             <tr>
                 <td class="omit_csv">
-                    <a href="/gene/{{ g }}" target="_blank"> {{ g }} </href>
+                    <a href="/gene/{{ g[0] }}" target="_blank"> {{ g }} </a>
                 </td>
             </tr>
         {% endfor %}
