@@ -19,11 +19,14 @@ from urllib2 import HTTPError, URLError
 import pysam
 import csv
 from collections import defaultdict, Counter
-import annotation
-import lookups
+import rest as annotation
+import vcf
 from phenotips_python_client import PhenotipsClient
 from optparse import OptionParser
 import mygene
+import lookups
+import orm
+import subprocess
 
 
 def find_item(obj, key):
@@ -56,11 +59,14 @@ def find_item(obj, key):
                     if item is not None:
                         return item
 
-def load_patient(filename,auth,hpo='HP:0000001'):
+def load_patient(filename,auth,hpo='HP:0000001'): 
+    # Some constant
+    RETNET  = json.load(open('gene_list/retnet.json', 'r'))
+    #HEADER = ['HUGO', 'HPO', 'consequence', 'ref(pubmedID)', 'description', 'OMIM', 'allele_freq', 'ExAC_freq', 'variant_id', 'p_change']
     # get db
     client = pymongo.MongoClient()
     hpo_db = client['hpo']
-    db = client['uclex-old']
+    db = client['uclex']
     patient_db = client['patients']
     patient_id=os.path.basename(filename.replace('.csv','')) 
     parent_dir=os.path.basename(os.path.abspath(os.path.join(filename, os.pardir)))
@@ -95,7 +101,7 @@ def load_patient(filename,auth,hpo='HP:0000001'):
         chrom, pos, ref, alt, = var['signature'].split('_')
         #for k in var.keys(): print k, ':', var[k]
         #break
-        variant=lookups.vcf_query(chrom, pos, ref, alt, individual=patient_id, limit=100)
+        variant=vcf.vcf_query(chrom, pos, ref, alt, individual=patient_id, limit=100)
         if variant is None:
             sys.stderr.write( '\033[01;31m' + var['signature'] + ' not found!' + '\033[m' + '\n' )
             with open("notfound.txt", "a") as myfile: myfile.write(var['signature'])
@@ -165,7 +171,8 @@ def load_patient(filename,auth,hpo='HP:0000001'):
             else:
                 mg=mygene.MyGeneInfo()
                 g=mg.query(VAR['HUGO'], scopes='symbol', fields='ensembl.gene', species='human')
-                if g and 'hits' in g and 'ensembl' in g['hits'][0]:
+                print g
+                if g and 'hits' in g and len(g['hits'])>0 and 'ensembl' in g['hits'][0]:
                     print g
                     # {u'hits': [{u'_id': u'643669', u'ensembl': [{u'gene': u'ENSG00000262484'}, {u'gene': u'ENSG00000283099'}]}], u'total': 1, u'max_score': 443.8707, u'took': 2}
                     gene_id=find_item(g,'gene')
@@ -215,6 +222,95 @@ def load_patient(filename,auth,hpo='HP:0000001'):
     print(db.patients.update({'external_id':patient_id}, {'$set':{'homozygous_variants_count':len(HOMOZYGOUS_VARIANTS)}}, upsert=True))
 
 
+def load_patient2(individual,auth,AC=5): 
+    # Some constant
+    RETNET  = json.load(open('gene_list/retnet.json', 'r'))
+    #HEADER = ['HUGO', 'HPO', 'consequence', 'ref(pubmedID)', 'description', 'OMIM', 'allele_freq', 'ExAC_freq', 'variant_id', 'p_change']
+    # get db
+    client = pymongo.MongoClient()
+    hpo_db = client['hpo']
+    db = client['uclex']
+    patient_db = client['patients']
+    patient_id=individual
+    # Add patient to phenotips if it does not already exist
+    pheno=PhenotipsClient()
+    patient={u'features':[], 'clinicalStatus': {u'clinicalStatus': u'affected'}, u'ethnicity': {u'maternal_ethnicity': [], u'paternal_ethnicity': []}, u'family_history': {}, u'disorders': [], u'life_status': u'alive', u'reporter': u'', u'genes': [], u'prenatal_perinatal_phenotype': {u'prenatal_phenotype': [], u'negative_prenatal_phenotype': []}, u'prenatal_perinatal_history': {u'twinNumber': u''}, u'sex': u'U', u'solved': {u'status': u'unsolved'}}
+    eid=patient_id
+    p=pheno.get_patient(auth=auth,eid=eid)
+    print p
+    if p is None:
+        print 'MISSING', eid
+        #patient['features']=[ {'id':h,'type':'phenotype','observed':'yes'} for h in hpo.strip().split(',')]
+        patient['features']=[ ]
+        patient['external_id']=eid
+        print 'CREATING', eid
+        print pheno.create_patient(auth,patient)
+    if not patient_db.patients.find_one({'external_id':eid}):
+        # update database
+        p=pheno.get_patient(eid=eid,auth=auth)
+        print 'UPDATE'
+        print patient_db.patients.update({'external_id':eid},{'$set':p},w=0,upsert=True)
+    patient_hpo_terms=lookups.get_patient_hpo(hpo_db, patient_db, patient_id, ancestors=False)
+    patient_hpo_terms = dict([(hpo['id'][0],{'id':hpo['id'][0],'name':hpo['name'][0], 'is_a':hpo.get('is_a',[])}) for hpo in patient_hpo_terms])
+    patient_hpo_ids=patient_hpo_terms.keys()
+    # get hpo terms from patient
+    print 'processing rare variants of %s' % patient_id
+    print 'patient hpo terms', patient_hpo_terms 
+    cmd="bgt view -s,"+individual+" -s 'name!=\""+individual+"\"' -f 'AC1>0&&AC2<%s' "%str(AC)+ "-G /slms/gee/research/vyplab/UCLex/mainset_July2016/bgt/mainset_July2016.bgt" 
+    print(cmd)
+    proc=subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)
+    VARIANTS=[]
+    for l in iter(proc.stdout.readline,''):
+        l=l.strip()
+        print(l)
+        if len(l)<5: continue
+        if l.startswith('##'): continue
+        if l.startswith('#'):
+            headers=l.split('\t')
+            continue
+        d=dict(zip(headers,l.split('\t')))
+        d.update(dict([x.split('=') for x in d['INFO'].split(';')]))
+        del d['INFO']
+        if ',' in d['ALT']: d['ALT']=d['ALT'].split(',')[0]
+        d['variant_id']='-'.join([d['#CHROM'],d['POS'],d['REF'],d['ALT']])
+        try:
+            var=orm.Variant(variant_id=d['variant_id'],db=db)
+            print(var.HUGO)
+            print(var.consequence)
+            print(var.filter)
+            print(var.p_change)
+            print(var.description)
+            print(var.ExAC_freq)
+            print(var.allele_freq)
+            if individual in var.hom_samples: var.variant_type='rare_homozygous'
+            else: var.variant_type=''
+            VARIANTS.append(var)
+        except Exception, e:
+            print('ERROR:')
+            print(e)
+            print(d)
+            break
+    #return Response(stream_with_context(generate()),mimetype='application/json')
+    # determine count per gene
+    gene_counter=Counter([var.HUGO for var in VARIANTS])
+    for var in VARIANTS: var.gene_count=gene_counter[var.HUGO]
+    print('gene_counter', gene_counter)
+    print('rare_variants',len(VARIANTS))
+    COMPOUND_HETS=[var.__dict__ for var in VARIANTS if var.gene_count>1]
+    print('compound_hets',len(COMPOUND_HETS))
+    print(db.patients.update({'external_id':patient_id}, {'$set':{'compound_hets':COMPOUND_HETS}}, upsert=True)) 
+    print(db.patients.update({'external_id':patient_id}, {'$set':{'compound_hets_count':len(COMPOUND_HETS)}}, upsert=True)) 
+    HOMOZYGOUS_VARIANTS=[var.__dict__ for var in VARIANTS if var.variant_type=='rare_homozygous']
+    print('rare_homozygous',len(HOMOZYGOUS_VARIANTS))
+    print(db.patients.update({'external_id':patient_id}, {'$set':{'homozygous_variants':HOMOZYGOUS_VARIANTS}}, upsert=True))
+    print(db.patients.update({'external_id':patient_id}, {'$set':{'homozygous_variants_count':len(HOMOZYGOUS_VARIANTS)}}, upsert=True))
+    VARIANTS=[var.__dict__ for var in VARIANTS]
+    print(db.patients.update({'external_id':patient_id}, {'$set':{'rare_variants':VARIANTS}}, upsert=True))
+    print(db.patients.update({'external_id':patient_id}, {'$set':{'rare_variants_count':len(VARIANTS)}}, upsert=True))
+
+
+
+
 
 if '__main__'==__name__:
     # get patients
@@ -234,6 +330,6 @@ if '__main__'==__name__:
     filename=options.filename
     auth=options.auth
     hpo=options.hpo
-    load_individual(filename,auth,hpo)
+    load_patient(filename,auth,hpo)
 
 
