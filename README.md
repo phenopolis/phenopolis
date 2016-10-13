@@ -1,11 +1,8 @@
 # Phenopolis
 
-This code has been forked from the ExAC browser for the purpose of the exomes hosted at UCL (UCLex).
 
 
-Installation
-=======
-
+### Installation
 
 Clone the repository.
 
@@ -35,4 +32,9 @@ Run webserver:
 cd phenopolis
 python run_server.py
 ```
+
+
+### Acknowledgment
+
+This code was originally forked from the ExAC browser.
 
