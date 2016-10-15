@@ -5,8 +5,6 @@ from load_individual import load_patient
 #matplotlib.use('Agg')
 #import matplotlib.pyplot as plt
 
-#from uclex_base import *
-#from uclex_gene import *
 
 #def get_db(dbname=None):
 #    """

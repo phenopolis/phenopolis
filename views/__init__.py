@@ -1603,9 +1603,8 @@ jinja2.filters.FILTERS['highlight2'] = highlight2
 
 
 
-import views.uclex_gene
-import views.uclex_irdc
 import views.gene
+import views.uclex_irdc
 import views.variant
 import views.individual
 import views.individuals

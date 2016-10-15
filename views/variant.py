@@ -27,7 +27,7 @@ def variant_page(variant_str):
     # pos, ref, alt = get_minimal_representation(pos, ref, alt)
     #v=load_variant(db,variant_id)
     #xpos = get_xpos(chrom, pos)
-    return jsonify(result=variant.__dict__)
+    #return jsonify(result=variant.__dict__)
     if variant is None:
         variant = {
             'chrom': chrom,

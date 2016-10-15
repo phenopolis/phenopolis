@@ -84,8 +84,9 @@ def individual_page(individual):
     # is this still updating?
     update_status = pubmedbatch.get('status', 0);
     # get known and retnet genes
-    known_genes = open('ret_known_genes.txt', 'r').readline().strip().split()
-    RETNET  = json.load(open('retnet.json', 'r'))
+    known_genes = open('gene_list/ret_known_genes.txt', 'r').readline().strip().split()
+    #RETNET  = json.load(open('retnet.json', 'r'))
+    RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},{'_id':False})])
     # get combinatorics of features to draw venn diagram
     feature_combo = []
     feature_venn = []
@@ -130,6 +131,8 @@ def individual_page(individual):
         temp = lookups.get_gene_by_name(get_db(), g)
         v['gene_id'] = temp['gene_id'] if temp else None
         genes_pubmed[g]=get_db('pubmedbatch').cache.find_one( {'key':g+'_'+patient.get('pubmed_key','')} )
+        v['canonical_hgvs']=dict(zip( v['canonical_hgvsp'], v['canonical_hgvsc']))
+        v['protein_mutations']=dict([(p,p.split(':')[1],) for p in v['canonical_hgvsp'] if ':' in p])
         # print(g, genes_pubmed[g])
     # figure out the order of columns from the variant row
     table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?>",file('templates/individual-page-tabs/individual_variant_row.tmpl','r').read())
@@ -137,12 +140,12 @@ def individual_page(individual):
     # get a list of genes related to retinal dystrophy. only relevant to subset group of ppl. talk to Jing or Niko for other cohorts. Note that dominant p value only counts paitents with 1 qualified variant on the gene. 
     # current setting: unrelated, exac_af 0.01 for recessive, 0.001 for dominant, cadd_phred 15
     retinal_genes = {}
-    if individual[:4] == 'IRDC':
+    if individual[:4] == 'IRDC' or individual in ['WebsterURMD_Sample_GV4344','WebsterURMD_Sample_IC16489','WebsterURMD_Sample_SJ17898','WebsterURMD_Sample_SK13768']:
         # retinal dystrophy == HP:0000556
         retinal_genes_raw = db.hpo_gene.find_one({'hpo_id':'HP:0000556'})
         # transform the data for easy access
         for mode in ['recessive','dominant']:
-            retinal_genes[mode] = dict([(i['gene_id'],i['p_val']) for i in retinal_genes_raw['data']['unrelated'][mode]])
+            retinal_genes[mode] = dict([(i['gene_id'],-math.log10(i['p_val'])) for i in retinal_genes_raw['data']['unrelated'][mode]])
     return render_template('individual.html', 
             external_id = individual,
             patient=patient,
