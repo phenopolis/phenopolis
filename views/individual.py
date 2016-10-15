@@ -8,6 +8,7 @@ import pysam
 import csv
 #hpo lookup
 import orm
+from load_individual import load_patient
 
 
 @app.route('/individual_json/<individual>')
@@ -178,6 +179,15 @@ def individual_update(individual):
         referrer='%s://%s' % (u.scheme,u.hostname,)
         if u.port: referrer='%s:%s' % (referrer,u.port,)
     return redirect(referrer+'/individual/'+individual)
+
+@app.route('/load_individual/<individual>')
+@requires_auth
+def load_individual(individual):
+    auth='%s:%s' % (session['user'],session['password2'],)
+    p = Process(target=load_patient, args=(individual,auth))
+    p.start()
+    return 'Loading %s...' % individual
+
 
 
 
