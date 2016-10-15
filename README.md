@@ -39,7 +39,11 @@ The JSON is then imported with mongoimport.
 
 #### Running pubmedbatch
 
-### Running Gene-HPO
+The pubmedbatch, written by Jing, scores genes based on their pubmed relevance.
+
+#### Running phenogenon
+
+The phenogenon, written by Jing, does an enrichment test per gene and HPO term.
 
 ## Running server
 
