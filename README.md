@@ -45,8 +45,10 @@ The JSON is then imported with mongoimport.
 git clone https://github.com/UCLGeneticsInstitute/DNASeq_pipeline
 ```
 ```
-DNASeq_pipeline/annotation/postprocess_VEP_json.py
+python DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > ${output}_VEP/VEP_chr${chr}.json
+mongoimport --db $DBNAME --collection variants --host $HOST < ${output}_VEP/VEP_chr${chr}.json
 ```
+
 ```
 function VEP_mongo() {
     memo=30
