@@ -9,8 +9,8 @@ Phenopolis requires a running mongo database and a running Phenotips server.
 Clone the repository.
 
 ```
-git@github.com:pontikos/phenopolis.git
-````
+git clone git@github.com:pontikos/phenopolis.git
+```
 
 Download Phenotips.
 ```
@@ -19,6 +19,7 @@ https://phenotips.org/Download
 
 Download the Exomiser stand alone.
 ```
+https://1drv.ms/u/s!AnAWImk12qlQjo8FkToxDH5lxOS7Xw
 ```
 
 Install latest version of mongo.
