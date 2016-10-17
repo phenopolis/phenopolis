@@ -40,6 +40,11 @@ The JSON is then imported with mongoimport.
 
 #### Importing data from JSON
 
+Load individual for individual page:
+```
+ python views/load_individual.py --individual $ID --auth Admin:`cat ~/.pass/Admin`
+```
+
 #### Running pubmedbatch
 
 The pubmedbatch, written by Jing, scores genes based on their pubmed relevance.
