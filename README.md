@@ -4,7 +4,7 @@
 
 ### Installation
 
-Phenopolis requires a running mongo database and a running Phenotips server.
+Phenopolis requires a running mongo database, a running Phenotips server and (optionally) a running Exomiser stand-alone server.
 
 Clone the repository.
 
@@ -17,7 +17,7 @@ Download Phenotips.
 https://phenotips.org/Download
 ```
 
-Download the Exomiser stand alone.
+Download the Exomiser stand-alone.
 ```
 https://1drv.ms/u/s!AnAWImk12qlQjo8FkToxDH5lxOS7Xw
 ```
@@ -38,8 +38,12 @@ mongod --dbpath $DBPATH --port 27017 --smallfiles
 #### Importing data from JSON
 
 The variants found in the VCF files are processed with VEP and the output is written to JSON.
-This is further piped into another python script which adds further annotation and formatting and writes output to JSON.
-The JSON is then imported with mongoimport.
+```
+--json \
+--output_file STDOUT 
+```
+The STDOUT is piped into another python script which adds further annotation, does the formatting and writes output to JSON.
+The JSON output is then imported with mongoimport into the variants collection.
 
 ```
 git clone https://github.com/UCLGeneticsInstitute/DNASeq_pipeline
