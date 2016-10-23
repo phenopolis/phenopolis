@@ -19,44 +19,6 @@ import subprocess
 import os
 
 
-@app.route('/variant2/<variant_str>')
-@requires_auth
-def variant_page2(variant_str):
-    db = get_db()
-    variant=orm.Variant(db=db,variant_id=variant_str)
-    # pos, ref, alt = get_minimal_representation(pos, ref, alt)
-    #v=load_variant(db,variant_id)
-    #xpos = get_xpos(chrom, pos)
-    #return jsonify(result=variant.__dict__)
-    if variant is None:
-        variant = {
-            'chrom': chrom,
-            'pos': pos,
-            'xpos': xpos,
-            'ref': ref,
-            'alt': alt
-        }
-    consequences = []
-    ordered_csqs = []
-    # Adds major_consequence
-    #base_coverage = lookups.get_coverage_for_bases(db, xpos, xpos + len(ref) - 1)
-    base_coverage = []
-    #any_covered = any([x['has_coverage'] for x in base_coverage])
-    any_covered = any([x['has_coverage'] for x in base_coverage])
-    # check the appropriate sqlite db to get the *expected* number of
-    # available bams and *actual* number of available bams for this variant
-    print 'Rendering variant: %s' % variant_str
-    #https://raw.githubusercontent.com/afshinm/Json-to-HTML-Table/master/json-to-table.js
-    return render_template(
-        'variant.html',
-        variant=variant,
-        base_coverage=base_coverage,
-        consequences=consequences,
-        any_covered=any_covered,
-        ordered_csqs=ordered_csqs,
-        metrics=[]
-    )
-
 
 @app.route('/variant/<variant_str>')
 @requires_auth
