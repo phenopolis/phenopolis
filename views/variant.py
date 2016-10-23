@@ -19,9 +19,9 @@ import subprocess
 import os
 
 
-@app.route('/variant/<variant_str>')
+@app.route('/variant2/<variant_str>')
 @requires_auth
-def variant_page(variant_str):
+def variant_page2(variant_str):
     db = get_db()
     variant=orm.Variant(db=db,variant_id=variant_str)
     # pos, ref, alt = get_minimal_representation(pos, ref, alt)
@@ -46,6 +46,7 @@ def variant_page(variant_str):
     # check the appropriate sqlite db to get the *expected* number of
     # available bams and *actual* number of available bams for this variant
     print 'Rendering variant: %s' % variant_str
+    #https://raw.githubusercontent.com/afshinm/Json-to-HTML-Table/master/json-to-table.js
     return render_template(
         'variant.html',
         variant=variant,
@@ -55,6 +56,22 @@ def variant_page(variant_str):
         ordered_csqs=ordered_csqs,
         metrics=[]
     )
+
+
+@app.route('/variant/<variant_str>')
+@requires_auth
+def variant_page(variant_str):
+    variant=orm.Variant(variant_id=variant_str,db=get_db('uclex'))
+    variant=variant.__dict__
+    if session['user'] == 'demo':
+        del variant['wt_samples']
+        del variant['het_samples']
+        del variant['hom_samples']
+    return render_template(
+        'variant.html',
+        variant=variant
+    )
+
 
 
 @app.route('/variant_json/<variant_str>')
