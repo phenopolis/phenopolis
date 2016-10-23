@@ -123,10 +123,33 @@ Load individual for individual page:
 
 The pubmedbatch, written by Jing, scores genes based on their pubmed relevance.
 
+The scripts can be found in `./pubmedBatch`
+
+Before running the script, it is preferable to write patients ids in `patients.txt`, which `pubmedBatch_jing.py` takes by default.
+
+```
+python pubmedBatch_jing.py
+    -i patients.txt
+    -g ABCA4 (if specified, will ignore -i and -p)
+    -p patientID_1 (if specified, will ignore -i)
+    -k retina,retinal,retinitis,blindness,macula,macular,stargardt,pigmentosa (Keywords to search on pubmed. Displayed is default)
+```
+
 #### Running phenogenon
 
 The phenogenon, written by Jing, does an enrichment test per gene and HPO term.
 
+The scripts can be found in `./phenogenon`
+
+First, the user has to run `python snapshot_patient_hpo.py` to take a snapshot of patients' HPO at the time. Since the phenogenon analysis will take some time, this is to avoid any inconsistency that might be introduced by editting patients' HPO in the database when phenogenon is running.
+
+Second, `python get_hpo_freq.py` will produce an HPO frequency file that phenogenon will use for its analysis.
+
+Phenogenon can then be run as `python gene_hpo_analysis --chrom X` per chromosome. This feature can be utilised to parallelise the jobs on chromosomes. It uses `ExAC_freq` and `CADD_phred` scores to help filter the variants. The defaults are `ExAC_freq <= 0.01 and CADD_phred >= 15` for _recessive_ inheritance mode, and `ExAC_freq <= 0.001 and CADD_phred >= 15` for _dominant_ inheritance mode. It will produce a JSON file for each gene.
+
+If one wishes to change the cutoffs to filter the variants after phenogenon is done, one can use `python recalculate_p.py --chrom X` to do the job quickly, without having to re-extracting info using the slow `gene_hpo_analysis.py`
+
+After this, `python hpo_gene_anlaysis.py` will extract all genes with significant p values for each valid HPO term, and write to a JSON file for each HPO term.
 ## Running server
 
 Run Phenotips:
