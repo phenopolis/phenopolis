@@ -39,12 +39,12 @@
                         </dt>
                         <dd>{{ variant.FILTER }}</dd>
                         <dt> Gene </td>
-                        <dd>{{variant.canonical_gene_name_upper}}</dd>
+                        <dd><a href="/gene/{{variant.canonical_gene_name_upper|join('')}}">{{variant.canonical_gene_name_upper|join('')}}</a></dd>
                         <dt> Consequence </td>
                         <dd>{{variant.most_severe_consequence}}</dd>
                         <dt> Transcript </td>
-                        <dd>{{variant.canonical_transcript}}</dd>
-                        <dt>dbSNP Membership </dt> <dd> {{variant.DB}} </dd>
+                        <dd><a href="/gene/{{variant.canonical_transcript|join('')}}">{{variant.canonical_transcript|join('')}}</a></dd>
+                        {# <dt>dbSNP Membership </dt> <dd> {{variant.DB}} </dd> #}
                         <dt>dbSNP</dt>
                         {% if variant.rsid and variant.rsid != "." %}
                             <dd><a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{ variant.rsid }}" target="_blank">{{ variant.rsid }}</a></dd>
@@ -53,10 +53,10 @@
                         {% endif %}
                         <dt>Allele Frequency</dt>
                         <dd>{% if variant.AF %}{{ '%0.4g' % variant.AF }}{% else %}NA (Allele Number = 0){% endif %}</dd>
-                        <dt>Kaviar: </dt> <dd>{{variant['kaviar']}}</dd>
+                        <dt>Kaviar: </dt> <dd>{{variant.kaviar}}</dd>
                         <dt>ExAC:</dt> <dd>{{variant.EXAC.AF}}</dd>
-                        <dt>HOM/HET/WT/MISS </dt> <dd>  {{variant.HOM_COUNT|int}} / {{variant.HET_COUNT|int}} / {{variant.WT_COUNT|int}} / {{variant.MISS_COUNT|int}} </dd>
-                        <dt>Allele Count</dt> <dd>{{ variant.AC|int }} / {{ variant.AN|int }}</dd>
+                        {# <dt>HOM/HET/WT/MISS </dt> <dd>  {{variant.HOM_COUNT|int}} / {{variant.HET_COUNT|int}} / {{variant.WT_COUNT|int}} / {{variant.MISS_COUNT|int}} </dd> #}
+                        <dt>Allele Count</dt> <dd>{{ variant.AC|int }} / {{ variant.AN|int }} </dd>
                         <dt>UCSC</dt>
                         <dd>
                             <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&highlight=hg19.chr{{ variant.chrom|string }}%3A{{ variant.pos|string }}-{{ variant.pos|int + variant.ref|length - 1 }}&position=chr{{ variant.chrom|string }}%3A{{ variant.pos|int - 25 }}-{{ variant.pos|int + variant.ref|length - 1 + 25 }}" target="_blank">
@@ -119,23 +119,26 @@
                         <tr><th> </th> <th>AC</th> <th>AN</th> <th>Het</th> <th>Hom</th> <th>AF POPMAX</th> <th> AF </th></tr>
                     </thead>
                     <tbody>
+                        <tr> <td> Internal </td> <td> {{variant.AC|int}} </td> <td> {{variant.AN|int}} </td> <td> {{variant.HET_COUNT|int}} </td> <td> {{variant.HOM_COUNT|int}} </td> <td> </td> <td> {{variant.AF}} </td> </tr>
             {% if variant.EXAC %}
-                        <tr> <td> African </td> <td>{{variant.EXAC.AC_AFR}}</td> <td>{{variant.EXAC.AN_AFR|int}}</td> <td>{{variant.EXAC.Het_AFR}}</td> <td>{{variant.EXAC.Hom_AFR}}</td> <td></td><td></td></tr>
-                        <tr> <td> East Asian </td> <td>{{variant.EXAC.AC_EAS}}</td> <td>{{variant.EXAC.AN_EAS|int}}</td> <td>{{variant.EXAC.Het_EAS}}</td> <td>{{variant.EXAC.Hom_EAS}}</td> <td></td><td></td></tr>
-                        <tr> <td> Finnish </td> <td>{{variant.EXAC.AC_FIN}}</td> <td>{{variant.EXAC.AN_FIN|int}}</td> <td>{{variant.EXAC.Het_FIN}}</td> <td>{{variant.EXAC.Hom_FIN}}</td> <td></td><td></td></tr>
-                        <tr> <td> Non-Finnish European </td> <td>{{variant.EXAC.AC_NFE}}</td> <td>{{variant.EXAC.AN_NFE|int}}</td> <td>{{variant.EXAC.Het_NFE}}</td> <td>{{variant.EXAC.Hom_NFE}}</td> <td></td><td></td></tr>
-                        <tr> <td> American </td> <td>{{variant.EXAC.AC_AMR}}</td> <td>{{variant.EXAC.AN_AMR|int}}</td> <td>{{variant.EXAC.Het_AMR}}</td> <td>{{variant.EXAC.Hom_AMR}}</td> <td></td><td></td></tr> 
-                        <tr> <td> Other </td> <td>{{variant.EXAC.AC_OTH}}</td> <td>{{variant.EXAC.AN_OTH|int}}</td> <td>{{variant.EXAC.Het_OTH}}</td> <td>{{variant.EXAC.Hom_OTH}}</td> <td></td><td></td></tr>
-                        <tr> <td> South Asian </td> <td>{{variant.EXAC.AC_SAS}}</td> <td>{{variant.EXAC.AN_SAS|int}}</td> <td>{{variant.EXAC.Het_SAS}}</td> <td>{{variant.EXAC.Hom_SAS}}</td> <td></td><td></td></tr>
-                        <tr> <td> Adj </td> <td>{{variant.EXAC.AC_Adj}}</td> <td>{{variant.EXAC.AN_Adj|int}} {{variant.EXAC.AN|int}}</td> <td>{{variant.EXAC.AC_Het}}</td> <td>{{variant.EXAC.AC_Hom}}</td> <td></td><td></td></tr>
-                        <tr> <td> Female/Male </td> <td>{{variant.EXAC.AC_FEMALE|int}}/{{variant.EXAC.AC_MALE|int}}</td> <td>{{variant.EXAC.AN_FEMALE|int}}/{{variant.EXAC.AN_MALE|int}}</td> <td> </td> <td> </td> <td></td><td></td></tr>
-                        <tr> <td> Consanguineous </td> <td>{{variant.EXAC.AC_CONSANGUINEOUS}}</td> <td>{{variant.EXAC.AN_CONSANGUINEOUS|int}}</td> <td> </td> <td>{{variant.EXAC.Hom_CONSANGUINEOUS}}</td> <td></td><td></td></tr>
-                        <tr> <td> Pop max </td> <td> {{variant.EXAC.POPMAX}} {{variant.EXAC.AC_POPMAX}}</td> <td>{{variant.EXAC.AN_POPMAX}}</td> <td></td> <td></td> <td></td><td></td></tr>
-
-                        <tr> <td> OneKG </td> <td>{{variant.EXAC.KG_AC}}</td> <td></td><td></td><td></td>   <td>{{variant.EXAC.KG_AF_POPMAX}}</td> <td>{{variant.EXAC.KG_AF_GLOBAL}}</td> </tr>
-                        <tr> <td> ESP </td> <td> {{variant.EXAC.ESP_AC}} </td> <td></td> <td></td> <td></td> <td> {{variant.EXAC.ESP_AF_POPMAX}} </td> <td> {{variant.EXAC.ESP_AF_GLOBAL}} </td> </tr>
+                        <tr> <td> African </td> <td>{{variant.EXAC.AC_AFR|int}}</td> <td>{{variant.EXAC.AN_AFR|int}}</td> <td>{{variant.EXAC.Het_AFR|int}}</td> <td>{{variant.EXAC.Hom_AFR|int}}</td> <td></td><td>{{variant.EXAC.AC_AFR / variant.EXAC.AN_AFR}}</td></tr>
+                        <tr> <td> East Asian </td> <td>{{variant.EXAC.AC_EAS|int}}</td> <td>{{variant.EXAC.AN_EAS|int}}</td> <td>{{variant.EXAC.Het_EAS|int}}</td> <td>{{variant.EXAC.Hom_EAS|int}}</td> <td></td><td>{{variant.EXAC.AC_EAS / variant.EXAC.AN_EAS}}</td></tr>
+                        <tr> <td> Finnish </td> <td>{{variant.EXAC.AC_FIN|int}}</td> <td>{{variant.EXAC.AN_FIN|int}}</td> <td>{{variant.EXAC.Het_FIN|int}}</td> <td>{{variant.EXAC.Hom_FIN|int}}</td> <td></td><td>{{variant.EXAC.AC_FIN / variant.EXAC.AN_FIN}}</td></tr>
+                        <tr> <td> Non-Finnish European </td> <td>{{variant.EXAC.AC_NFE|int}}</td> <td>{{variant.EXAC.AN_NFE|int}}</td> <td>{{variant.EXAC.Het_NFE|int}}</td> <td>{{variant.EXAC.Hom_NFE|int}}</td> <td></td><td>{{variant.EXAC.AC_NFE / variant.EXAC.AN_NFE}}</td></tr>
+                        <tr> <td> American </td> <td>{{variant.EXAC.AC_AMR|int}}</td> <td>{{variant.EXAC.AN_AMR|int}}</td> <td>{{variant.EXAC.Het_AMR|int}}</td> <td>{{variant.EXAC.Hom_AMR|int}}</td> <td></td><td>{{variant.EXAC.AC_AMR / variant.EXAC.AN_AMR}}</td></tr> 
+                        <tr> <td> Other </td> <td>{{variant.EXAC.AC_OTH|int}}</td> <td>{{variant.EXAC.AN_OTH|int}}</td> <td>{{variant.EXAC.Het_OTH|int}}</td> <td>{{variant.EXAC.Hom_OTH|int}}</td> <td></td><td>{{variant.EXAC.AC_OTH / variant.EXAC.AN_OTH}}</td></tr>
+                        <tr> <td> South Asian </td> <td>{{variant.EXAC.AC_SAS|int}}</td> <td>{{variant.EXAC.AN_SAS|int}}</td> <td>{{variant.EXAC.Het_SAS|int}}</td> <td>{{variant.EXAC.Hom_SAS|int}}</td> <td></td><td>{{variant.EXAC.AC_SAS / variant.EXAC.AN_SAS}}</td></tr>
+                        <tr> <td> Adj </td> <td>{{variant.EXAC.AC_Adj|int}}</td> <td>{{variant.EXAC.AN_Adj|int}} {# {{variant.EXAC.AN|int}} #}</td> <td>{{variant.EXAC.AC_Het|int}}</td> <td>{{variant.EXAC.AC_Hom|int}}</td> <td></td><td>{{variant.EXAC.AC_Adj / variant.EXAC.AN_Adj}}</td></tr>
+                        <tr> <td> Female </td> <td>{{variant.EXAC.AC_FEMALE|int}}</td> <td>{{variant.EXAC.AN_FEMALE|int}}</td> <td> </td> <td> </td> <td></td><td>{{variant.EXAC.AC_FEMALE / variant.EXAC.AN_FEMALE}}</td></tr>
+                        <tr> <td> Male </td> <td>{{variant.EXAC.AC_MALE|int}}</td> <td>{{variant.EXAC.AN_MALE|int}}</td> <td> </td> <td> </td> <td></td><td>{{variant.EXAC.AC_MALE / variant.EXAC.AN_MALE}}</td></tr>
+                        <tr> <td> Consanguineous </td> <td>{{variant.EXAC.AC_CONSANGUINEOUS|int}}</td> <td>{{variant.EXAC.AN_CONSANGUINEOUS|int}}</td> <td> </td> <td>{{variant.EXAC.Hom_CONSANGUINEOUS|int}}</td> <td></td><td>{{variant.EXAC.AC_CONSANGUINEOUS / variant.EXAC.AN_CONSANGUINEOUS}}</td></tr>
+                        {# <tr> <td> Pop max </td> <td> {{variant.EXAC.POPMAX}} {{variant.EXAC.AC_POPMAX|int}}</td> <td>{{variant.EXAC.AN_POPMAX|int}}</td> <td></td> <td></td> <td></td><td></td></tr> #}
+                        <tr> <td> OneKG </td> <td>{{variant.EXAC.KG_AC|int}}</td> <td></td><td></td><td></td>   <td>{{variant.EXAC.KG_AF_POPMAX}}</td> <td>{{variant.EXAC.KG_AF_GLOBAL}}</td> </tr>
+                        <tr> <td> ESP </td> <td> {{variant.EXAC.ESP_AC|int}} </td> <td></td> <td></td> <td></td> <td> {{variant.EXAC.ESP_AF_POPMAX}} </td> <td> {{variant.EXAC.ESP_AF_GLOBAL}} </td> </tr>
              {% endif %}
+             {% if variant.kaviar %}
                         <tr> <td> Kaviar </td> <td>  </td> <td></td> <td></td> <td></td> <td>  </td> <td> {{variant.kaviar}} </td> </tr>
+             {% endif %}
                         </tbody>
            </table>
 
