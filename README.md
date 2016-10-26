@@ -116,7 +116,7 @@ rm ${output}_VEP/chr${chr}_for_VEP.vcf
 
 Load individual for individual page:
 ```
- python views/load_individual.py --individual $ID --auth Admin:`cat ~/.pass/Admin`
+ python views/load_individual.py --individual $ID --auth Admin:$PASSWORD
 ```
 
 #### Running pubmedbatch
