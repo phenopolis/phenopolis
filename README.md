@@ -16,16 +16,12 @@ Download Phenotips.
 ```
 https://phenotips.org/Download
 ```
-
-Download the Exomiser stand-alone.
-```
-https://1drv.ms/u/s!AnAWImk12qlQjo8FkToxDH5lxOS7Xw
-```
-
 Install latest version of mongo.
 ```
 https://www.mongodb.com/download-center#community
 ```
+
+If you wish to download the Exomiser stand-alone, please get in touch with Julius Jacobsen.
 
 ### Creating database
 
