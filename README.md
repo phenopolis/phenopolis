@@ -2,11 +2,20 @@
 
 
 
+You can access a demo version of the server at:
+https://phenopolis.github.io
+username/password:
+demo/demo123
+
+
 ### Installation
 
-Phenopolis requires a running mongo database, a running Phenotips server and (optionally) a running Exomiser stand-alone server.
+Phenopolis requires:
+* a running mongo database
+* a running Phenotips server
+* (optionally) a running Exomiser stand-alone server, which can be obtained on request as it being developed separately by [Julius Jacobsen](https://github.com/julesjacobsen).
 
-Clone the repository.
+The first step is to clone the repository.
 
 ```
 git clone git@github.com:pontikos/phenopolis.git
@@ -16,18 +25,13 @@ Download Phenotips.
 ```
 https://phenotips.org/Download
 ```
-
-Download the Exomiser stand-alone.
-```
-https://1drv.ms/u/s!AnAWImk12qlQjo8FkToxDH5lxOS7Xw
-```
-
 Install latest version of mongo.
 ```
 https://www.mongodb.com/download-center#community
 ```
+If you wish to download the Exomiser stand-alone, please get in touch with [Julius Jacobsen](https://github.com/julesjacobsen).
 
-### Creating database
+### Creating database, importing data
 
 First make sure mongoDB is running:
 ```
@@ -35,7 +39,7 @@ DBPATH=
 mongod --dbpath $DBPATH --port 27017 --smallfiles
 ```
 
-#### Importing data from JSON
+#### Creating and importing data from JSON
 
 The variants found in the VCF files are processed with VEP and the output is written to JSON.
 ```
@@ -116,19 +120,19 @@ rm ${output}_VEP/chr${chr}_for_VEP.vcf
 
 Load individual for individual page:
 ```
- python views/load_individual.py --individual $ID --auth Admin:`cat ~/.pass/Admin`
+ python views/load_individual.py --individual $ID --auth Admin:$PASSWORD
 ```
 
-#### Running pubmedbatch
+#### Running pubmedScore
 
-The pubmedbatch, written by Jing, scores genes based on their pubmed relevance.
+The pubmedscore, written by [Jing Yu](https://github.com/logust79), scores genes based on their pubmed relevance.
 
-The scripts can be found in `./pubmedBatch`
+The scripts can be found in `./pubmedScore`
 
-Before running the script, it is preferable to write patients ids in `patients.txt`, which `pubmedBatch_jing.py` takes by default.
+Before running the script, it is preferable to write patients ids in `patients.txt`, which `pubmedScore.py` takes by default.
 
 ```
-python pubmedBatch_jing.py
+python pubmedScore.py
     -i patients.txt
     -g ABCA4 (if specified, will ignore -i and -p)
     -p patientID_1 (if specified, will ignore -i)
@@ -137,7 +141,7 @@ python pubmedBatch_jing.py
 
 #### Running phenogenon
 
-The phenogenon, written by Jing, does an enrichment test per gene and HPO term.
+The phenogenon, written by [Jing Yu](https://github.com/logust79), does an enrichment test per gene and HPO term.
 
 The scripts can be found in `./phenogenon`
 
@@ -150,7 +154,8 @@ Phenogenon can then be run as `python gene_hpo_analysis --chrom X` per chromosom
 If one wishes to change the cutoffs to filter the variants after phenogenon is done, one can use `python recalculate_p.py --chrom X` to do the job quickly, without having to re-extracting info using the slow `gene_hpo_analysis.py`
 
 After this, `python hpo_gene_anlaysis.py` will extract all genes with significant p values for each valid HPO term, and write to a JSON file for each HPO term.
-## Running server
+
+## Running servers
 
 Run Phenotips:
 ```
