@@ -39,7 +39,7 @@ DBPATH=
 mongod --dbpath $DBPATH --port 27017 --smallfiles
 ```
 
-#### Creating an importing data from JSON
+#### Creating and importing data from JSON
 
 The variants found in the VCF files are processed with VEP and the output is written to JSON.
 ```
