@@ -15,6 +15,7 @@ The pubmedscore(g) is calculated by counting the appearance of each keyword (use
 
 
 The overall Pubmed Relevance (Sp) score of a given gene (g) is calculated as:
+
 Sp(g) = max(B<sub>known</sub>(g), pubmedscore(g))
 
 
