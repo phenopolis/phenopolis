@@ -42,17 +42,16 @@ mongod --dbpath $DBPATH --port 27017 --smallfiles
 #### Creating and importing data from JSON
 
 The variants found in the VCF files are processed with VEP and the output is written to JSON.
+We use the following option to the [Variant Effec Predictor](http://www.ensembl.org/info/docs/tools/vep/):
 ```
---json \
+--json 
 --output_file STDOUT 
 ```
-The STDOUT is piped into another python script which adds further annotation, does the formatting and writes output to JSON.
-The JSON output is then imported with mongoimport into the variants collection.
+The STDOUT is piped into another python script ```postprocess_VEP_json.py``` which adds further annotation, does further formatting and writes output to JSON, which is then imported with mongoimport into the variants collection:
+
 
 ```
 git clone https://github.com/UCLGeneticsInstitute/DNASeq_pipeline
-```
-```
 python DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > ${output}_VEP/VEP_chr${chr}.json
 mongoimport --db $DBNAME --collection variants --host $HOST < ${output}_VEP/VEP_chr${chr}.json
 ```
@@ -117,8 +116,7 @@ rm ${output}_VEP/chr${chr}_for_VEP.vcf
   done
 }
 ```
-
-Load individual for individual page:
+Load individual for individual page (this is tedious, we are going to streamline this):
 ```
  python views/load_individual.py --individual $ID --auth Admin:$PASSWORD
 ```
