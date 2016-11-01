@@ -64,12 +64,11 @@ for chr in `seq 1 22` X
 do
 ############### VEP_mongo chr${chr}
 # split single lines
-zcat chr${chr}.vcf.gz | python DNASeq_pipeline/annotation/annotation/multiallele_to_single_gvcf.py --headers CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO > ${output}_VEP/chr${chr}_for_VEP.vcf
+zcat chr${chr}.vcf.gz | python DNASeq_pipeline/annotation/annotation/multiallele_to_single_gvcf.py --headers CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO > chr${chr}_for_VEP.vcf
 ####CONFIGURE SOFTWARE SHORTCUTS AND PATHS
 reference=1kg
 ensembl=/cluster/project8/vyp/AdamLevine/software/ensembl/
 export PERL5LIB=${PERL5LIB}:${ensembl}/src/bioperl-1.6.1::${ensembl}/src/ensembl/modules:${ensembl}/src/ensembl-compara/modules:${ensembl}/src/ensembl-variation/modules:${ensembl}/src/ensembl-funcgen/modules:${ensembl}/Plugins
-export PATH=$PATH:/cluster/project8/vyp/vincent/Software/tabix-0.2.5/
 # RUN VEP
 /share/apps/perl/bin/perl ${VEP_DIR}/variant_effect_predictor/variant_effect_predictor.pl --offline \
 --ASSEMBLY GRCh37 --fasta /SAN/vyplab/UKIRDC/reference/human_g1k_v37.fasta \
@@ -96,10 +95,10 @@ export PATH=$PATH:/cluster/project8/vyp/vincent/Software/tabix-0.2.5/
 --plugin SameCodon \
 --input_file ${output}_VEP/chr${chr}_for_VEP.vcf \
 --json \
---output_file STDOUT | python ${baseFolder}/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > ${output}_VEP/VEP_chr${chr}.json
-/share/apps/genomics/htslib-1.1/bin/bgzip -f -c ${output}_VEP/chr${chr}_for_VEP.vcf > ${output}_VEP/chr${chr}_for_VEP.vcf.gz
-/share/apps/genomics/htslib-1.1/bin/tabix -f -p vcf ${output}_VEP/chr${chr}_for_VEP.vcf.gz
-rm ${output}_VEP/chr${chr}_for_VEP.vcf
+--output_file STDOUT | python  DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > VEP_chr${chr}.json
+bgzip -f -c chr${chr}_for_VEP.vcf > chr${chr}_for_VEP.vcf.gz
+tabix -f -p vcf chr${chr}_for_VEP.vcf.gz
+rm chr${chr}_for_VEP.vcf
 done
 ```
 Load individual for individual page (this is tedious, we are going to streamline this):
