@@ -14,12 +14,13 @@ Phenopolis requires:
 * a running Phenotips server (needed to provide the HPO phenotypes per patient)
 * (optionally) a running Exomiser stand-alone server, which can be obtained on request as it being developed separately by [Julius Jacobsen](https://github.com/julesjacobsen).
 
+You will then be able to run the python Flask server.
+
 The first step is to clone the repository.
 
 ```
 git clone git@github.com:pontikos/phenopolis.git
 ```
-
 Download Phenotips:
 ```
 https://phenotips.org/Download
@@ -40,13 +41,8 @@ mongod --dbpath $DBPATH --port 27017 --smallfiles
 
 #### Creating and importing data from JSON
 
-The variants found in the VCF files are processed with [Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/) and the output is written to JSON.
-We use the following option to the VEP:
-```
---json 
---output_file STDOUT 
-```
-The STDOUT is piped into another python script, ```postprocess_VEP_json.py``` (available from another repositor), which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection:
+The variants found in the VCF files are processed with [Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/) and the output is written to JSON standard output.
+The standard output is piped into another python script, ```postprocess_VEP_json.py``` (available from another [repository](https://github.com/UCLGeneticsInstitute/DNASeq_pipeline)), which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection:
 
 ```
 git clone https://github.com/UCLGeneticsInstitute/DNASeq_pipeline
@@ -54,7 +50,7 @@ python DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 
 mongoimport --db $DBNAME --collection variants --host $HOST < VEP_chr${chr}.json
 ```
 
-The bash command to run the VEP, assuming your input files are ```chr${chr}.vcf.gz```:
+The bash command to run the VEP, assuming your variant files are ```chr${chr}.vcf.gz```:
 ```
 ensembl=/cluster/project8/vyp/AdamLevine/software/ensembl/
 VEP_DIR=/cluster/project8/vyp/Software/ensembl-tools-release-82/scripts/
@@ -101,7 +97,7 @@ tabix -f -p vcf chr${chr}_for_VEP.vcf.gz
 rm chr${chr}_for_VEP.vcf
 done
 ```
-Load individual for individual page (this is tedious, we are going to streamline this):
+Load individual for individual page (this is currently tedious, we are going to streamline this):
 ```
  python views/load_individual.py --individual $ID --auth Admin:$PASSWORD
 ```
