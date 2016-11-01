@@ -1,4 +1,4 @@
-# Phenopolis
+# Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
 
 Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
 
@@ -7,12 +7,11 @@ https://phenopolis.github.io
 username/password:
 demo/demo123
 
-
 ### Installation
 
 Phenopolis requires:
 * a running mongo database
-* a running Phenotips server
+* a running Phenotips server (needed to provide the HPO phenotypes per patient)
 * (optionally) a running Exomiser stand-alone server, which can be obtained on request as it being developed separately by [Julius Jacobsen](https://github.com/julesjacobsen).
 
 The first step is to clone the repository.
@@ -21,15 +20,15 @@ The first step is to clone the repository.
 git clone git@github.com:pontikos/phenopolis.git
 ```
 
-Download Phenotips.
+Download Phenotips:
 ```
 https://phenotips.org/Download
 ```
-Install latest version of mongo.
+Install latest version of mongo:
 ```
 https://www.mongodb.com/download-center#community
 ```
-If you wish to download the Exomiser stand-alone, please get in touch with [Julius Jacobsen](https://github.com/julesjacobsen).
+If you wish to download the Exomiser stand-alone server, please get in touch with [Julius Jacobsen](https://github.com/julesjacobsen).
 
 ### Creating database, importing data
 
@@ -41,41 +40,31 @@ mongod --dbpath $DBPATH --port 27017 --smallfiles
 
 #### Creating and importing data from JSON
 
-The variants found in the VCF files are processed with VEP and the output is written to JSON.
-We use the following option to the [Variant Effec Predictor](http://www.ensembl.org/info/docs/tools/vep/):
+The variants found in the VCF files are processed with [Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/) and the output is written to JSON.
+We use the following option to the VEP:
 ```
 --json 
 --output_file STDOUT 
 ```
-The STDOUT is piped into another python script ```postprocess_VEP_json.py``` which adds further annotation, does further formatting and writes output to JSON, which is then imported with mongoimport into the variants collection:
-
+The STDOUT is piped into another python script, ```postprocess_VEP_json.py``` (available from another repositor), which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection:
 
 ```
 git clone https://github.com/UCLGeneticsInstitute/DNASeq_pipeline
-python DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > ${output}_VEP/VEP_chr${chr}.json
-mongoimport --db $DBNAME --collection variants --host $HOST < ${output}_VEP/VEP_chr${chr}.json
+python DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > VEP_chr${chr}.json
+mongoimport --db $DBNAME --collection variants --host $HOST < VEP_chr${chr}.json
 ```
 
+The bash command to run the VEP, assuming your input files are ```chr${chr}.vcf.gz```:
 ```
-function VEP_mongo() {
-    memo=30
-    mkdir -p ${output}_VEP
-    #VEP_output="--tab --output_file ${output}_VEP/VEP_${chr}.txt"
-    ensembl=/cluster/project8/vyp/AdamLevine/software/ensembl/
-    VEP_DIR=/cluster/project8/vyp/Software/ensembl-tools-release-82/scripts/
-    DIR_CACHE=/SAN/vyplab/NCMD_raw/VEP/cache/
-    DIR_PLUGINS=${DIR_CACHE}/Plugins
-    for chr in `seq 1 22` X
-    do
-        #output_lines=`zcat ${output}_VEP/VEP_${chr}.json.gz | wc -l`
-        #input_lines=`tail -n+2 ${output}_VEP/chr${chr}_for_VEP.vcf | wc -l`
-        #echo ${output}_VEP/chr${chr}_for_VEP.vcf input lines: $input_lines
-        #echo ${output}_VEP/VEP_${chr}.json.gz output lines: $output_lines
-        #if [[ $lines -gt 0 ]]; then echo ${output}_VEP/VEP_${chr}.json.gz $lines gt than 0, skipping; continue; fi
-        echo "
+ensembl=/cluster/project8/vyp/AdamLevine/software/ensembl/
+VEP_DIR=/cluster/project8/vyp/Software/ensembl-tools-release-82/scripts/
+DIR_CACHE=/SAN/vyplab/NCMD_raw/VEP/cache/
+DIR_PLUGINS=${DIR_CACHE}/Plugins
+for chr in `seq 1 22` X
+do
 ############### VEP_mongo chr${chr}
 # split single lines
-zcat ${output}_chr${chr}_for_annovar.vcf.gz | /share/apps/python/bin/python ${baseFolder}/annotation/multiallele_to_single_gvcf.py --headers CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO > ${output}_VEP/chr${chr}_for_VEP.vcf
+zcat chr${chr}.vcf.gz | python DNASeq_pipeline/annotation/annotation/multiallele_to_single_gvcf.py --headers CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO > ${output}_VEP/chr${chr}_for_VEP.vcf
 ####CONFIGURE SOFTWARE SHORTCUTS AND PATHS
 reference=1kg
 ensembl=/cluster/project8/vyp/AdamLevine/software/ensembl/
@@ -111,10 +100,7 @@ export PATH=$PATH:/cluster/project8/vyp/vincent/Software/tabix-0.2.5/
 /share/apps/genomics/htslib-1.1/bin/bgzip -f -c ${output}_VEP/chr${chr}_for_VEP.vcf > ${output}_VEP/chr${chr}_for_VEP.vcf.gz
 /share/apps/genomics/htslib-1.1/bin/tabix -f -p vcf ${output}_VEP/chr${chr}_for_VEP.vcf.gz
 rm ${output}_VEP/chr${chr}_for_VEP.vcf
-" >> ${scripts_folder}/subscript_chr${chr}.sh
-#--output_file STDOUT | python ${baseFolder}/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' | mongoimport --db uclex --collection variants --host phenotips
-  done
-}
+done
 ```
 Load individual for individual page (this is tedious, we are going to streamline this):
 ```
@@ -139,11 +125,11 @@ python pubmedScore.py
 
 #### Running phenogenon
 
-The phenogenon, written by [Jing Yu](https://github.com/logust79), does an enrichment test per gene and HPO term.
+The phenogenon, written by [Jing Yu](https://github.com/logust79), does an enrichment test (Fisher test) per gene and HPO term.
 
 The scripts can be found in `./phenogenon`
 
-First, the user has to run `python snapshot_patient_hpo.py` to take a snapshot of patients' HPO at the time. Since the phenogenon analysis will take some time, this is to avoid any inconsistency that might be introduced by editting patients' HPO in the database when phenogenon is running.
+First, the user has to run `python snapshot_patient_hpo.py` to take a snapshot of patients' HPO at the time. Since the phenogenon analysis will take some time, this is to avoid any inconsistency that might be introduced by editing patients' HPO in the database when phenogenon is running.
 
 Second, `python get_hpo_freq.py` will produce an HPO frequency file that phenogenon will use for its analysis.
 
@@ -181,6 +167,6 @@ python run_server.py
 
 ### Acknowledgment
 
-This code was originally forked from the ExAC browser but has since diverged considerably.
+This code was originally forked from the [ExAC browser](https://github.com/konradjk/exac_browser) but has since diverged considerably.
 
 
