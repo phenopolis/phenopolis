@@ -42,60 +42,15 @@ mongod --dbpath $DBPATH --port 27017 --smallfiles
 #### Creating and importing data from JSON
 
 The variants found in the VCF files are processed with [Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/) and the output is written to JSON standard output.
-The standard output is piped into another python script, ```postprocess_VEP_json.py``` (available from another [repository](https://github.com/UCLGeneticsInstitute/DNASeq_pipeline)), which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection:
+The standard output is piped into another python script, ```postprocess_VEP_json.py``` (available from another [repository](https://github.com/UCLGeneticsInstitute/DNASeq_pipeline)), which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection.
 
+The bash command to run the VEP, assuming your variant files are:
 ```
-git clone https://github.com/UCLGeneticsInstitute/DNASeq_pipeline
-python DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > VEP_chr${chr}.json
-mongoimport --db $DBNAME --collection variants --host $HOST < VEP_chr${chr}.json
+bash VEP/runVEP.sh --input <infile> --output <outfile>
 ```
-
-The bash command to run the VEP, assuming your variant files are ```chr${chr}.vcf.gz```:
+Importing of the variants can then be done:
 ```
-ensembl=/cluster/project8/vyp/AdamLevine/software/ensembl/
-VEP_DIR=/cluster/project8/vyp/Software/ensembl-tools-release-82/scripts/
-DIR_CACHE=/SAN/vyplab/NCMD_raw/VEP/cache/
-DIR_PLUGINS=${DIR_CACHE}/Plugins
-for chr in `seq 1 22` X
-do
-############### VEP_mongo chr${chr}
-# split single lines
-zcat chr${chr}.vcf.gz | python DNASeq_pipeline/annotation/annotation/multiallele_to_single_gvcf.py --headers CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO > chr${chr}_for_VEP.vcf
-####CONFIGURE SOFTWARE SHORTCUTS AND PATHS
-reference=1kg
-ensembl=/cluster/project8/vyp/AdamLevine/software/ensembl/
-export PERL5LIB=${PERL5LIB}:${ensembl}/src/bioperl-1.6.1::${ensembl}/src/ensembl/modules:${ensembl}/src/ensembl-compara/modules:${ensembl}/src/ensembl-variation/modules:${ensembl}/src/ensembl-funcgen/modules:${ensembl}/Plugins
-# RUN VEP
-/share/apps/perl/bin/perl ${VEP_DIR}/variant_effect_predictor/variant_effect_predictor.pl --offline \
---ASSEMBLY GRCh37 --fasta /SAN/vyplab/UKIRDC/reference/human_g1k_v37.fasta \
---cache --dir_cache ${DIR_CACHE} \
---dir_plugins ${DIR_PLUGINS} \
---sift b --polyphen b --symbol --canonical --check_existing --check_alleles  \
---fork 4 --maf_esp --gmaf --maf_1kg --maf_exac \
---no_progress --quiet \
---custom /cluster/project9/IBDAJE/VEP_custom_annotations/1kg/1kg/chr${chr}_EUR.vcf.gz,1KG_EUR,vcf,exact \
---custom /cluster/project9/IBDAJE/VEP_custom_annotations/1kg/1kg/chr${chr}_AFR.vcf.gz,1KG_AFR,vcf,exact \
---custom /cluster/project9/IBDAJE/VEP_custom_annotations/1kg/1kg/chr${chr}_AMR.vcf.gz,1KG_AMR,vcf,exact \
---custom /cluster/project9/IBDAJE/VEP_custom_annotations/1kg/1kg/chr${chr}_ASN.vcf.gz,1KG_ASN,vcf,exact \
---custom /cluster/project9/IBDAJE/VEP_custom_annotations/1kg/esp/chr${chr}_EA.vcf.gz,ESP_EA,vcf,exact \
---custom /cluster/project9/IBDAJE/VEP_custom_annotations/1kg/esp/chr${chr}_AA.vcf.gz,ESP_AA,vcf,exact \
---custom /cluster/project9/IBDAJE/VEP_custom_annotations/1kg/CADD/chr${chr}.vcf.gz,CADD,vcf,exact \
---custom /cluster/scratch3/vyp-scratch2/reference_datasets/Kaviar/Kaviar-160204-Public/hg19/VEP_annotation.vcf.gz,Kaviar,vcf,exact \
---plugin Condel,${DIR_PLUGINS}/config/Condel/config,b \
---plugin Carol \
---plugin CADD,/cluster/project9/IBDAJE/VEP_custom_annotations/1kg/CADD/chr${chr}.vcf.gz \
---no_stats \
---hgvs \
---pubmed \
---plugin HGVSshift \
---plugin SameCodon \
---input_file ${output}_VEP/chr${chr}_for_VEP.vcf \
---json \
---output_file STDOUT | python  DNASeq_pipeline/annotation/postprocess_VEP_json.py | grep '^JSON:' | sed 's/^JSON://' > VEP_chr${chr}.json
-bgzip -f -c chr${chr}_for_VEP.vcf > chr${chr}_for_VEP.vcf.gz
-tabix -f -p vcf chr${chr}_for_VEP.vcf.gz
-rm chr${chr}_for_VEP.vcf
-done
+mongoimport --db $DBNAME --collection variants --host $HOST < <infile>
 ```
 Load individual for individual page (this is currently tedious, we are going to streamline this):
 ```
