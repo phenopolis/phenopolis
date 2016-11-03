@@ -1,21 +1,44 @@
 # Mongodb database documentation
 
+## hpo
+
+### hpo
+Stores the HPO ontology downloaded from the HPO website:
+```
+{
+	"comment" : [
+		"Root of all terms in the Human Phenotype Ontology."
+	],
+	"id" : [
+		"HP:0000001"
+	],
+	"name" : [
+		"All"
+	]
+}
+```
+
 ## patients
 
+### patients
+Sync of the Phenotips database.  All patiens are accessed in JSON format from the API:
+```
+```
+
 ### hpo_cache
+Stores all the HPO to person associations to allow fast lookup.
+No need to traverse the HPO graph.
 ```
 {
 	
-	"external_id" : [ ],
+	"external_id" : ["individual_id"],
 	"hpo_id" : "HP:0000003"
 }
-````
-
-### hpo
+```
 
 ### hpo_freq
 
-### patients
+
 
 ## pubmedbatch
 
