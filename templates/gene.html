@@ -43,6 +43,59 @@
     tr.highlight {
        background-color: #ffa !important;
     }
+    a.bad,span.bad {
+        color:orange;
+    }
+    a.warning,span.warning {
+        color: #6E6E6E;
+    }
+    span.candidate-tag,span.solved-tag {
+        color:white;
+        display:inline-block;
+        font-size:70%;
+        margin-left:5px;
+        margin-right:5px;
+        margin-bottom:3px;
+        vertical-align:top;
+        padding-right:2px;
+        padding-top:1px;
+        padding-left:2px;
+        border-radius:3px;
+    }
+    span.candidate-tag {
+        background-color:blue;
+    }
+    span.solved-tag {
+        background-color:green;
+    }
+    span.candidate-gene {
+        background-color:#999;
+        color:white;
+        display:inline-block;
+        padding-right:2px;
+        padding-top:1px;
+        padding-left:2px;
+        border-radius:3px;
+    }
+    span.vqsr {
+        background-color:orange;
+        display:inline-block;
+        font-size:70%;
+        margin-left:5px;
+        padding-right:2px;
+        padding-left:2px;
+        color:white;
+        border-radius:3px;
+    }
+    a.modal-patient {
+        color:#3c3c3d;
+    }
+    a.modal-patient.candidate {
+        color:steelblue;
+    }
+    a.modal-patient.solved {
+        color:green;
+    }
    </style>
 
 <script type="text/javascript">
@@ -200,15 +253,19 @@ window.variants = [];
     </div>
 </div><!--end of row-->
 
-<label class='tip' title='individuals relatedness is calculated using KINSHIP'>
-  <input id='remove-related' type="checkbox" checked> Remove relatedness
+<label class='tip' title='individuals relatedness is calculated using KINSHIP. Only applies to Phenogenon'>
+  <input class='remove' id='remove-related' type="checkbox" checked> Remove relatedness
 </label>&nbsp;
-<ul class="nav nav-tabs" role="tablist">
+<label class='remove' class='tip' title='Remove variants with dubious filter quality. Only applies to Phenogenon'>
+  <input id='remove-bad-variants' type="checkbox" checked> Remove dubious variants
+</label>&nbsp;
+<ul class="nav nav-tabs" id='data-nav' role="tablist">
     <li class="active">
-    <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">HPO hom/compound-het</a>
+    <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">Phenogenon Recessive</a>
     </li> 
-    <li><a href="#gene-tab_het" role="tab" class="tab-li" data-toggle="tab" id="het-tab">HPO graph het</a></li>
-    <li><a href="#gene-tab_tables" role="tab" class="tab-li" data-toggle="tab" id="table-tab">HPO tables</a></li>
+    <li><a href="#gene-tab_het" role="tab" class="tab-li" data-toggle="tab" id="het-tab">Phenogenon Dominant</a></li>
+    <li><a href="#gene-tab_tables" role="tab" class="tab-li" data-toggle="tab" id="table-tab">Phenogenon tables</a></li>
+    <li><a href="#gene-tab_simreg_tables" role="tab" class="tab-li" data-toggle="tab" id="simreg-table-tab">Simreg tables</a></li>
     <li><a href="#gene-tab_variant_table" role="tab" class="tab-li" data-toggle="tab">variant table</a></li>
     {# <li><a href="#gene-tab_transcript_display" role="tab" class="tab-li" data-toggle="tab">transcript display</a></li> #}
     <li><a href="#gene-tab_hpo" role="tab" class="tab-li" data-toggle="tab">OMIM HPO terms</a></li>
@@ -221,10 +278,12 @@ window.variants = [];
 <!-- tab 3 -->
 {% include "gene-page-tabs/gene-tab_tables.html" %}
 <!-- tab 4 -->
-{% include "gene-page-tabs/gene-tab_variant_table.html" %}
+{% include "gene-page-tabs/gene-tab_simreg_tables.html" %}
 <!-- tab 5 -->
-{# {% include "gene-page-tabs/gene-tab_transcript_display.html" %} #}
+{% include "gene-page-tabs/gene-tab_variant_table.html" %}
 <!-- tab 6 -->
+{# {% include "gene-page-tabs/gene-tab_transcript_display.html" %} #}
+<!-- tab 7 -->
 {% include "gene-page-tabs/gene-tab_hpo.html" %}
 </div>
 <!--modal to show genes on omim page-->
@@ -253,6 +312,9 @@ window.variants = [];
 <script src="/static/fisher.js"></script>
 <script src="/static/hpo.js"></script>
 <script type="text/javascript">
+
+var session_user= "{{session['user']}}" ;
+
 // tooltip
 $('.tip').tooltip({html:true});
 // ExAC/CADD_slider
@@ -274,21 +336,25 @@ requirejs.config({
         renderer: '/static/bower_components/graph-viz-d3-js/dist/renderer'
     }
 });
-var unrelated_flag = false;
-var hpo_terms = {{ hpo_terms_json|safe }};
-var hom = {{ dot_hom_comp|safe }};
-var het = {{ dot_het|safe }};
-var hpo_freq = {{ hpo_freq|safe }};
+var unrelated_flag = false,
+    hpo_terms = {{ hpo_terms_json|safe }},
+    patients_status = {{ patients_status|safe }},
+    hom = {{ dot_hom_comp|safe }},
+    het = {{ dot_het|safe }};
 // draw hom first. can't draw two on the same page
-draw_hpo(hom, 'hom_comp', 0.01, 15, false);
-$('.tab-li').on('click',function(){
+draw_hpo(hom, 'hom_comp', 0.01, 15, false, true);
+$('#data-nav').on('click','.tab-li',function(){
     var tabID = $(this).attr('href');
+    var remove_bad_vars = false;
+    if ($('#remove-bad-variants').is(':checked')){
+        remove_bad_vars = true;
+    }
     $('svg').remove();
     if (tabID == '#gene-tab_comp'){
         // get exac and cadd values
-        var exac = $('#hom_comp_exac_slider').val();
-        var cadd = $('#hom_comp_cadd_slider').val();
-        draw_hpo(hom, 'hom_comp', exac, cadd, false); 
+        var exac = $('#hom-comp_exac_graph_slider').val();
+        var cadd = $('#hom-comp_cadd_graph_slider').val();
+        draw_hpo(hom, 'hom_comp', exac, cadd, false, remove_bad_vars); 
     } else if (tabID == '#gene-tab_het'){
         // get remove_hom
         var remove_hom = false;
@@ -296,140 +362,150 @@ $('.tab-li').on('click',function(){
             remove_hom = true;
         }
         // get exac and cadd values
-        var exac = $('#het_exac_slider').val();
-        var cadd = $('#het_cadd_slider').val();
-        var temp = jQuery.extend(true,{}, het);
-        draw_hpo(temp, 'het', exac, cadd, remove_hom);
+        var exac = $('#het_exac_graph_slider').val();
+        var cadd = $('#het_cadd_graph_slider').val();
+        draw_hpo(het, 'het', exac, cadd, remove_hom, remove_bad_vars);
     }
 });
 // draw table
 var columns = ['id','phi','p_value','pat_h','pat_gh'];
 $.each(['hom_comp','het'],function(i,v){
     if (v == 'hom_comp'){
-        getTable(hom,v,0.01,15,false);
+        getTable(hom,v,0.01,15,false,true);
     }else{
-        getTable(het,v,0.001,15,false);
+        getTable(het,v,0.0001,15,false,true);
     }
 });
 // update on slide on graph
-$.each(['#hom_comp','#het'],function(i,v){
-    $.each(['_exac','_cadd'],function(j,val){
-        $(v+val+"_slider").on("slide", function(slideEvt) {
-            $(v+val+"SliderVal").text(slideEvt.value);
-        });
-        $(v+val+'_slider').on('slideStop', function(slideEvt){
-            $(v+val+"SliderVal").text(slideEvt.value);
-            var exac = $(v+'_exac_slider').val();
-            var cadd = $(v+'_cadd_slider').val();
-            $('svg').remove();
-            if (v=='#hom_comp'){
-                draw_hpo(hom, 'hom_comp', exac, cadd, false);
-            } else if (v=='#het'){
-                var remove_hom = false;
-                if ($('#graph-remove-hom').is(':checked')){
-                    remove_hom = true;
-                }
-                var temp = jQuery.extend(true,{}, het);
-                draw_hpo(temp, 'het', exac, cadd, remove_hom);
-            }
-        });
-    });
+$('div.tab-content').on('slide','input.slider',function(slideEvt){
+    var me = $(this);
+    var ID = me.attr('id').slice(0,-7);
+    $('#'+ID+'SliderVal').text(slideEvt.value);
 });
-// update on slide on table
-$.each(['#hom_comp','#het'],function(i,v){
-    $.each(['_exac','_cadd'],function(j,val){
-        $(v+'_table'+val+"_slider").on("slide", function(slideEvt) {
-            $(v+'_table'+val+"SliderVal").text(slideEvt.value);
-        });
-        $(v+'_table'+val+'_slider').on('slideStop', function(slideEvt){
-            $(v+'_table_body').empty();
-            $(v+'_table'+val+"SliderVal").text(slideEvt.value);
-            var exac = $(v+'_table_exac_slider').val();
-            var cadd = $(v+'_table_cadd_slider').val();
-            var remove_hom = false;
-            if ($('#graph-remove-hom').is(':checked')){
-                remove_hom = true;
-            }
-            if (v=='#hom_comp'){
-                getTable(hom,'hom_comp',exac,cadd,false);
-            } else if (v=='#het'){
-                var temp = jQuery.extend(true,{}, het);
-                getTable(temp,'het',exac,cadd,remove_hom);
-            }
-        });
-    });
+$('div.tab-content').on('slideStop','input.slider',function(slideEvt){
+    var me = $(this);
+    var ID = me.attr('id').slice(0,-7);
+    $('#'+ID+'SliderVal').text(slideEvt.value);
+    var [mode,metric,section] = ID.split('_');
+    var exac = $('#'+mode+'_exac_'+section+'_slider').val();
+    var cadd = $('#'+mode+'_cadd_'+section+'_slider').val();
+    var remove_bad_vars = false;
+    // get remove values
+    if ($('#remove-bad-variants').is(':checked')){
+        remove_bad_vars = true;
+    }
+    var remove_hom = false;
+    if ($('#graph-remove-hom').is(':checked')){
+        remove_hom = true;
+    }
+    // draw graph
+    if (section == 'graph'){
+        $('svg').remove();
+        if (mode=='hom-comp'){
+            draw_hpo(hom, 'hom_comp', exac, cadd, false, remove_bad_vars);
+        } else if (mode=='het'){
+            draw_hpo(het, 'het', exac, cadd, remove_hom, remove_bad_vars);
+        }
+    } else {
+    // draw table
+        if (mode=='hom-comp'){
+            getTable(hom,'hom_comp',exac,cadd,false,remove_bad_vars);
+        } else if (mode=='het'){
+            getTable(het,'het',exac,cadd,remove_hom,remove_bad_vars);
+        }
+    }
+});
+// remove hom-comp or dubious variants
+$('body').on('click','.remove',function(){
+    $('svg').remove();
+    var remove_bad_vars = false;
+    if ($('#remove-bad-variants').is(':checked')){
+        remove_bad_vars = true;
+    }
+    var remove_hom = false;
+    // which li is active?
+    var tab = $('#data-nav').children('.active').children('a').attr('id');
+    if (tab == 'hom-comp-tab'){
+        var exac = $('#hom-comp_exac_graph_slider').val();
+        var cadd = $('#hom-comp_cadd_graph_slider').val();
+        draw_hpo(hom, 'hom_comp', exac, cadd, false, remove_bad_vars);
+    } else if (tab == 'het-tab'){
+        if ($('#graph-remove-hom').is(':checked')){
+            remove_hom = true;
+        }
+        var exac = $('#het_exac_graph_slider').val();
+        var cadd = $('#het_cadd_graph_slider').val();
+        draw_hpo(het, 'het', exac, cadd, remove_hom, remove_bad_vars);
+    } else if (tab == 'table-tab'){
+        if ($('#table-remove-hom').is(':checked')){
+            remove_hom = true;
+        }
+        var hom_exac = $('#hom-comp_exac_table_slider').val();
+        var hom_cadd = $('#hom_comp_cadd_table_slider').val();
+        var het_exac = $('#het_exac_table_slider').val();
+        var het_cadd = $('#het_cadd_table_slider').val();
+        getTable(hom,'hom_comp',hom_exac,hom_cadd,false,remove_bad_vars);
+        getTable(het,'het',het_exac,het_cadd,remove_hom,remove_bad_vars);
+    }
 });
 
-// remove hom-comp
-$('#graph-remove-hom').on('click',function(){
-    $('svg').remove();
-    var exac = $('#het_exac_slider').val();
-    var cadd = $('#het_cadd_slider').val();
-    if($(this).is(':checked')){
-        var temp = jQuery.extend(true,{}, het);
-        draw_hpo(temp, 'het', exac, cadd, true);
-    }else{
-        draw_hpo(het, 'het', exac, cadd, false);
+function mark_arm(hpo, mydata, seen, bad_hpos){
+    seen[hpo] = 1;
+    delete bad_hpos[hpo];
+    if (hpo != 'HP:0000001'){
+        $.each(mydata[hpo].is_a,function(i,a){
+            mark_arm(a,mydata,seen, bad_hpos);
+        });
     }
-});
-$('#table-remove-hom').on('click',function(){
-    $('#het_table_body').empty();
-    var exac = $('#het_table_exac_slider').val();
-    var cadd = $('#het_table_cadd_slider').val();
-    if($(this).is(':checked')){
-        var temp = jQuery.extend(true,{}, het);
-        getTable(temp, 'het', exac, cadd, true);
-    }else{
-        getTable(het, 'het', exac, cadd, false);
+}
+
+function clean_hpo_arm(hpo, mydata, p_cutoff,seen,bad_hpos){
+    // start from the bottomest, delete nodes until hits good nodes with p_val <= p_cutoff
+    if (hpo != 'HP:0000001' && hpo in mydata && mydata[hpo].p_value > p_cutoff && !(hpo in seen)){
+        var ancs = mydata[hpo].is_a;
+        bad_hpos[hpo] = 1;
+        $.each(ancs,function(i,a){
+            clean_hpo_arm(a,mydata,p_cutoff,seen,bad_hpos);
+        });
+    } else {
+        mark_arm(hpo,mydata,seen, bad_hpos);
+        return false;
     }
-});
-// unrelatedness
-$('#remove-related').on('click',function(){
-    $('svg').remove();
-    // which tab is active?
-    var me = $('.tab-pane.active');
-    var id = me.attr('id');
-    if (id == 'gene-tab_comp'){
-        // get exac and cadd values
-        var exac = $('#hom_comp_exac_slider').val();
-        var cadd = $('#hom_comp_cadd_slider').val();
-        draw_hpo(hom, 'hom_comp', exac, cadd, false); 
-    } else if (id == 'gene-tab_het'){
-        // get remove_hom
-        var remove_hom = false;
-        if ($('#graph-remove-hom').is(':checked')){
-            remove_hom = true;
-        }
-        // get exac and cadd values
-        var exac = $('#het_exac_slider').val();
-        var cadd = $('#het_cadd_slider').val();
-        var temp = jQuery.extend(true,{}, het);
-        draw_hpo(temp, 'het', exac, cadd, remove_hom);
-    } else if (id == 'gene-tab_tables'){
-        $('#hom_comp_table_body').empty();
-        $('#het_table_body').empty();
-        var hom_exac = $('#hom_comp_table_exac_slider').val();
-        var hom_cadd = $('#hom_comp_table_cadd_slider').val();
-        var het_exac = $('#het_table_exac_slider').val();
-        var het_cadd = $('#het_table_cadd_slider').val();
-        var remove_hom = false;
-        if ($('#graph-remove-hom').is(':checked')){
-            remove_hom = true;
-        }
-        getTable(hom,'hom_comp',hom_exac,hom_cadd,false);
-        getTable(het,'het',het_exac,het_cadd,remove_hom);
+}
+
+function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
+    if ($.isEmptyObject(temp)){
+        return true;
     }
-});
-function draw_hpo(temp, mode, exac, cadd, remove_hom){
     var unrelated_flag = false;
     if ($('#remove-related').is(':checked')){
         unrelated_flag = true;
     }
     var my_data = jQuery.extend(true,{}, temp);
-    var returned = transform(my_data,hpo_freq,mode,exac,cadd,remove_hom, unrelated_flag, hpo_terms);
+    var returned = transform(my_data,mode,exac,cadd,remove_hom, unrelated_flag, hpo_terms,remove_bad_vars);
     var num_of_patients = returned.pat_g;
     var num_of_vars = returned.num_of_vars;
     var result = returned.data;
+    // clean node if it has the same p_val to its subclass
+    // assign a p_cutoff to hide insignificant nodes
+    var p_cutoff = 0.005;
+    var seen = {};
+    var bad_hpos = {};
+    if (p_cutoff){
+        // sort hpo by pat_gh
+        var hpos = Object.keys(result).sort(function(a,b){
+            return ((result[a].pat_gh < result[b].pat_gh) ? -1 : ((result[a].pat_gh > result[b].pat_gh) ? 1 : 0));
+        });
+        // start looking from the smallest pat_gh (bottomest)
+        $.each(hpos,function(i,h){
+            // skip if h was already deleted
+            if (!(h in result) || h == 'HP:0000001' || h in seen){ return true;}
+            clean_hpo_arm(h,result,p_cutoff,seen,bad_hpos);
+        });
+    }
+    $.each(bad_hpos,function(k,d){
+        delete result[k];
+    });
     $('#dot-'+mode+'-pNum').text(num_of_patients);
     $('#dot-'+mode+'-vNum').text(num_of_vars);
     var dot = convert_to_dot(result,'filled');
@@ -443,42 +519,79 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom){
                 // get the HPO id
             var this_node = $(this);
             var id = this_node.find('title').text();
-
             // populate modal
             $('#myModalLabel').html("<a href='/hpo/"+id+"'>"+id+', '+data[id].name+"</a>");
             var modal_content = '<ul>';
             // get patients in order
+
             var patients = $.map(data[id]['data'], function(v,k){return k;});
             $.each(patients, function(i,p){
-                if (p.match("^obfuscated")){
-                    modal_content = modal_content + '<li><span class="tip" title="';
+                if (p.match("^hidden")){
+                    modal_content += '<li><span class="tip" title="';
                 } else {
-                    modal_content = modal_content + '<li><a href="/individual/'+p+'" class="tip" title="';
+                    modal_content += '<li><a data-placement="left" class="tip modal-patient" id='+p+' title="';
                 }
                 $.each(data[id]['data'][p].hpo, function(i,v){
-                    modal_content = modal_content + v + '<br/>';
+                    modal_content += v + "<br/>";
                 });
-                modal_content = modal_content + '">' + p;
-                if (p.match("^obfuscated")){
-                modal_content = modal_content + '</span><ul>';
+                modal_content += '">'+p;
+                if (p.match("^hidden")){
+                    modal_content +=  '</span><ul>';
                 } else {
-                    modal_content = modal_content + '</a><ul>';
+                    modal_content += '</a><ul>';
                 }
                 $.each(data[id]['data'][p]['var'], function(k,v){
-                    modal_content = modal_content + '<li><span class="tip" title="<b>ExAF:</b> ' + Fixed(v.exac,8,5) + '<br/><b>CADD_phred:</b> ' + v.cadd; //+ '"><a href="/variant/' + v.variant_id + '">'+ v.variant_id + '</a></span></li>';
+                    var cl = '',
+                        vqsr = '';
+                    if ('filter' in v && v.filter != 'PASS'){
+                        cl = 'bad';
+                        vqsr = '<span class="vqsr">vqsr</span>';
+                    } else if (!('filter' in v)){
+                        cl = 'warning';
+                    }
+                    modal_content += '<li><span class="tip" title="<b>ExAF:</b> ' + Fixed(v.exac,8,5) + '<br/><b>CADD_phred:</b> ' + v.cadd; 
                     if (v.variant_id.match("hidden")){
-                        modal_content = modal_content + '">' + v.variant_id + '</span></li>';
+                        modal_content += '"><span class="'+cl+'">' + v.variant_id + '</span>';
                     } else {
-                        modal_content = modal_content + '"><a href="/variant/' + v.variant_id + '">'+ v.variant_id + '</a></span></li>';
+                        modal_content += '"><a href="/variant/' + v.variant_id + '" class="' + cl +'">'+ v.variant_id + '</a>';
 
                     }
+                    modal_content += vqsr+'</span></li>';
                 });
 
-                modal_content = modal_content + '</ul></li>'
+                modal_content += '</ul></li>';
             $('#hpo-modal-p').html( modal_content );
+            // add solved status
+            $('.modal-patient').each(function(){
+                var this_e = $(this);
+                var p_id = this_e.attr('id');
+                var thisC = null;
+                var genes = [];
+                if (patients_status[p_id].genes != undefined){
+                    thisC = 'candidate';
+                    genes = $.map(patients_status[p_id].genes,function(v,i){
+                        return v['gene'];
+                    });
+                }
+                if (patients_status[p_id].solved.status == 'solved'){
+                    thisC = 'solved';
+                }
+                if (thisC){
+                    this_e.toggleClass(thisC);
+                    var content = '<span class="'+thisC+'-tag tip" title="'+thisC+'">'+thisC.charAt(0)+'</span>';
+                    $.each(genes,function(i,v){
+                        content += '<span class="candidate-gene pointer">'+v+'</span>';
+                    });
+                    $(content).insertAfter(this_e);
+                }
+                $('#hpo-modal-p').on('click','.candidate-gene',function(){
+                    var gene_id = $(this).text();
+                    window.location.href='/gene/'+gene_id;
+                });
+                this_e.next().tooltip({html:true});
+            });
             $('#hpo-modal').modal('show');
             $('.tip').tooltip({html:true});
-            //window.location.href = "https://uclex.cs.ucl.ac.uk/hpo/" + id;
             });
         });
     }
@@ -581,14 +694,25 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom){
     };
 }
 // table functions
-function getTable(temp,mode,exac,cadd,remove_hom){
+function getTable(temp,mode,exac,cadd,remove_hom,remove_bad_vars){
+    // get table div id
+    var tableDiv_id = '#gene-hpo-'+mode+'-tableDiv';
+    // empty the div
+    $(tableDiv_id).empty();
+    // draw table header
+    var table_header = '<table id="gene-hpo-'+mode+'-table" class="table-sorter"><thead><tr><th>HPO</th><th title="correlation score">Phi</th> <th title="fisher test">p value</th> <th title="number of patients having the HPO term">Pat_h</th> <th title="number of patients having both the HPO term and the genotype">Pat_gh</th> </tr> </thead> <tbody id="'+mode+'_table_body"> </tbody>';
+
+    $(tableDiv_id).append(table_header);
+    if ($.isEmptyObject(temp)){
+        return true;
+    }
     unrelated_flag = false;
     if ($('#remove-related').is(':checked')){
         unrelated_flag = true;
     }
     // draw the d3 table
     var input = jQuery.extend(true,{}, temp);
-    returned = transform(input,hpo_freq,mode,exac,cadd,remove_hom,unrelated_flag,hpo_terms);
+    returned = transform(input,mode,exac,cadd,remove_hom,unrelated_flag,hpo_terms,remove_bad_vars);
     var data = returned.data;
     data = dictToArray(data,'p_value');
     var table = d3.select('#'+mode+'_table_body');
@@ -815,6 +939,7 @@ $('.table-sorter').tablesorter({
 });
 $('.pop').popover({html:true});
 
+
 // get variant_id in real time
 $('.variant_id').hover(function(){
     // get variant_id
@@ -824,10 +949,12 @@ $('.variant_id').hover(function(){
         function(data){
             var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
             $.each(data.result.hom_samples.sort(), function(i,v){
+                if (session_user=='demo') { var v='hidden'; }
                 content += '<a href="/individual/' + v + '">' + v + '</a><br />'
             });
             content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
             $.each(data.result.het_samples.sort(), function(i,v){
+                if (session_user=='demo') { var v='hidden'; }
                 content += '<a href="/individual/' + v + '">' + v + '</a><br />'
             });
             content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
@@ -837,30 +964,6 @@ $('.variant_id').hover(function(){
 });
 
 
-// get individual_id in real time
-$('.individual_id').on('click',function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    var variantids=span.attr('variantids');
-    $.get('/individual_json/' + id,
-        function(data){
-            if ($('h3.popover-title').text() == 'loading...'){
-                $('div.popover.in').remove();
-                span.trigger('click');
-                span.trigger('click');
-            }
-        var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
-        content += '<p><b>Features:</b>'
-        $.each(data.result.features.sort(), function(i,v){
-                content += v.label+'<br/>';
-        });
-        content += '</p>';
-        content += '<p> <b>Variants:</b> <br> '+variantids+'</p>';
-            span.attr('data-original-title', '<a href="/individual/' + id + '">Link to individual</a>');
-            span.attr('data-content', content);
-    });
-});
 
 
 
