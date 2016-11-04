@@ -178,6 +178,7 @@ function convert_to_dot(data,style){
             d.label = d.name + '*';
         }
         //if (d.id == 'HP:0000510' || d.id == 'HP:0000007' || d.id == 'HP:0012712' || d.id == 'HP:0000001'){ d.label = ''; }
+        d.label='';
         var fillcolor = [d.fillcolor];
         if (style == 'filled'){
         }else if (style == 'wedged'){
@@ -188,7 +189,6 @@ function convert_to_dot(data,style){
                 fillcolor.push(e.color+';'+propotion);
             });
             // calculate proportion
-
         }
         dot = dot + '"' + d.id +  '" [style="'+style+'", fixedsize="true", fontsize="6", shape="circle", width="' + d.width +'", fillcolor="' + fillcolor.join(':') +'", label="' + d.label +'", id="' + d.id + '", color="transparent"];\n';
         //dot = dot + '"' + d.id +  '" [style="wedged", fixedsize="true", fontsize="6", shape="circle", width="' + d.width +'", fillcolor="red;0.3:green;0.6:orange", label="' + d.label +'", id="' + d.id + '", color="transparent"];\n';
