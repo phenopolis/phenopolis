@@ -131,3 +131,22 @@ No need to traverse the HPO graph.
 	]
 }
 ```
+## causal_variants
+Variants which have been identified as causal
+
+## ensembl_entrez
+
+## exons
+## gene_hpo
+## genes
+Genes table, loaded from Gencode file.
+
+## hpo_freq
+## hpo_gene
+## lof
+## patients
+## read_depth
+## retnet
+## simreg
+## solved_patients
+## transcripts
