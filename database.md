@@ -146,6 +146,26 @@ Genes table, loaded from Gencode file.
 ### hpo_freq
 
 ### hpo_gene
+```
+{
+	"cadd_cutoff" : 15,
+	"exac_dominant_cutoff" : 0.001,
+	"exac_recessive_cutoff" : 0.01,
+	"version" : 4,
+	"hpo_id" : "HP:0000001",
+	"release" : "2016_Aug",
+	"data" : {
+		"unrelated" : {
+			"recessive" : [ ],
+			"dominant" : [ ]
+		},
+		"related" : {
+			"recessive" : [ ],
+			"dominant" : [ ]
+		}
+	}
+}
+```
 
 ### lof
 
@@ -154,9 +174,104 @@ Genes table, loaded from Gencode file.
 ### read_depth
 
 ### retnet
+```
+{
+	"omim" : [
+		"268000",
+		"608172",
+		"613861"
+	],
+	"mode" : "r",
+	"gene_name" : "DHDDS",
+	"disease" : "recessive retinitis pigmentosa; protein: dehydrodolichyl diphosphate synthetase"
+}
+```
 
 ### simreg
+```
+{
+	"_id" : ObjectId("580fa7c22ebb946cc56d5f19"),
+	"gene" : "ENSG00000012779",
+	"phi" : {
+		"HP:0012045" : {
+			"hpo_id" : "HP:0012045",
+			"desc" : "Retinal flecks",
+			"prob" : 0.45
+		},
+		"HP:0030506" : {
+			"hpo_id" : "HP:0030506",
+			"desc" : "Yellow/white lesions of the retina",
+			"prob" : 0.45
+		},
+		"HP:0002597" : {
+			"hpo_id" : "HP:0002597",
+			"desc" : "Abnormality of the vasculature",
+			"prob" : 0.12
+		},
+		"HP:0011276" : {
+			"hpo_id" : "HP:0011276",
+			"desc" : "Vascular skin abnormality",
+			"prob" : 0.03
+		},
+		"HP:0001009" : {
+			"hpo_id" : "HP:0001009",
+			"desc" : "Telangiectasia",
+			"prob" : 0.03
+		},
+		"HP:0000005" : {
+			"hpo_id" : "HP:0000005",
+			"desc" : "Mode of inheritance",
+			"prob" : 0.02
+		},
+		"HP:0030466" : {
+			"hpo_id" : "HP:0030466",
+			"desc" : "Abnormal full-field electroretinogram",
+			"prob" : 0.02
+		},
+		"HP:0000007" : {
+			"hpo_id" : "HP:0000007",
+			"desc" : "Autosomal recessive inheritance",
+			"prob" : 0.02
+		},
+		"HP:0003745" : {
+			"hpo_id" : "HP:0003745",
+			"desc" : "Sporadic",
+			"prob" : 0.02
+		},
+		"HP:0030453" : {
+			"hpo_id" : "HP:0030453",
+			"desc" : "Abnormal visual electrophysiology",
+			"prob" : 0.01
+		},
+		"HP:0000479" : {
+			"hpo_id" : "HP:0000479",
+			"desc" : "Abnormality of the retina",
+			"prob" : 0.01
+		},
+		"HP:0001626" : {
+			"hpo_id" : "HP:0001626",
+			"desc" : "Abnormality of the cardiovascular system",
+			"prob" : 0.01
+		}
+	},
+	"p" : 0.0002740577430736998,
+	"mode" : "dom"
+}
+```
 
 ### solved_patients
 
 ### transcripts
+```
+{
+	"_id" : ObjectId("57a4ba17cda06e21ec540df7"),
+	"start" : 11870,
+	"transcript_id" : "ENST00000456328",
+	"strand" : "+",
+	"stop" : 14410,
+	"xstart" : 1000011870,
+	"chrom" : "1",
+	"gene_id" : "ENSG00000223972",
+	"xstop" : 1000014410
+}
+```
