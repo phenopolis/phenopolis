@@ -138,14 +138,31 @@ Variants which have been identified as causal
 
 ### exons
 
-### gene_hpo
-
 ### genes
 Genes table, loaded from Gencode file.
 
 ### hpo_freq
 
+### gene_hpo
+Phenogenon collection.
+```
+{
+	"_id" : ObjectId("581257ef2ebb946cc56d9a77"),
+	"het" : {
+
+	},
+	"description" : "add online-calculated CADD phred scores",
+	"hom_comp" : {
+
+	},
+	"gene_id" : "ENSG00000015568",
+	"version" : 4,
+	"release" : "2016_Aug"
+}
+```
+
 ### hpo_gene
+Phenogenon collection.
 ```
 {
 	"cadd_cutoff" : 15,
