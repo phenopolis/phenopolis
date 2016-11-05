@@ -11,10 +11,10 @@ demo/demo123
 
 Phenopolis requires:
 * a running mongo database
-* a running Phenotips server (needed to provide the HPO phenotypes per patient)
+* a running Phenotips server (needed to provide the HPO phenotypes per patient) on which you will need to create an Admin account which has access to all patient
 * (optionally) a running Exomiser stand-alone server, which can be obtained on request as it being developed separately by [Julius Jacobsen](https://github.com/julesjacobsen).
 
-You will then be able to run the python Flask server.
+You will then be able to run ```phenopolis.py```, the python Flask server.
 
 The first step is to clone the repository.
 
@@ -42,7 +42,7 @@ mongod --dbpath $DBPATH --port 27017 --smallfiles
 #### Creating and importing data from JSON
 
 The variants found in the VCF files are processed with [Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/) and the output is written to JSON standard output.
-The standard output is piped into another python script, ```postprocess_VEP_json.py``` (available from another [repository](https://github.com/UCLGeneticsInstitute/DNASeq_pipeline)), which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection.
+The standard output is piped into another python script, ```VEP/postprocess_VEP_json.py```, which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection.
 
 The bash command to run the VEP, assuming your variant files are:
 ```
@@ -61,7 +61,7 @@ Load individual for individual page (this is currently tedious, we are going to 
 
 The pubmedscore, written by [Jing Yu](https://github.com/logust79), scores genes based on their pubmed relevance.
 
-The scripts can be found in `./pubmedScore`
+The scripts can be found in [pubmedScore](pubmedScore):
 
 Before running the script, it is preferable to write patients ids in `patients.txt`, which `pubmedScore.py` takes by default.
 
@@ -77,7 +77,7 @@ python pubmedScore.py
 
 The phenogenon, written by [Jing Yu](https://github.com/logust79), does an enrichment test (Fisher test) per gene and HPO term.
 
-The scripts can be found in `./phenogenon`
+The scripts can be found in [phenogenon](phenogenon):
 
 First, the user has to run `python snapshot_patient_hpo.py` to take a snapshot of patients' HPO at the time. Since the phenogenon analysis will take some time, this is to avoid any inconsistency that might be introduced by editing patients' HPO in the database when phenogenon is running.
 
