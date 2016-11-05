@@ -24,6 +24,43 @@ def hpo_main():
     hpo_freq = lookups.get_hpo_size_freq('hpo_freq.tsv')
     return str(hpo_freq)
 
+@app.route('/phenogenon_json/<hpo_id>')
+@requires_auth
+def phenogenon_json(hpo_id):
+    print 'PHENOGENON_JSON'
+    hpo_db=get_db('hpo')
+    db=get_db()
+    lit_genes=[]
+    omim_genes=[]
+    for r in hpo_db.hpo_gene.find({'HPO-ID':hpo_id}):
+        g=db.genes.find_one({'gene_name_upper':r['Gene-Name'].upper()},{'_id':0})
+        if not g: continue
+        phenogenon=db.gene_hpo.find_one({'gene_id':g['gene_id']})
+        if not phenogenon: continue
+        g['phenogenon']={
+                'het':phenogenon.get('het',{}).get(hpo_id,{}),
+                'hom_comp':phenogenon.get('hom_comp',{}).get(hpo_id,{})
+                }
+        lit_genes+=[g]
+    omim_genes=map(lambda x: x['gene_id'], lit_genes)
+    phenogenon=db.hpo_gene.find_one({'hpo_id':hpo_id})
+    if phenogenon: phenogenon=phenogenon['data']['unrelated']
+    else: phenogenon={'recessive':[],'dominant':[]}
+    recessive_genes=[{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'],'known':x['gene_id'] in omim_genes} for x in phenogenon['recessive']]
+    dominant_genes=[{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'], 'known':x['gene_id'] in omim_genes} for x in phenogenon['dominant']]
+    #print(intersect(obs_genes.keys(),lit_genes))
+    #print(Counter([rv['HUGO'] for rv in db.patients.find_one({'external_id':p['external_id']},{'rare_variants':1})]['rare_variants']))
+    ## only return common variants if there are many individuals
+    ##rsession.voidEval('common_variants <- common.variants')
+    #print(lit_genes)
+    #print(omim_genes)
+    #print(recessive_genes)
+    #print(dominant_genes)
+    return jsonify( result={
+                    'lit_genes':lit_genes,
+                    'omim_genes':omim_genes,
+                    'recessive_genes':recessive_genes,
+                    'dominant_genes':dominant_genes} )
 
 @app.route('/hpo/<hpo_id>')
 @requires_auth
@@ -33,10 +70,10 @@ def hpo_page(hpo_id):
     hpo_db=get_db('hpo')
     patients_db=get_db('patients')
     #patients=[p for p in patients_db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
-    print(hpo_id)
+    print hpo_id 
     if not hpo_id.startswith('HP:'):
         hpo_id=hpo_db.hpo.find_one({'name':hpo_id})['id'][0]
-    print(hpo_id)
+    print hpo_id 
     hpo_name=hpo_db.hpo.find_one({'id':hpo_id})['name'][0]
     print('HPO ANCESTORS')
     hpo_ancestors=lookups.get_hpo_ancestors(hpo_db,hpo_id)
@@ -48,32 +85,28 @@ def hpo_page(hpo_id):
     #r=patients_db.hpo.find_one({'hp_id':hpo_id})
     #if r: external_ids=r['external_ids']
     #else: external_ids=[]
-    lit_genes=[lookups.get_gene_by_name(db, r['Gene-Name']) for r in hpo_db.hpo_gene.find({'HPO-ID':hpo_id})]
     #for r in hpo_db.hpo_pubmed.find({'hpoid':hpo_id}): print(r)
     #pmids=[r['pmid'] for r in hpo_db.hpo_pubmed.find({'hpoid':hpo_id})]
     patients=lookups.get_hpo_patients(hpo_db,patients_db,hpo_id)
     print('num patients', len(patients))
     pmids=[]
     obs_genes=[]
-    if len(patients) < 100:
+    #if len(patients) < 100:
+    if False:
         for p in patients:
                 p2=db.patients.find_one({'external_id':p['external_id']},{'rare_variants':1})
                 if not p2: continue
-                #print(p['external_id'])
                 for rv in p2.get('rare_variants',[]):
                     if 'HUGO' in rv: obs_genes+=[rv['HUGO']]
     obs_genes=Counter(obs_genes)
     obs_genes=obs_genes.most_common(10)
+    print(obs_genes)
     #obs_genes=[g for g in obs_genes if obs_genes[g]>5]
     obs_genes=[g for g in obs_genes]
     # candidate genes
     candidate_genes = [p.get('genes',[]) for p in patients]
     # solved genes
     solved_genes = [p.get('solved',[]) for p in patients]
-    #print(intersect(obs_genes.keys(),lit_genes))
-    #print(Counter([rv['HUGO'] for rv in db.patients.find_one({'external_id':p['external_id']},{'rare_variants':1})]['rare_variants']))
-    ## only return common variants if there are many individuals
-    ##rsession.voidEval('common_variants <- common.variants')
     ## private variants (not seen in others in the cohort)
     ##rsession.voidEval('common_variants <- common.variants')
     #variants=rsession.r.private_variants(hpo_patients)
@@ -93,12 +126,49 @@ def hpo_page(hpo_id):
         #for s in external_ids:
             #r=record.samples[s]
             #if 'GT' in r: print(r['GT'])
-    return render_template('hpo.html',hpo_id=hpo_id,hpo_name=hpo_name,
-            individuals=[str(p['external_id']) for p in patients],
+    hpo_db=get_db('hpo')
+    def f(p):
+        print p['external_id']
+        p['features']=[f for f in p.get('features',[]) if f['observed']=='yes']
+        if 'solved' in p:
+            if 'gene' in p['solved']:
+                p['solved']=[p['solved']['gene']]
+            else:
+                p['solved']=[]
+        else: p['solved']=[]
+        if 'genes' in p: p['genes']=[x['gene'] for x in p['genes'] if 'gene' in x]
+        else: p['genes']=[]
+        p['genes']=list(frozenset(p['genes']+p['solved']))
+        p2=db.patients.find_one({'external_id':p['external_id']},{'rare_homozygous_variants_count':1,'rare_compound_hets_count':1, 'rare_variants_count':1,'total_variant_count':1})
+        if not p2: return p
+        p['rare_homozygous_variants_count']=p2.get('rare_homozygous_variants_count','')
+        p['rare_compound_hets_count']=p2.get('rare_compound_hets_count','')
+        p['rare_variants_count']=p2.get('rare_variants_count','')
+        p['total_variant_count']=p2.get('total_variant_count','')
+        solved_patient=db.solved_patients.find_one({'external_id':p['external_id']})
+        if solved_patient and session['user']!='demo': p['solved_variants']=solved_patient.get('genes',{})
+        #p['all_variants_count']=get_db().patients.find_one({'external_id':p['external_id']},{'_id':0,'all_variants_count':1})['all_variants_count']
+        #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
+        return p
+    #eids=[p['eid'] for p in patients]
+    #print(eids)
+    #patients=get_db('patients').patients.find({'external_id':{'$in':eids}})
+    #patients=get_db('patients').patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
+    patients=[f(p) for p in patients[:500] if 'external_id' in p]
+    #print recessive_genes
+    #print dominant_genes
+    lit_genes=[]
+    return render_template('hpo.html',
+            hpo_id=hpo_id,
+            hpo_name=hpo_name,
+            individuals=[p for p in patients],
             lit_genes=lit_genes,
             obs_genes=obs_genes,
+            recessive_genes=[],
+            dominant_genes=[],
             hpo_gene=hpo_gene,
-            pmids=pmids,variants=[])
+            pmids=pmids,
+            variants=[])
 
 
 @auth.verify_password

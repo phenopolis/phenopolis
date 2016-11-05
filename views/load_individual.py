@@ -61,7 +61,7 @@ def find_item(obj, key):
                     if item is not None:
                         return item
 
-def load_patient(individual,auth,hpo,AC=6,kaviar=.05,consequence_exclude=['intron_variant','non_coding_transcript','5_prime_UTR_variant','3_prime_UTR_variant','upstream_gene_variant','downstream_gene_variant']):
+def load_patient(individual,auth,hpo='HP:0000001',AC=6,kaviar=.05,consequence_exclude=['intron_variant','non_coding_transcript','5_prime_UTR_variant','3_prime_UTR_variant','upstream_gene_variant','downstream_gene_variant']):
     client = pymongo.MongoClient()
     hpo_db = client['hpo']
     db = client['uclex']
@@ -126,6 +126,8 @@ def load_patient(individual,auth,hpo,AC=6,kaviar=.05,consequence_exclude=['intro
     patient['compound_hets']=[process(x) for x in patient['rare_variants'] if x['gene_count']>1]
     patient['rare_compound_hets_count']=len(patient['compound_hets'])
     print('number of compound hets:',patient['rare_compound_hets_count'])
+    patient["pubmedbatch_status"]=0
+    patient["pubmed_key"]="blindness-macula-macular-pigmentosa-retina-retinal-retinitis-stargardt"
     db.patients.update({'external_id':patient_id}, patient, upsert=True)
 
 

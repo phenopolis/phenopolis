@@ -1,5 +1,5 @@
 from views import *
-
+from bson.json_util import dumps
 @app.route('/pubmedbatch/', methods=['GET', 'POST'])
 @requires_auth
 def pubmedbatch_main():
@@ -371,4 +371,11 @@ def pubmedbatch_progress(id):
     progress_id = user + id
     return json.dumps(PROGRESS_BAR[progress_id])
 
-
+'''
+get pubmedbatch cache results based on pubmedkey
+'''
+@app.route('/pubmedbatch-cache/<pubmedkey>')
+def pubmedbatch_getcache(pubmedkey):
+    db = get_db('pubmedbatch') 
+    result = db.cache.find_one({'key':pubmedkey})
+    return dumps(result)

@@ -17,10 +17,11 @@ def individual_json(individual):
     db=get_db()
     hpo_db=get_db('hpo')
     patient_db=get_db('patients')
-    patient = db.patients.find_one({'external_id':individual})
-    patient2 = patient_db.patients.find_one({'external_id':individual},{'_id':False})
-    print(patient2)
-    return jsonify(result=patient2)
+    #if not patient: return jsonify(result=None)
+    patient = patient_db.patients.find_one({'external_id':individual},{'_id':False})
+    patient['features']=[f for f in patient['features'] if f['observed']=='yes']
+    print(patient)
+    return jsonify(result=patient)
 
 @app.route('/individual/<individual>')
 @requires_auth
@@ -38,7 +39,6 @@ def individual_page(individual):
     patient_db=get_db('patients')
     patient = db.patients.find_one({'external_id':individual})
     patient2 = patient_db.patients.find_one({'external_id':individual})
-    print patient2
     if patient2 is None or 'report_id' not in patient2 or patient is None:
         print 'no patient in mongo'
         referrer=request.referrer
@@ -53,8 +53,8 @@ def individual_page(individual):
         print(url)
         return redirect(url)
     patient['report_id']=patient2['report_id']
-    patient['features']=patient2.get('features',[])
     patient['sex'] = patient2['sex']
+    patient['features'] = patient2['features']
     patient['family_history'] = patient2.get('family_history',[])
     hpo_ids=[f['id'] for f in patient['features'] if f['observed']=='yes']
     # TODO
@@ -75,8 +75,14 @@ def individual_page(individual):
     print '========'
     print hpo_gene
     print '========'
-    # get pubmedbatch table
-    pubmedbatch = patient.get('pubmedbatch',{})
+    # get pubmedbatch scores
+    pubmedbatch = {}
+    if patient.get('pubmed_key',None):
+        genes = [v.get('canonical_gene_name_upper',None) for v in patient['rare_variants']+patient['homozygous_variants']+patient['compound_hets']]
+        pubmed_keys = ['_'.join([g,patient['pubmed_key']]) for g in set(genes)]
+        pubmedbatch = list(get_db('pubmedbatch').cache.find({'key':{'$in':pubmed_keys}},{'key':1,'score':1,'_id':0}))
+        if pubmedbatch:
+            pubmedbatch = dict([(i['key'],i.get('score',None)) for i in pubmedbatch])
     # candidate genes
     patient['genes'] = patient2.get('genes',[])
     # solved genes
@@ -85,14 +91,14 @@ def individual_page(individual):
     # is this still updating?
     update_status = pubmedbatch.get('status', 0);
     # get known and retnet genes
-    known_genes = open('gene_list/ret_known_genes.txt', 'r').readline().strip().split()
-    #RETNET  = json.load(open('retnet.json', 'r'))
+    #known_genes = open('gene_list/ret_known_genes.txt', 'r').readline().strip().split()
+    known_genes=[x['gene_name'] for x in db.retnet.find()]
     RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},{'_id':False})])
     # get combinatorics of features to draw venn diagram
     feature_combo = []
     feature_venn = []
     print len(hpo_terms)
-    for i in range(len(hpo_terms[1:5])):
+    for i in range(len(hpo_terms[:5])):
         feature_combo.extend(itertools.combinations(range(len(hpo_terms)), i+1))
     #venn_ind = -1
     print 'calculate Venn diagram'
@@ -108,39 +114,54 @@ def individual_page(individual):
             else:
                 tem = feature_venn[-1]['value']
                 feature_venn[-1]['value'] = feature_venn[-1]['value'] & frozenset(hpo_gene[hpo_terms[combo[ind]][0]])
+    print 'get pubmed score and RETNET'
     gene_info=dict()
     individuals=dict()
-    for v in patient['rare_variants']:
-        gene=v['canonical_gene_name_upper']
-        gene_info[gene]=dict()
-        if gene in known_genes: gene_info[gene]['known']=True
-        if gene not in RETNET: continue
-        gene_info[gene]['disease'] = RETNET[gene]['disease']
-        gene_info[gene]['omim'] = RETNET[gene]['omim']
-        gene_info[gene]['mode'] = RETNET[gene]['mode']
-        if 'het_samples' not in v: print(v)
-        for s in v['het_samples']:
-            if v['HET_COUNT'] < 10:
-                individuals[s]=individuals.get(s,[])+[v]
+    # add known gene and retnet gene labels, and re-calculate pubmed_score
+    for mm in ['rare_variants','homozygous_variants','compound_hets']:
+        for v in patient[mm]:
+            gene=v['canonical_gene_name_upper']
+            pubmed_key = '_'.join([gene,patient['pubmed_key']])
+            gene_info[gene]=dict()
+            if gene in known_genes: 
+                gene_info[gene]['known']=True
+                pubmedbatch[pubmed_key] = max(1,pubmedbatch[pubmed_key])
+            if gene not in RETNET: continue
+            gene_info[gene]['disease'] = RETNET[gene]['disease']
+            gene_info[gene]['omim'] = RETNET[gene]['omim']
+            gene_info[gene]['mode'] = RETNET[gene]['mode']
+            pubmedbatch[pubmed_key] = max(1,pubmedbatch[pubmed_key])
+            if mm != 'rare_variants' or ('d' in gene_info[gene]['mode'] and mm == 'rare_variants') :
+                pubmedbatch[pubmed_key] = max(100,pubmedbatch[pubmed_key])
+                if gene=='DRAM2':
+                    print pubmed_key
+                    print pubmedbatch[pubmed_key]
+
+            if 'het_samples' not in v: print(v)
+            for s in v['het_samples']:
+                if v['HET_COUNT'] < 10:
+                    individuals[s]=individuals.get(s,[])+[v]
     genes['homozygous_variants']=[v['canonical_gene_name_upper'] for v in patient['homozygous_variants']]
     genes['compound_hets']=[v['canonical_gene_name_upper'] for v in patient['compound_hets']]
     genes['rare_variants']=[v['canonical_gene_name_upper'] for v in patient['rare_variants']]
-    genes_pubmed=dict()
+    print 'get annotation'
     for v in patient['rare_variants']+patient['homozygous_variants']+patient['compound_hets']:
         g=v['canonical_gene_name_upper']
         # gene_id is used to get gene-hpo analysis result
         temp = lookups.get_gene_by_name(get_db(), g)
         v['gene_id'] = temp['gene_id'] if temp else None
-        genes_pubmed[g]=get_db('pubmedbatch').cache.find_one( {'key':g+'_'+patient.get('pubmed_key','')} )
         v['canonical_hgvs']=dict(zip( v['canonical_hgvsp'], v['canonical_hgvsc']))
         v['protein_mutations']=dict([(p,p.split(':')[1],) for p in v['canonical_hgvsp'] if ':' in p])
         # print(g, genes_pubmed[g])
     # figure out the order of columns from the variant row
-    table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?>",file('templates/individual-page-tabs/individual_variant_row.tmpl','r').read())
+    table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?.*>",file('templates/individual-page-tabs/individual_variant_row.tmpl','r').read())
+    if session['user']=='demo': table_headers=table_headers[:-1]
     print table_headers
     # get a list of genes related to retinal dystrophy. only relevant to subset group of ppl. talk to Jing or Niko for other cohorts. Note that dominant p value only counts paitents with 1 qualified variant on the gene. 
     # current setting: unrelated, exac_af 0.01 for recessive, 0.001 for dominant, cadd_phred 15
+    print 'get phenogenon genes'
     retinal_genes = {}
+    patient['pubmed_key']=patient.get('pubmed_key','')
     if individual[:4] == 'IRDC' or individual in ['WebsterURMD_Sample_GV4344','WebsterURMD_Sample_IC16489','WebsterURMD_Sample_SJ17898','WebsterURMD_Sample_SK13768']:
         # retinal dystrophy == HP:0000556
         retinal_genes_raw = db.hpo_gene.find_one({'hpo_id':'HP:0000556'})
@@ -158,7 +179,6 @@ def individual_page(individual):
             individuals=individuals,
             hpo_gene = hpo_gene,
             gene_info=gene_info,
-            genes_pubmed = genes_pubmed,
             update_status = update_status,
             retinal_genes = retinal_genes,
             feature_venn = feature_venn)

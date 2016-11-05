@@ -41,7 +41,6 @@ import os
 import pymongo
 import pysam
 import gzip
-from parsing import *
 import logging
 import lookups
 import random

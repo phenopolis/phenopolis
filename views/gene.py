@@ -6,8 +6,20 @@ import requests
 import primer3
 import myvariant
 from vcf import vcf_query
-
-
+import hashlib
+from bson.json_util import dumps
+'''
+defs
+'''
+def hide_hpo_for_demo(data):
+    for mode in ['hom_comp','het']:
+        for k1,v1 in data[mode].iteritems():
+            # hide hpo
+            for k2,v2 in v1['data'].iteritems():
+                v2['hpo'] = ['hidden']
+            # hide p_id
+            for k2 in v1['data'].keys():
+                v1['data']['hidden_'+hashlib.sha224(k2).hexdigest()[:6]] = v1['data'].pop(k2)
 '''
 routes
 '''
@@ -20,8 +32,6 @@ def gene_page(gene_id):
     patient_db=get_db('patients')
     hpo=request.args.get('hpo')
     if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
-    hom_comp_file = os.path.join('dot',gene_id+'_hom_comp.json')
-    het_file = os.path.join('dot',gene_id+'_het.json')
     gene=db.genes.find_one({'gene_id':gene_id})
     variants=db.variants.find({'genes':gene_id})
     gene['variants']=[Variant(variant_id=v['variant_id'],db=db) for v in variants]
@@ -46,22 +56,34 @@ def gene_page(gene_id):
     hpo_terms_dict=dict()
     for hpo_id in hpo_terms:
         hpo_terms_dict[hpo_id]=hpo_db.hpo.find_one({'id':hpo_id})
-    # get lof force
-    # lof_p_hpo = get_lof_p_hpo(gene_id, db, patient_db)
-    # rare_p_hpo = get_rare_var_p_hpo(gene_id, db, patient_db)
-    # force_test = json.dumps(draw_force_graph(rare_p_hpo['het'], hpo_freq, hpo_db))
     gene_hpo = db.gene_hpo.find_one({'gene_id':gene_id})
+    patients_status = {}
     if session['user'] == 'demo': hide_hpo_for_demo(gene_hpo) 
-    #dot_hom_comp = json.dumps(hide_hpo_for_demo(hom_comp)) if session['user'] == 'demo' else json.dumps(hom_comp)
-    #dot_het = json.dumps(hide_hpo_for_demo(het)) if session['user'] == 'demo' else json.dumps(het)
+    else:
+    # get patients status, solved? candidate genes? Only work when user is not demo for the time-being. Will probably change data struture later on to make it work for demo too
+        all_patients = frozenset(gene_hpo['het'].get('HP:0000001',{'data':{}})['data'].keys()) | frozenset(gene_hpo['hom_comp'].get('HP:0000001',{'data':{}})['data'].keys())
+        patients_status = dict([(i['external_id'],i) for i in patient_db.patients.find({'external_id':{'$in':list(all_patients)}},{'external_id':1,'solved':1,'genes':1})])
     table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?>",file('templates/gene-page-tabs/gene_variant_row.tmpl','r').read())
+    # get simreg
+    simreg_data = list(db.simreg.find({'gene':gene_id}))
+    simreg = {'rec':{'data':[],'p':None},'dom':{'data':[],'p':None}}
+    for mode in ['rec','dom']:
+        temp = [i for i in simreg_data if i['mode'] == mode]
+        if not temp: continue
+        simreg[mode]['p'] = temp[0]['p']
+        # convert it to array
+        simreg[mode]['data'] = temp[0]['phi'].values()
+        # sort desc
+        simreg[mode]['data'] = sorted(simreg[mode]['data'], key=lambda x: x['prob'], reverse=True)
     return render_template('gene.html', 
             gene=gene,
             table_headers=table_headers,
             dot_hom_comp = json.dumps(gene_hpo['hom_comp']),
             dot_het = json.dumps(gene_hpo['het']),
+            simreg = simreg,
             individuals=individuals,
             hpo_terms_json = json.dumps(hpo_terms),
+            patients_status = dumps(patients_status),
             hpo_terms=hpo_terms_dict)
 
 @app.route('/gene2/<gene_id>',methods=['GET'])

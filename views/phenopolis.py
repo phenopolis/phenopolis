@@ -1400,13 +1400,4 @@ def highlight2(text, kw, myclass):
 jinja2.filters.FILTERS['highlight2'] = highlight2
 
 
-@app.route('/load_individual/<individual>')
-@requires_auth
-def load_individual(individual):
-    filename='/slms/UGI/vm_exports/vyp/phenotips/DROPBOX/rare_variants/%s.csv' % individual
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p = Process(target=load_patient, args=(filename,auth))
-    p.start()
-    return 'Loading %s...' % individual
-
 

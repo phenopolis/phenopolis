@@ -19,11 +19,14 @@ import subprocess
 import os
 
 
-
 @app.route('/variant/<variant_str>')
 @requires_auth
 def variant_page(variant_str):
-    variant=orm.Variant(variant_id=variant_str,db=get_db('uclex'))
+    try:
+        variant=orm.Variant(variant_id=variant_str,db=get_db('uclex'))
+    except:
+        return 'Variant does not exist'
+    if not variant: return 'Variant does not exist'
     variant=variant.__dict__
     if session['user'] == 'demo':
         del variant['wt_samples']
@@ -34,19 +37,21 @@ def variant_page(variant_str):
         variant=variant
     )
 
-
+#@app.route('/variant_json/<variant_str>')
+#def variant_json(variant_str): return jsonify(result=vcf.vcf_query(variant_str=variant_str))
 
 @app.route('/variant_json/<variant_str>')
 def variant_json(variant_str):
-    return jsonify(result=vcf.vcf_query(variant_str=variant_str))
-
-@app.route('/variant_json_db/<variant_str>')
-def variant_json_db(variant_str):
     variant=orm.Variant(variant_id=variant_str,db=get_db())
+    if session['user'] == 'demo':
+        variant.__dict__['wt_samples']=[]
+        variant.__dict__['het_samples']=[]
+        variant.__dict__['hom_samples']=[]
     return jsonify(result=variant.__dict__)
 
 @app.route('/variant_json_db_new/<variant_str>')
 def variant_json_db_new(variant_str):
+    if session['user'] == 'demo': return ''
     variant=orm.Variant(variant_id=variant_str,db=get_db('uclex'))
     return jsonify(result=variant.__dict__)
 
