@@ -77,7 +77,7 @@ python pubmedScore.py
 
 The phenogenon, written by [Jing Yu](https://github.com/logust79), does an enrichment test (Fisher test) per gene and HPO term.
 
-The scripts can be found in `./phenogenon`
+The scripts can be found in [phenogenon](phenogenon):
 
 First, the user has to run `python snapshot_patient_hpo.py` to take a snapshot of patients' HPO at the time. Since the phenogenon analysis will take some time, this is to avoid any inconsistency that might be introduced by editing patients' HPO in the database when phenogenon is running.
 
