@@ -61,7 +61,7 @@ Load individual for individual page (this is currently tedious, we are going to 
 
 The pubmedscore, written by [Jing Yu](https://github.com/logust79), scores genes based on their pubmed relevance.
 
-The scripts can be found in (pubmedScore)[pubmedScore]:
+The scripts can be found in [pubmedScore](pubmedScore):
 
 Before running the script, it is preferable to write patients ids in `patients.txt`, which `pubmedScore.py` takes by default.
 
