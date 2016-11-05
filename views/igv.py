@@ -17,8 +17,6 @@ import re
 def bam_viewer():
     return render_template('igv_viewer.html')
 
-
-
 @app.route('/read_viz/bam/<sample>')
 def read_viz(sample):
     print(request.method)
@@ -34,13 +32,13 @@ def read_viz(sample):
     #Server:Apache/2.4.12 (Red Hat) mod_wsgi/3.4 Python/2.7.8
     headers.add('X-Frame-Options','SAMEORIGIN')
     if sample=='gencode.v19.sorted.bed':
-        bamfile='/slms/UGI/vm_exports/vyp/phenotips/uclex_files/bam/gencode.v19.sorted.bed'
+        bamfile=BAM_FILES+'/gencode.v19.sorted.bed'
     elif sample=='gencode.v19.sorted.bed.idx':
-        bamfile='/slms/UGI/vm_exports/vyp/phenotips/uclex_files/bam/gencode.v19.sorted.bed.idx'
+        bamfile=BAM_FILES+'/gencode.v19.sorted.bed.idx'
     elif sample.endswith('.bai'):
-        bamfile='/slms/UGI/vm_exports/vyp/phenotips/uclex_files/bam/OXF_3018_sorted_unique.bam.bai'
+        bamfile=BAM_FILES+'/%s.bam.bai' % sample
     else:
-        bamfile='/slms/UGI/vm_exports/vyp/phenotips/uclex_files/bam/OXF_3018_sorted_unique.bam'
+        bamfile=BAM_FILES+'/%s.bam' % sample
     size = os.path.getsize(bamfile)
     print(size)
     status = 200
@@ -66,15 +64,7 @@ def read_viz(sample):
         elif request.method=='GET':
             response = Response( file(bamfile), status=200, mimetype="application/octet-stream", headers=headers, direct_passthrough=True)
     #Add mimetype   
-    #mimetypes = {u"mp3":"audio/mpeg",u"ogg":"audio/ogg"}
-    #if stream==True: mimetype = mimetypes[musicFile.filetype]
-    #else:
-    #enable browser file caching with etags
     response.cache_control.public  = True
-    #response.cache_control.max_age = int(cachetimout)
-    #response.last_modified         = int(musicFile.changetime)
-    #response.expires               = int( time() + int(cachetimout) )
-    #response.set_etag('%s%s' % ( musicFile.id,musicFile.changetime ))
     response.make_conditional(request)
     return response
 
@@ -84,8 +74,6 @@ def read_viz(sample):
 def read_viz2():
     print(sample)
     print(region)
-    #region="2:240981885-240982890"
-    #bam=pysam.AlignmentFile('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/bam/OXF_3018_sorted_unique.bam')
     from subprocess import call
     tmpfile=subprocess.Popen('mktemp', shell=True, stdout=subprocess.PIPE).stdout.read().strip()+'.bam'
     print(tmpfile)
