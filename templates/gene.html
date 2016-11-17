@@ -109,6 +109,8 @@ window.variants = [];
         <dl class="dl-horizontal">
             <dt>{{ gene.gene_name }}</dt>
             <dd>{{ gene.full_gene_name }}</dd>
+            <dt> pLI </dt>
+            <dd> {{pli|round(2)}} </dd>
             <dt>Number of variants</dt>
             <dd><span id="number_of_variants"> {{ gene.variants|length }}</span></dd>
 {#                    <dt>Number of LoF variants</dt>#}
@@ -253,20 +255,21 @@ window.variants = [];
     </div>
 </div><!--end of row-->
 
+
+
 <label class='tip' title='individuals relatedness is calculated using KINSHIP. Only applies to Phenogenon'>
-  <input class='remove' id='remove-related' type="checkbox" checked> Remove relatedness
+      <input class='remove' id='remove-related' type="checkbox" checked> Remove relatedness
 </label>&nbsp;
 <label class='remove' class='tip' title='Remove variants with dubious filter quality. Only applies to Phenogenon'>
-  <input id='remove-bad-variants' type="checkbox" checked> Remove dubious variants
+        <input id='remove-bad-variants' type="checkbox" checked> Remove dubious variants
 </label>&nbsp;
+
 <ul class="nav nav-tabs" id='data-nav' role="tablist">
-    <li class="active">
-    <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">Phenogenon Recessive</a>
-    </li> 
+    <li class="active"> <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">Phenogenon Recessive</a> </li>
     <li><a href="#gene-tab_het" role="tab" class="tab-li" data-toggle="tab" id="het-tab">Phenogenon Dominant</a></li>
-    <li><a href="#gene-tab_tables" role="tab" class="tab-li" data-toggle="tab" id="table-tab">Phenogenon tables</a></li>
+    <li> <a href="#gene-tab_tables" role="tab" class="tab-li" data-toggle="tab" id="table-tab">Phenogenon tables</a> </li> 
     <li><a href="#gene-tab_simreg_tables" role="tab" class="tab-li" data-toggle="tab" id="simreg-table-tab">Simreg tables</a></li>
-    <li><a href="#gene-tab_variant_table" role="tab" class="tab-li" data-toggle="tab">variant table</a></li>
+    <li> <a href="#gene-tab_variant_table" role="tab" class="tab-li" data-toggle="tab">variant table</a></li>
     {# <li><a href="#gene-tab_transcript_display" role="tab" class="tab-li" data-toggle="tab">transcript display</a></li> #}
     <li><a href="#gene-tab_hpo" role="tab" class="tab-li" data-toggle="tab">OMIM HPO terms</a></li>
 </ul>
@@ -294,9 +297,7 @@ window.variants = [];
                 <h4 class="modal-title" id="myModalLabel"></h4>
             </div>
             <div class="modal-body">
-                <p id='hpo-modal-p'>
-                        
-                </p>
+                <p id='hpo-modal-p'> </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default refresh" data-dismiss="modal">Close</button>
@@ -441,7 +442,7 @@ $('body').on('click','.remove',function(){
             remove_hom = true;
         }
         var hom_exac = $('#hom-comp_exac_table_slider').val();
-        var hom_cadd = $('#hom_comp_cadd_table_slider').val();
+        var hom_cadd = $('#hom-comp_cadd_table_slider').val();
         var het_exac = $('#het_exac_table_slider').val();
         var het_cadd = $('#het_cadd_table_slider').val();
         getTable(hom,'hom_comp',hom_exac,hom_cadd,false,remove_bad_vars);
@@ -473,6 +474,19 @@ function clean_hpo_arm(hpo, mydata, p_cutoff,seen,bad_hpos){
     }
 }
 
+function simplify_graph(graph, id, trim) {
+    $.each(graph, function(i,x) {
+            if (x.is_a.includes(id)) {
+            if (x.observed_freq==graph[id].observed_freq && id != 'HP:0000001') {
+                    graph[x.id].is_a=graph[x.id].is_a.concat(graph[id].is_a.slice());
+                    graph[x.id].is_a=$.unique(graph[x.id].is_a.sort());
+                    trim.push(id);
+                }
+                simplify_graph(graph, x.id, trim)
+            }
+    });
+}
+
 function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
     if ($.isEmptyObject(temp)){
         return true;
@@ -482,13 +496,14 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
         unrelated_flag = true;
     }
     var my_data = jQuery.extend(true,{}, temp);
+    //console.log(temp);
     var returned = transform(my_data,mode,exac,cadd,remove_hom, unrelated_flag, hpo_terms,remove_bad_vars);
     var num_of_patients = returned.pat_g;
     var num_of_vars = returned.num_of_vars;
     var result = returned.data;
     // clean node if it has the same p_val to its subclass
     // assign a p_cutoff to hide insignificant nodes
-    var p_cutoff = 0.005;
+    var p_cutoff = 0.05;
     var seen = {};
     var bad_hpos = {};
     if (p_cutoff){
@@ -496,12 +511,26 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
         var hpos = Object.keys(result).sort(function(a,b){
             return ((result[a].pat_gh < result[b].pat_gh) ? -1 : ((result[a].pat_gh > result[b].pat_gh) ? 1 : 0));
         });
+        //console.log(hpos);
         // start looking from the smallest pat_gh (bottomest)
         $.each(hpos,function(i,h){
             // skip if h was already deleted
             if (!(h in result) || h == 'HP:0000001' || h in seen){ return true;}
             clean_hpo_arm(h,result,p_cutoff,seen,bad_hpos);
         });
+    }
+    if ($('#simplify-graph').is(':checked')){
+        var trim=[];
+        simplify_graph(result,"HP:0000001",trim);
+        $.each(result,function(k,v){
+                //console.log(v.is_a)
+                v.is_a=v.is_a.filter(function(x) { return (!trim.includes(x)) });
+                //console.log(v.is_a)
+        });
+        $.each(trim,function(k,v){
+                delete result[v];
+        });
+        trim=[];
     }
     $.each(bad_hpos,function(k,d){
         delete result[k];
@@ -567,14 +596,18 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
                 var p_id = this_e.attr('id');
                 var thisC = null;
                 var genes = [];
-                if (patients_status[p_id].genes != undefined){
-                    thisC = 'candidate';
-                    genes = $.map(patients_status[p_id].genes,function(v,i){
-                        return v['gene'];
-                    });
-                }
-                if (patients_status[p_id].solved.status == 'solved'){
-                    thisC = 'solved';
+                if (p_id in patients_status){
+                    if (patients_status[p_id].genes != undefined){
+                        thisC = 'candidate';
+                        genes = $.map(patients_status[p_id].genes,function(v,i){
+                            return v['gene'];
+                        });
+                    }
+                    if (patients_status[p_id].solved.status == 'solved'){
+                        thisC = 'solved';
+                    }
+                }else{
+                    console.log('Patient status error: '+p_id+' cannot be found in the database!');
                 }
                 if (thisC){
                     this_e.toggleClass(thisC);
@@ -693,6 +726,7 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
                 });
     };
 }
+
 // table functions
 function getTable(temp,mode,exac,cadd,remove_hom,remove_bad_vars){
     // get table div id
@@ -862,10 +896,39 @@ $('.variant_id').hover(function(){
             span.attr('data-content', content);
     });
 });
+/*
+$.get('http://whateverorigin.org/get?url=' + encodeURIComponent('http://exac.broadinstitute.org/gene/{{ gene.gene_id }}'), function(data){
+            alert(data.contents);
+            });
+*/
 
 
-
-
+// get individual_id in real time
+$('.individual_id').on('click',function(){
+    // get variant_id
+    var span = $(this);
+    var id = span.text();
+    $.get('/individual_json/' + id,
+        function(data){
+            if ($('h3.popover-title').text() == 'loading...'){
+                $('div.popover.in').remove();
+                span.trigger('click');
+                span.trigger('click');
+            }
+            if (!data.result) {
+                span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
+                span.attr('data-content', 'no data available');
+            }
+            var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
+            content += '<p><b>Features:</b><br/>'
+            $.each(data.result.features.sort(), function(i,v){
+                content += '<a href="/hpo/'+v.label+'">'+v.label+'</a><br/>';
+            });
+            content += '</p>';
+            span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
+            span.attr('data-content', content);
+    });
+});
 
 
 </script>
