@@ -107,6 +107,10 @@ wget ftp://ftp.sanger.ac.uk/pub/resources/software/exomiser/downloads/exomiser/e
 unzip exomiser-cli-7.2.1-data.zip
 java -jar exomiser-rest-prioritiser-7.3.0-SNAPSHOT.jar --exomiser.data-directory=$EXOMISER_DATA
 ```
+There is also an online version available at the [Monarch Initiative](https://monarchinitiative.org).
+```
+https://monarch-exomiser-prod.monarchinitiative.org/exomiser/api/prioritise/
+```
 
 Run Phenopolis:
 ```
