@@ -16,22 +16,9 @@ import orm
 import vcf
 
 
-@app.route('/hpo')
-def hpo_main():
-    # HPO summary page
-    # major groups, borrowed from phenotips
-    major_groups = {'GROWTH PARAMETERS':['HP:0000256','HP:0000252','HP:0000098','HP:0004322','HP:0004324','HP:0004325','HP:0001508','HP:0001528'],'CRANIOFACIAL':['HP:0001363','HP:0000204','HP:0000175','HP:0001999'],'EYE DEFECTS':['HP:0000505','HP:0000481','HP:0000589','HP:0000593','HP:0000518','HP:0000479','HP:0000587','HP:0000568','HP:0000639','HP:0000486','HP:0000601','HP:0000316'],'EAR DEFECTS':['HP:0000407','HP:0000405','HP:0004467','HP:0000384','HP:0000356','HP:0000359'],'CUTANEOUS':['HP:0000953','HP:0001010','HP:0005306','HP:0011276'],'CARDIOVASCULAR':['HP:0001631','HP:0001629','HP:0001674','HP:0001680','HP:0001636','HP:0001638','HP:0011675'],'RESPIRATORY':['HP:0000776','HP:0002088'],'MUSCULOSKELETAL':['HP:0002652','HP:0002659','HP:0009816','HP:0009824','HP:0100490','HP:0001836','HP:0006101','HP:0001770','HP:0100258','HP:0100259','HP:0001180','HP:0001849','HP:0002650','HP:0000925','HP:0001371','HP:0001762'],'GASTROINTESTINAL':['HP:0002032','HP:0002575','HP:0001543','HP:0001539','HP:0002251','HP:0001396','HP:0002910','HP:0001738','HP:0000819'],'GENITOURINARY':['HP:0000107','HP:0000085','HP:0000069','HP:0000795','HP:0000062','HP:0000047','HP:0000028'],'BEHAVIOR, COGNITION AND DEVELOPMENT':['HP:0001263','HP:0010862','HP:0002194','HP:0000750','HP:0001328','HP:0001256','HP:0002342','HP:0010864','HP:0007018','HP:0000717','HP:0000708'],'NEUROLOGICAL':['HP:0001290','HP:0001250','HP:0001251','HP:0001332','HP:0002072','HP:0001257','HP:0010301','HP:0002011']}
-    hpo_freq = lookups.get_hpo_size_freq('hpo_freq.tsv')
-    return str(hpo_freq)
-
-@app.route('/phenogenon_json/<hpo_id>')
-@requires_auth
-def phenogenon_json(hpo_id):
-    print 'PHENOGENON_JSON'
+def phenogenon(hpo_id,lit_genes,omim_genes,recessive_genes,dominant_genes):
     hpo_db=get_db('hpo')
     db=get_db()
-    lit_genes=[]
-    omim_genes=[]
     for r in hpo_db.hpo_gene.find({'HPO-ID':hpo_id}):
         g=db.genes.find_one({'gene_name_upper':r['Gene-Name'].upper()},{'_id':0})
         if not g: continue
@@ -42,20 +29,31 @@ def phenogenon_json(hpo_id):
                 'hom_comp':phenogenon.get('hom_comp',{}).get(hpo_id,{})
                 }
         lit_genes+=[g]
-    omim_genes=map(lambda x: x['gene_id'], lit_genes)
+    omim_genes.extend(map(lambda x: x['gene_id'], lit_genes))
     phenogenon=db.hpo_gene.find_one({'hpo_id':hpo_id})
     if phenogenon: phenogenon=phenogenon['data']['unrelated']
     else: phenogenon={'recessive':[],'dominant':[]}
-    recessive_genes=[{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'],'known':x['gene_id'] in omim_genes} for x in phenogenon['recessive']]
-    dominant_genes=[{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'], 'known':x['gene_id'] in omim_genes} for x in phenogenon['dominant']]
+    recessive_genes.extend([{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'],'known':x['gene_id'] in omim_genes} for x in phenogenon['recessive']])
+    dominant_genes.extend([{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'], 'known':x['gene_id'] in omim_genes} for x in phenogenon['dominant']])
+
+
+@app.route('/phenogenon_json/<hpo_id>')
+@requires_auth
+def phenogenon_json(hpo_id):
+    print 'PHENOGENON_JSON'
     #print(intersect(obs_genes.keys(),lit_genes))
     #print(Counter([rv['HUGO'] for rv in db.patients.find_one({'external_id':p['external_id']},{'rare_variants':1})]['rare_variants']))
     ## only return common variants if there are many individuals
     ##rsession.voidEval('common_variants <- common.variants')
-    #print(lit_genes)
-    #print(omim_genes)
-    #print(recessive_genes)
-    #print(dominant_genes)
+    lit_genes=[]
+    omim_genes=[]
+    recessive_genes=[]
+    dominant_genes=[]
+    phenogenon(hpo_id, lit_genes, omim_genes, recessive_genes, dominant_genes)
+    print(len(lit_genes))
+    print(len(omim_genes))
+    print(len(recessive_genes))
+    print(len(dominant_genes))
     return jsonify( result={
                     'lit_genes':lit_genes,
                     'omim_genes':omim_genes,
@@ -72,6 +70,7 @@ def hpo_page(hpo_id):
     #patients=[p for p in patients_db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     print hpo_id 
     if not hpo_id.startswith('HP:'):
+        hpo_id=hpo_id.upper()
         hpo_id=hpo_db.hpo.find_one({'name':hpo_id})['id'][0]
     print hpo_id 
     hpo_name=hpo_db.hpo.find_one({'id':hpo_id})['name'][0]
@@ -157,8 +156,17 @@ def hpo_page(hpo_id):
     patients=[f(p) for p in patients[:500] if 'external_id' in p]
     #print recessive_genes
     #print dominant_genes
-    lit_genes=[]
+    lit_genes=[r['Gene-Name'] for r in hpo_db.hpo_gene.find({'HPO-ID':hpo_id})]
+    skat_genes=db.skat.find({'HPO':hpo_id})
+    skat_genes=[g for g in skat_genes if g['FisherPvalue']<0.05 and g['SKATO']<0.005]
+    for g in skat_genes:
+        pli=get_db('exac').pli.find_one({'gene':g['Symbol']})
+        if pli:
+            g['pli']=pli['pLI'] 
+        else:
+            g['pli']=-1
     return render_template('hpo.html',
+            title=hpo_id,
             hpo_id=hpo_id,
             hpo_name=hpo_name,
             individuals=[p for p in patients],
@@ -167,6 +175,7 @@ def hpo_page(hpo_id):
             recessive_genes=[],
             dominant_genes=[],
             hpo_gene=hpo_gene,
+            skat_genes=skat_genes,
             pmids=pmids,
             variants=[])
 
