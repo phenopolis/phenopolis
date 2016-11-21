@@ -34,6 +34,7 @@ def variant_page(variant_str):
         del variant['hom_samples']
     return render_template(
         'variant.html',
+        title=variant_str,
         variant=variant
     )
 

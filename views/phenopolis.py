@@ -641,55 +641,6 @@ def gene_page(gene_id):
     return get_gene_page_content(gene_id,hpo,hpo_string)
 
 
-@app.route('/transcript2/<transcript_id>')
-def transcript_page2(transcript_id):
-    db = get_db()
-    try:
-        transcript = lookups.get_transcript(db, transcript_id)
-        cache_key = 't-transcript-{}'.format(transcript_id)
-        t = cache.get(cache_key)
-        print 'Rendering %stranscript: %s' % ('' if t is None else 'cached ', transcript_id)
-        if t is None:
-            gene = lookups.get_gene(db, transcript['gene_id'])
-            gene['transcripts'] = lookups.get_transcripts_in_gene(db, transcript['gene_id'])
-            variants_in_transcript = lookups.get_variants_in_transcript(db, transcript_id)
-            coverage_stats = lookups.get_coverage_for_transcript(db, transcript['xstart'] - EXON_PADDING, transcript['xstop'] + EXON_PADDING)
-            add_transcript_coordinate_to_variants(db, variants_in_transcript, transcript_id)
-            t = render_template(
-                'transcript.html',
-                transcript=transcript,
-                transcript_json=json.dumps(transcript),
-                variants_in_transcript=variants_in_transcript,
-                variants_in_transcript_json=json.dumps(variants_in_transcript),
-                coverage_stats=coverage_stats,
-                coverage_stats_json=json.dumps(coverage_stats),
-                gene=gene,
-                gene_json=json.dumps(gene),
-                csq_order=csq_order,
-            )
-            cache.set(cache_key, t)
-        return t
-    except Exception, e:
-        print 'Failed on transcript:', transcript_id, ';Error=', traceback.format_exc()
-        abort(404)
-
-
-
-@app.route('/transcript/<transcript_id>')
-def transcript_page(transcript_id):
-    db = get_db()
-    transcript = lookups.get_transcript(db, transcript_id)
-    cache_key = 't-transcript-{}'.format(transcript_id)
-    t = cache.get(cache_key)
-    print 'Rendering %stranscript: %s' % ('' if t is None else 'cached ', transcript_id)
-    if t: return t
-    variants=[v for v in db.variants.find({'Transcript':str(transcript_id)})]
-    genes=list(set([variants['Gene'] for v in variants]))
-    print(genes)
-    cache.set(cache_key, t)
-    return t
-
-
 
 @app.route('/region/<region_id>')
 def region_page(region_id):

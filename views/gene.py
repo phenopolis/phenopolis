@@ -31,8 +31,14 @@ def gene_page(gene_id):
     hpo_db=get_db('hpo')
     patient_db=get_db('patients')
     hpo=request.args.get('hpo')
-    if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
-    gene=db.genes.find_one({'gene_id':gene_id})
+    if not gene_id.startswith('ENSG'):
+        gene=db.genes.find_one({'gene_name': gene_id}, fields={'_id': False})
+        #if not gene: gene=db.genes.find_one({'other_names': gene_id}, fields={'_id': False})
+        if not gene: return gene_id+' does not exist'
+        gene_id=gene['gene_id']
+    else:
+        gene=db.genes.find_one({'gene_id':gene_id})
+        if not gene: return gene_id+' does not exist'
     variants=db.variants.find({'genes':gene_id})
     gene['variants']=[Variant(variant_id=v['variant_id'],db=db) for v in variants]
     individuals=dict()
@@ -45,7 +51,6 @@ def gene_page(gene_id):
     print(gene['gene_id'])
     hpo_terms=hpo_db.gene_hpo.find_one({'gene_id':gene['gene_id']})
     if hpo_terms:
-        #hpo_terms=dict(zip(hpo_terms['hpo_terms'],hpo_terms['hpo_names']))
         hpo_terms=hpo_terms['hpo_terms']
     else:
         hpo_terms=hpo_db.genes_pheno.find_one({'gene':gene['gene_name']})
@@ -75,8 +80,15 @@ def gene_page(gene_id):
         simreg[mode]['data'] = temp[0]['phi'].values()
         # sort desc
         simreg[mode]['data'] = sorted(simreg[mode]['data'], key=lambda x: x['prob'], reverse=True)
+    pli=get_db('exac').pli.find_one({'gene':gene['gene_name_upper']})
+    if pli:
+        pli=pli['pLI']
+    else:
+        pli=-1
     return render_template('gene.html', 
+            title=gene['gene_name_upper'],
             gene=gene,
+            pli=pli,
             table_headers=table_headers,
             dot_hom_comp = json.dumps(gene_hpo['hom_comp']),
             dot_het = json.dumps(gene_hpo['het']),
@@ -85,6 +97,23 @@ def gene_page(gene_id):
             hpo_terms_json = json.dumps(hpo_terms),
             patients_status = dumps(patients_status),
             hpo_terms=hpo_terms_dict)
+
+
+@app.route('/gene_json/<gene_id>',methods=['GET','POST'])
+def gene_json(gene_id):
+    # if gene not ensembl id then translate to
+    db=get_db()
+    hpo_db=get_db('hpo')
+    patient_db=get_db('patients')
+    hpo=request.args.get('hpo')
+    if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
+    gene=db.genes.find_one({'gene_id':gene_id})
+    del gene['_id']
+    variants=db.variants.find({'genes':gene_id})
+    return json.dumps(gene)
+
+
+
 
 @app.route('/gene2/<gene_id>',methods=['GET'])
 #@requires_auth
@@ -144,7 +173,6 @@ def sequence():
     primer_tm_max = float(request.args.get('primer_tm_max') or 67)
     PCR_size_range = request.args.get('PCR_size_range') or '100-400'
     SEQUENCE_EXCLUDED_REGION = []
-
     # get sequence
     server = "http://%s.rest.ensembl.org" % build
     ext = '''/sequence/region/human/%(chrom)s:%(start)s..%(end)s:%(strand)s?expand_5prime=%(margins)s;expand_3prime=%(margins)s;''' % locals()
@@ -152,7 +180,6 @@ def sequence():
     if not r.ok:
         return r.raise_for_status()
     decoded = r.json()
-
     # run primer3 to get primers suggestion
     # useful keys:
     # PRIMER_LEFT_0: (start(0 based), length)
@@ -160,7 +187,6 @@ def sequence():
     # PRIMER_LEFT_0_TM
     # PRIMER_LEFT_0_GC_PERCENT
     # PRIMER_PAIR_0_PRODUCT_SIZE
-
     # region sets the paddings to include in the sequencing.Default with 100 bp on each side.
     region = [margins - paddings, end - start + 2*paddings ]
     seq = str(decoded['seq'])
@@ -262,22 +288,6 @@ def test():
                            genes = json.dumps(list(set(genes))),
                            omims = json.dumps(list(set(omims)))
                            )
-
-
-@app.route('/gene_json/<gene_id>',methods=['GET','POST'])
-def gene_json(gene_id):
-    # if gene not ensembl id then translate to
-    db=get_db()
-    hpo=request.args.get('hpo')
-    if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
-    gene_name=db.genes.find_one({'gene_id':gene_id})['gene_name']
-    print(gene_name)
-    hpo_string=lookups.get_gene_hpo(get_db('hpo'),gene_name)
-    print(hpo_string)
-    variants=db.variants.find({'genes': gene_id}, fields={'_id': False})
-    #if gene_id in app.config['GENES_TO_CACHE']:
-        #return open(os.path.join(app.config['GENE_CACHE_DIR'], '{}.html'.format(gene_id))).read()
-    #else:
 
 
 

@@ -77,6 +77,7 @@ def homepage():
     #image=imgdata.buf
     #image = '<svg' + image.split('<svg')[1]
     t = render_template('homepage.html',
+        title='home',
         total_patients=total_patients,
         male_patients=male_patients,
         female_patients=female_patients,

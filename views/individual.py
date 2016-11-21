@@ -120,17 +120,18 @@ def individual_page(individual):
     # add known gene and retnet gene labels, and re-calculate pubmed_score
     for mm in ['rare_variants','homozygous_variants','compound_hets']:
         for v in patient[mm]:
+            if 'canonical_gene_name_upper' not in v: v['canonical_gene_name_upper']=v['Gene']
             gene=v['canonical_gene_name_upper']
-            pubmed_key = '_'.join([gene,patient['pubmed_key']])
+            pubmed_key = '_'.join([gene,patient.get('pubmed_key','')])
             gene_info[gene]=dict()
             if gene in known_genes: 
                 gene_info[gene]['known']=True
-                pubmedbatch[pubmed_key] = max(1,pubmedbatch[pubmed_key])
+                pubmedbatch[pubmed_key] = max(1,pubmedbatch.get('pubmed_key',0))
             if gene not in RETNET: continue
             gene_info[gene]['disease'] = RETNET[gene]['disease']
             gene_info[gene]['omim'] = RETNET[gene]['omim']
             gene_info[gene]['mode'] = RETNET[gene]['mode']
-            pubmedbatch[pubmed_key] = max(1,pubmedbatch[pubmed_key])
+            pubmedbatch[pubmed_key] = max(1,pubmedbatch.get('pubmed_key',0))
             if mm != 'rare_variants' or ('d' in gene_info[gene]['mode'] and mm == 'rare_variants') :
                 pubmedbatch[pubmed_key] = max(100,pubmedbatch[pubmed_key])
                 if gene=='DRAM2':
@@ -150,8 +151,10 @@ def individual_page(individual):
         # gene_id is used to get gene-hpo analysis result
         temp = lookups.get_gene_by_name(get_db(), g)
         v['gene_id'] = temp['gene_id'] if temp else None
-        v['canonical_hgvs']=dict(zip( v['canonical_hgvsp'], v['canonical_hgvsc']))
-        v['protein_mutations']=dict([(p,p.split(':')[1],) for p in v['canonical_hgvsp'] if ':' in p])
+        v['canonical_hgvs']=dict(zip( v.get('canonical_hgvsp',''), v.get('canonical_hgvsc','')))
+        v['protein_mutations']=dict([(p,p.split(':')[1],) for p in v.get('canonical_hgvsp','') if ':' in p])
+        if 'FILTER' not in v: v['FILTER']=v['filter']
+        if 'ID' not in v: v['ID']=''
         # print(g, genes_pubmed[g])
     # figure out the order of columns from the variant row
     table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?.*>",file('templates/individual-page-tabs/individual_variant_row.tmpl','r').read())
@@ -169,6 +172,7 @@ def individual_page(individual):
         for mode in ['recessive','dominant']:
             retinal_genes[mode] = dict([(i['gene_id'],-math.log10(i['p_val'])) for i in retinal_genes_raw['data']['unrelated'][mode]])
     return render_template('individual.html', 
+            title=individual,
             external_id = individual,
             patient=patient,
             table_headers=table_headers,
