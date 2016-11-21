@@ -1,0 +1,65 @@
+<div id="gene-tab_simreg_tables" class="tab-pane">
+    <div class='row'>
+        <div class='col-md-6 panel-like'>
+            <div class='row'>
+                <div class='col-md-11 col-md-offset-1'>
+                    <h3 class='grey'>Recessive <small>[Model p:{{ simreg.rec.p }}]</small> </h3>
+                </div>
+            </div>
+            <img src="/static/SimReg/{{ gene.gene_id }}-rec.svg"></img>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <table id="" class="table-sorter">
+                        <thead>
+                            <tr>
+                                <th>HPO</th>
+                                <th title='Phi Probability score'>Prob</th>
+                            </tr>
+                        </thead>
+                        <tbody id="simreg_recessive_table_body">
+                        {% if simreg.rec.data %}
+                            {% for h in simreg.rec.data %}
+                                <tr>
+                                    <td><a href='/hpo/{{h.hpo_id|upper}}'>{{ h.desc }}</a></td>
+                                    <td>{{ h.prob }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div><!--table row-->
+        </div><!--hom table col-->
+        <div class='col-md-6 panel-like'>
+            <div class='row'>
+                <div class='col-md-11 col-md-offset-1'>
+                    <h3 class='grey'>Dominant <small>[Model p:{{ simreg.dom.p }}]</small> </h3>
+                </div>
+            </div>
+            <img src="/static/SimReg/{{ gene.gene_id }}-dom.svg"></img>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <table id="" class="table-sorter">
+                        <thead>
+                            <tr>
+                                <th>HPO</th>
+                                <th title='Phi Probability score'>Prob</th>
+                            </tr>
+                        </thead>
+                        <tbody id="simreg_dominant_table_body">
+                        {% if simreg.dom.data %}
+                            {% for h in simreg.dom.data %}
+                                <tr>
+                                    <td><a href='/hpo/{{h.hpo_id|upper}}'>{{ h.desc }}</a></td>
+                                    <td>{{ h.prob }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div><!--table row-->
+        </div><!--het table col-->
+    </div><!--both table rows-->
+</div><!--tab3-->
+

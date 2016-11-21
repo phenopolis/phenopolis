@@ -6,23 +6,22 @@
                 Number of matching variants: <span id='dot-het-vNum'></span>
             </h3>
             <div class='row'>
-                <input id="het_exac_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.001" data-slider-step="0.0001" data-slider-value="0.001"/>
-                &nbsp;&nbsp;<span id="het_exacCurrentSliderValLabel">ExAC_AF cutoff: <span id="het_exacSliderVal">0.001</span></span>
+                <input id="het_exac_graph_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.001" data-slider-step="0.0001" data-slider-value="0.0001"/>
+                &nbsp;&nbsp;<span id="het_exac_graphCurrentSliderValLabel">ExAC_AF cutoff: <span id="het_exac_graphSliderVal">0.0001</span></span>
                 <button class='btn btn-success' id='copy-het'>Convert to png</button>
             </div>
             <div class='row'>
-                <input id="het_cadd_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="15"/>
-                &nbsp;&nbsp;<span id="het_caddCurrentSliderValLabel">CADD Phred cutoff: <span id="het_caddSliderVal">15</span></span>&nbsp;&nbsp;
+                <input id="het_cadd_graph_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="15"/>
+                &nbsp;&nbsp;<span id="het_cadd_graphCurrentSliderValLabel">CADD Phred cutoff: <span id="het_cadd_graphSliderVal">15</span></span>&nbsp;&nbsp;
                 <label>
-                  <input id='graph-remove-hom' type="checkbox"> Remove hom-comp
+                  <input class='remove' id='graph-remove-hom' type="checkbox"> Remove hom-comp
                 </label>
             </div>
         </div>
         <div class='copy col-md-5' id='copy-het-div'></div>
     </div>
     <div class='row'>
-        <div class='col-md-10 col-md-offset-1 hpo' id='dot-het'>
-        </div>
+        <div class='col-md-10 col-md-offset-1 hpo' id='dot-het'> </div>
     </div><!--row-->
 </div><!--tab2-->
 
