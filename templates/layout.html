@@ -1,6 +1,6 @@
 <!doctype html>
 <head>
-    <title> &Phi;enopolis  </title>
+    <title> Phenopolis-{{ title }}  </title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -8,8 +8,7 @@
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='typeaheadjs.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
 
-
-
+    <script type="text/javascript" src="{{ url_for('static', filename='json-to-table.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='jquery-1.11.1.min.js') }}"></script>
     <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='typeahead.bundle.min.js') }}"></script>
@@ -17,16 +16,16 @@
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.tablesorter.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.tablesorter.pager.js') }}"></script>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='theme.default.css') }}">
-    <script type="text/javascript" src="{{ url_for('static', filename='underscore-min.js') }}"></script>
+    <!-- <script type="text/javascript" src="{{ url_for('static', filename='underscore-min.js') }}"></script> -->
 
     <link rel=stylesheet type=text/css href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
     <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='alchemy.min.css') }}"> -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='vis.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='d3.v3.min.js') }}"></script>
-    <script type="text/javascript" src="https://gabelerner.github.io/canvg/rgbcolor.js"></script>
+    <!--script type="text/javascript" src="https://gabelerner.github.io/canvg/rgbcolor.js"></script>
     <script type="text/javascript" src="https://gabelerner.github.io/canvg/StackBlur.js"></script>
-    <script type="text/javascript" src="https://gabelerner.github.io/canvg/canvg.js"></script>
+    <script type="text/javascript" src="https://gabelerner.github.io/canvg/canvg.js"></script-->
     <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
     <script type="text/javascript" src="{{  url_for('static', filename='exac.js') }}"></script>
     <!-- <script type="text/javascript" src="{{  url_for('static', filename='alchemy.min.js') }}"></script> -->

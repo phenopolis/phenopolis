@@ -39,15 +39,15 @@
                         </dt>
                         <dd>{{ variant.FILTER }}</dd>
                         <dt> Gene </td>
-                        <dd><a href="/gene/{{variant.canonical_gene_name_upper|join('')}}">{{variant.canonical_gene_name_upper|join('')}}</a></dd>
+                        <dd> {{ variant.canonical_gene_name_upper|unique|href(link='gene') }} </dd>
                         <dt> Consequence </td>
                         <dd>{{variant.most_severe_consequence}}</dd>
                         <dt> Transcript </td>
-                        <dd><a href="/gene/{{variant.canonical_transcript|join('')}}">{{variant.canonical_transcript|join('')}}</a></dd>
+                        <dd> {{ variant.canonical_transcript|unique|href(link='transcript') }} </dd>
                         {# <dt>dbSNP Membership </dt> <dd> {{variant.DB}} </dd> #}
                         <dt>dbSNP</dt>
-                        {% if variant.rsid and variant.rsid != "." %}
-                            <dd><a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{ variant.rsid }}" target="_blank">{{ variant.rsid }}</a></dd>
+                        {% if variant.id and variant.id != "." %}
+                            <dd><a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{ variant.id }}" target="_blank">{{ variant.id }}</a></dd>
                         {% else %}
                             <dd>Not found in dbSNP</dd>
                         {% endif %}
@@ -105,7 +105,9 @@
     <ul class="nav nav-tabs" role="tablist">
         <li class="active"><a href="#frequency" role="tab" data-toggle="tab">Frequency</a></li> 
         <li><a href="#consequence" role="tab" data-toggle="tab">Consequence ({{variant.transcript_consequences|length}}) </a></li>
+{% if session['user'] != 'demo' %}
         <li><a href="#quality" role="tab" data-toggle="tab">Quality</a></li>
+{% endif %}
 {% if session['user'] != 'demo' %}
 <li><a href="#individuals" role="tab" data-toggle="tab">Individuals ({{variant.hom_samples|length}} / {{variant.het_samples|length}} )</a></li>
 {% endif %}
@@ -219,6 +221,7 @@
 </div>
 
 
+{% if session['user'] != 'demo' %}
 <div id="quality" class="tab-pane">
                 <table id="individuals_table" class="tablesorter">
                         <tr> <td> Culprit: </td> <td> {{variant.culprit}} </td> </tr>
@@ -243,22 +246,25 @@
                         <tr> <td> Symmetric Odds Ratio of 2x2 contingency table to detect strand bias: </td> <td> {{variant['SOR']}} </td> </tr> 
                     </table>
 </div>
+{% endif %}
 
 
 {% if session['user'] != 'demo' %}
 <div id='individuals' class="tab-pane">
           <table id="individuals_table" class="table-sorter">
-                <tr> <td> HOM </td>
+                <tr> <td> HOM <hr/></td>
                 <td>
                 {% for y in variant['hom_samples'] %}
                  <a href="/individual/{{y}}">{{y}}</a>
                 {% endfor %}
+                <hr />
                 </td>
-                <tr> <td> HET </td>
+                <tr> <td> HET <hr/></td>
                 <td>
                 {% for y in variant['het_samples'] %}
                 <a href="/individual/{{y}}">{{y}}</a>
                 {% endfor %}
+                <hr />
                 </td>
                 <tr> <td> WT </td>
                 <td>

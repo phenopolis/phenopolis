@@ -30,6 +30,7 @@
                   <th>Individual (total: {{individuals|length}})</th>
                   <th>Gender</th>
                   <th>Phenotype</th>
+                  <th tooltip='scaled score from Monarch'>Phenotype Score</th>
                   <th>Rare Hom</th>
                   <th>Rare Comp Het</th>
                   <th>Rare</th>
@@ -42,6 +43,7 @@
             <td><a href="/individual/{{ ind.external_id }}">{{ ind.external_id }}</a></td>
             <td>{{ind.sex}}</td>
             <td>{{ ind.features|map('get_attributes','id','label')|map('map_format', '<a href="/hpo/{0}">{1}</a>')|join(', ')|safe }}</td>
+            <td>{{ind.specificity.score|round(2,'floor')}}</td>
             <td id="{{ind.external_id}}_variant_count">{{ind.rare_homozygous_variants_count}}</td>
             <td> {{ind.rare_compound_hets_count}} </td>
             <td>{{ ind.rare_variants_count}}</td>

@@ -80,7 +80,7 @@
         font-size: 200%;
         color: green;
     }
-    .pubmed-hide {
+    span.hide {
         display: none;
     }
     .venn.hide {
@@ -178,6 +178,12 @@
     tr.highlight {
        background-color: #ffa !important;
     }
+    .gene-highlight {
+        background-color: #90EE90;
+    }
+    .term-highlight {
+        background-color: yellow;
+    }
     #update-form {
        border-style: solid;
        border-width: 2px;
@@ -272,7 +278,9 @@
     <li><a href="#individual-tab_hom_variants" role="tab" data-toggle="tab" id="hom-loaded">Rare Hom ({{patient.homozygous_variants|length}})</a></li>
     <li><a href="#individual-tab_comp_variants" role="tab" data-toggle="tab" id="comp-hets_loaded">Rare Comp Hets ({{patient.compound_hets|length}})</a></li>
     <li><a href="#individual-tab_rare_variants" role="tab" data-toggle="tab" id="variants_loaded">Rare Var ({{patient.rare_variants|length}})</a></li>
+    {% if session['user']!='demo' %}
     <li><a href="#individual-tab_downloads" role="tab" data-toggle="tab" id="csv">Download files</a></li>
+    {% endif %}
     <li><a href="#individual-tab_Exomiser" role="tab" data-toggle="tab" id="exomiser">Exomiser</a></li>
 </ul>
 
@@ -285,8 +293,10 @@
     {% include "individual-page-tabs/individual-tab_comp_variants.html" %}
     <!-- tab4 -->
     {% include "individual-page-tabs/individual-tab_rare_variants.html" %}
+    {% if session['user']!='demo' %}
     <!-- tab5 -->
     {% include "individual-page-tabs/individual-tab_downloads.html" %}
+    {% endif %}
     <!-- tab6 -->
     {% include "individual-page-tabs/individual-tab_Exomiser.html" %}
 </div>
@@ -320,8 +330,57 @@
 <script type="text/javascript" src="/static/jquery.tablesorter.widgets.js"></script>
 <script type="text/javascript" src="/static/individual_pubmed.js"></script>
 <script type="text/javascript" src="/static/node_modules/venn.js/venn.js"></script>
+<script type="text/javascript" src="/static/main.js"></script>
 
 <script type=text/javascript>
+// load pubmed
+$('.pubmed-gene-cell').each(function(){
+    var theCell = $(this);
+    var handler = onVisibilityChange($(this), function() {
+        /* send key, get data */
+        $.get('/pubmedbatch-cache/'+theCell.attr('pubmedkey'), function(data){
+            data = $.parseJSON(data);
+            if (!data){ 
+                theCell.html('Will be available later');
+            }
+            // get gene and terms
+            var genes = [data.key.split('_')[0]];
+            var terms = data.key.split('_')[1].split('-');
+            // add score as hidden
+            var content = theCell.children().first()[0].outerHTML;
+            $.each(data['data'], function(i,d){
+                // highlight
+                d.abstract = highlightPubmed(d.abstract, genes, terms);
+                // clean title and abstract
+                var sq = new RegExp("'", 'g');
+                var dq = new RegExp('"', 'g');
+                var lt = new RegExp('<', 'g');
+                var gt = new RegExp('>', 'g');
+                d.title = d.title.replace(sq, "&#39;");
+                d.title = d.title.replace(dq, "&#34;");
+                d.title = d.title.replace(lt, "&#60;");
+                d.title = d.title.replace(gt, "&#62;");
+                d.abstract = d.abstract.replace(sq, "&#39;");
+                d.abstract = d.abstract.replace(dq, "&#34;");
+                d.abstract = d.abstract.replace(lt, "&#60;");
+                d.abstract = d.abstract.replace(gt, "&#62;");
+                var thisClass = 'pop-modal pointer';
+                if (i>1){
+                    thisClass += ' pubmed hide';
+                }
+                content += "<span class='" + thisClass + "' title='<a href=" + '"http://www.ncbi.nlm.nih.gov/pubmed/'+d.id+ '">' + d.title + "</a>'" + 'data-content="' + d.abstract + '">'+d.id+"<br></span>";
+            });
+            if (data.data.length > 2){
+                content += '<br /><span class="pubmed"> and <b>' + (data.data.length - 2) + '</b> more...</span>';
+                content += '<br /><span class="button-more"><span class="glyphicon glyphicon-chevron-down"></span></span>';
+            }
+            // populate cell
+            theCell.html(content);
+        });
+    });
+    //jQuery
+    $(window).on('DOMContentLoaded click load resize scroll', handler);
+});
 // venn diagram
 var solved_genes = [
     {% if patient.solved.status == 'solved' %}
@@ -445,11 +504,11 @@ venDiv.selectAll("g")
             })
             .attr('tab',function(d){
                 if ($.inArray(d, hom_genes) != -1){
-                    return '2';
+                    return 'individual-tab_hom_variants';
                 } else if ($.inArray(d, compound_het_genes) != -1){
-                    return '3';
+                    return 'individual-tab_comp_variants';
                 } else if ($.inArray(d, rare_genes) != -1){
-                    return '4';
+                    return 'individual-tab_rare_variants';
                 }
                 return '';
             })
@@ -462,8 +521,9 @@ venDiv.selectAll("g")
             $('tr.highlight').toggleClass('highlight');
             var the_tab = $(this).find('a').attr('tab');
             var the_url = $(this).find('a').attr('href');
+            console.log(the_tab);
             $('#omim-genes-modal').modal('hide');
-            $('.nav-tabs a[href="#tab' + the_tab + '"]').tab('show');
+            $('.nav-tabs a[href="#' + the_tab + '"]').tab('show');
             $(the_url).toggleClass('highlight');
             var height = $(the_url).offset().top - 120;
             $(document).scrollTop( height );
@@ -471,50 +531,12 @@ venDiv.selectAll("g")
         $('.tip').tooltip({html:true});
     });
 
-// collapsible pubmedcell
-var cells = $(document).find('td.pubmed-cell');
-cells.each(function(){
-    var spans = $(this).find('span');
-    if (spans.length > 2){
-        spans.slice(2).toggleClass('pubmed').toggleClass('hide');
-        $(this).append('<br /><span class="pubmed"> and <b>' + (spans.length - 2) + '</b> more...</span>');
-        $(this).append('<br /><span class="button-more"><span class="glyphicon glyphicon-chevron-down"></span></span>')
-        //$(this).html($(spans[0]).prop('outerHTML') + $(spans[1]).prop('outerHTML') + '<br /><span> and <b>' + (spans.length - 2) + '</b> more...</span>');
-    }
-});
-$('span.button-more').on('click', function(){
+$('.pubmed-gene-cell').on('click', 'span.button-more',function(){
     var cell = $(this).parent();
     cell.find('span.pubmed').toggleClass('hide');
     $(this).find('span.glyphicon').toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
-    $('html, body').animate({ scrollTop: $(cell).offset().top - 100 }, 'slow');
+    $('html, body').animate({ scrollTop: $(cell).offset().top - 180 }, 'slow');
 });
-
-// get variant_id in real time
-$('.variant_id').on('click',function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    $.get('/variant_json/' + id,
-        function(data){
-            if ($('h3.popover-title').text() == 'loading...'){
-                $('div.popover.in').remove();
-                span.trigger('click');
-                span.trigger('click');
-            }
-            var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
-            $.each(data.result.hom_samples.sort(), function(i,v){
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
-            $.each(data.result.het_samples.sort(), function(i,v){
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
-            span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a> <br> <a href="/set_variant_causal/{{patient.external_id}}/'+id+'">Mark as causal</a>  <br> <a href="/unset_variant_causal/{{patient.external_id}}/'+id+'">Unmark as causal</a>');
-            span.attr('data-content', content);
-    });
-});
-
 
 </script>
 <script type="text/javascript" src="/static/individual_pubmed.js"></script>
@@ -608,7 +630,7 @@ $('.re-search').on('click', function(e){
 });
 
 // display pubmed result
-$('.pop-modal').on('click', function(){
+$('.pubmed-gene-cell').on('click','.pop-modal', function(){
     var title = $(this).attr('title');
     var content = $(this).attr('data-content');
     $('#myModalLabel').html(title);
@@ -658,7 +680,7 @@ $('.variant_status').on('click',function() {
             });
 });
 
-
+var session_user= "{{session['user']}}" ;
 // get variant_id in real time
 $('.variant_id').hover(function(){
     // get variant_id
@@ -668,10 +690,12 @@ $('.variant_id').hover(function(){
         function(data){
             var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
             $.each(data.result.hom_samples.sort(), function(i,v){
+                 if (session_user=='demo') { var v='hidden'; }
                 content += '<a href="/individual/' + v + '">' + v + '</a><br />'
             });
             content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
             $.each(data.result.het_samples.sort(), function(i,v){
+                 if (session_user=='demo') { var v='hidden'; }
                 content += '<a href="/individual/' + v + '">' + v + '</a><br />'
             });
             content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
@@ -686,7 +710,6 @@ $('.individual_id').on('click',function(){
     // get variant_id
     var span = $(this);
     var id = span.text();
-    var variantids=span.attr('variantids');
     $.get('/individual_json/' + id,
         function(data){
             if ($('h3.popover-title').text() == 'loading...'){
@@ -694,20 +717,28 @@ $('.individual_id').on('click',function(){
                 span.trigger('click');
                 span.trigger('click');
             }
-        var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
-        content += '<p><b>Features:</b>'
-        $.each(data.result.features.sort(), function(i,v){
-                content += v.label+'<br/>';
-        });
-        content += '</p>';
-        content += '<p> <b>Variants:</b> <br> '+variantids+'</p>';
-            span.attr('data-original-title', '<a href="/individual/' + id + '">Link to individual</a>');
+            if (!data.result) {
+                span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
+                span.attr('data-content', 'no data available');
+            }
+            var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
+            content += '<p><b>Features:</b><br/>'
+            content += '<p><b>Genes:</b> ' + data.result.genes[0].gene + '</p>';
+            $.each(data.result.features.sort(), function(i,v){
+                content += '<a href="/hpo/'+v.label+'">'+v.label+'</a><br/>';
+            });
+            content += '</p>';
+            span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
             span.attr('data-content', content);
     });
 });
 
+</script>
 
-
+<script>
+$(document).ready(function(){
+            $('[data-toggle="popover"]').popover(); 
+            });
 </script>
 
 

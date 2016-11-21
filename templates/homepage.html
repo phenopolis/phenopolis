@@ -24,13 +24,15 @@
 <ul class="nav nav-tabs" role="tablists">
     <li class="active"><a href="#tab1" role="tab" data-toggle="tab">Search Page</a></li>
     <li><a href="#tab2" role="tab" data-toggle="tab">HPO Browser</a></li>
-    <li><a href="#tab3" role="tab" data-toggle="tab">Stats</a></li>
+    {% if session["user"]!="demo" %}
+        <li><a href="#tab3" role="tab" data-toggle="tab">Stats</a></li>
+    {% endif %}
     <li><a href="#tab4" role="tab" data-toggle="tab">Publications</a></li>
     <li><a href="#tab5" role="tab" data-toggle="tab">Terms of Use</a></li>
 </ul>
 
 <div class="container">
-  <h1 id="home-title"><a href="/about" style="color: black;">&Phi;enopolis</a></h1>
+    <h1 id="home-title">Phenopolis </h1>
   <div class="tab-content">
 
             <div id="tab1" class="tab-pane active">
@@ -43,43 +45,46 @@
                             <input type="submit" style="position: absolute; left: -9999px"/>
                         </form>
                         <p class="text-muted">
-                            Examples - Phenotype: <a href="/awesome?query=Nystagmus">Nystagmus</a>,
-                            HPO: <a href="/awesome?query=HP:0000639">HP:0000639</a>,
+                            Examples - Phenotype: <a href="/hpo/Nystagmus">Nystagmus</a>,
+                            HPO: <a href="/gene/HP:0000639">HP:0000639</a>,
                             Individual: <a href="/individual/WebsterURMD_Sample_GV4344">WebsterURMD_Sample_GV4344</a>,
-                            Gene: <a href="/awesome?query=PCSK9">PCSK9</a>,
-                            Transcript: <a href="/transcript/ENST00000407236">ENST00000407236</a>,
-                            Variant: <a href="/variant/22-38212762-A-G">22-38212762-A-G</a>,
-                            Multi-allelic variant: <a href="/awesome?query=rs1800234">rs1800234</a>,
-                            Region: <a href="/region/22-46615715-46615880">22:46615715-46615880</a>
+                            Gene: <a href="/gene/PCSK9">PCSK9</a>,
+                            Variant: <a href="/variant/22-38212762-A-G">22-38212762-A-G</a>
                         </p>
                     </div>
                 </div>
                 </div>
                 <div class="row" style="font-size: 16px;">
                     <div class="col-md-8">
-                        <h3 align="center"> <a href="/about" style="color: black;">About &Phi;enopolis</a></h3>
+                        <h3 align="center"> <a href="/about" style="color: black;">About Phenopolis</a></h3>
                         <div>
                             <p>
-                                The <a href="/about">&Phi;enopolis</a>  is a coalition of investigators seeking to aggregate and harmonize exome sequencing data and phenotypes.
-                            The Principal Investigators and groups that have contributed data to the current release are listed <a href="https://phenotips.cs.ucl.ac.uk/" target="_blank">here</a>.
-                            Funding for analytical staff is currently provided mainly by NIHR (UCL-Moorfields Eyes Hospital Biomedical Research Center) and in part by the UK Medical Research Council and the British Heart Foundation. Consumables funding originates from a variety of sources (charities and research councils).
+                            Phenopolis is an open platform for harmonization and analysis of sequencing and phenotype data.
+                            The Phenopolis code is available at <a href=https://github.com/pontikos/phenopolis>github</a>.
+                            Funding  is currently provided mainly by NIHR (UCL-Moorfields Eyes Hospital Biomedical Research Center)
+                            and in part by the UK Medical Research Council and the British Heart Foundation.
+                            Consumables funding originates from a variety of sources (charities and research councils).
                             </p>
 
-                            <h3 align="center"> <a href="/about" style="color: black;">Samples</a></h3>
+                            <h3 align="center"> Samples </h3>
                             <p>
-                            The current release of Phenopolis contains {{ total_patients }} patients ({{ male_patients }} male,
-                            {{ female_patients }} female, and {{ unknown_patients }} unknown)
-                            sequenced as part of various disease-specific genetic studies.
-                            An interactive PCA plot of the patients ancestry ancestry is available <a href="/static/plots/UCLex_ancestry_pca.html"> here</a>.
+                            Phenopolis currently contains {{ total_patients }} exomes ({{ male_patients }} male,
+                            {{ female_patients }} female, and {{ unknown_patients }} unknown).
+                            {% if session["user"]!="demo" %}
+                                An interactive PCA plot of the patients ancestry is available <a href="/static/plots/UCLex_ancestry_pca.html"> here</a>.
+                            {% endif %}
                             </p>
 
-                            <h3 align="center"> <a href="/about" style="color: black;">Variants</a></h3>
+                            <h3 align="center"> Variants </h3>
                             <p>
                             There is a total of {{ '{0:,}'.format(total_variants) }} variants.
                             {{ '{0:,}'.format(pass_variants) }} variants pass the GATK filter.
                             </p>
+
+
                         </div>
                     </div>
+                    {% if session["user"]!="demo" %}
                     <div class="col-md-4">
                         <h3 align="center">Recent News</h3>
                         <h4>December 1, 2015</h4> - First launch.
@@ -88,6 +93,7 @@
                         <h4>April 26, 2016</h4> - Demo at HPO day at UCL.
                         <h4>June 22, 2016</h4> - Demo at Curating the Clinical Genome.
                     </div>
+                    {% endif %}
                 </div>
              </div>
 
@@ -124,23 +130,27 @@
                  </div><!--top row in tab2-->
              </div>
 
+             {% if session["user"]!="demo" %}
              <div id="tab3" class="tab-pane">
                  <div>
                     {{image|safe}}
                  </div>
                  <table>
+                     <thead> <tr> <th> Variants </th> </tr> </thead>
                      <tbody>
                      <tr> <td> all variants </td> <td> {{ '{0:,}'.format(total_variants) }} </td> </tr>
-                     <tr> <td> all pass variants </td> <td> {{ '{0:,}'.format(pass_variants) }} </td> </tr>
-                     <tr> <td> pass variants ExAC </td> <td> {{'{0:,}'.format(pass_exac_variants) }} </td> </tr>
-                     <tr> <td> pass variants not ExAC </td> <td> {{'{0:,}'.format(pass_nonexac_variants) }} </td> </tr>
-                     <tr> <td> all non-pass variants </td> <td> {{'{0:,}'.format(nonpass_variants)}} </td> </tr>
-                     <tr> <td> non-pass variants in ExAC </td> <td> </td> </tr>
-                     <tr> <td> non-pass variants not in ExAC </td> <td> </td> </tr>
+                     <tr> <td> pass variants </td> <td> {{ '{0:,}'.format(pass_variants) }} </td> </tr>
+                     <tr> <td> non-pass variants </td> <td> {{'{0:,}'.format(nonpass_variants)}} </td> </tr>
                      </tbody>
-
+                 </table>
+                 <table>
+                     <thead> <tr> <th> Patients </th> </tr> </thead>
+                     <tbody>
+                     <tr> <td> all patients </td> <td> {{ '{0:,}'.format(total_patients) }} </td> </tr>
+                     </tbody>
                  </table>
             </div>
+            {% endif %}
 
              <div id="tab4" class="tab-pane">
 
@@ -243,16 +253,23 @@ Cryptogenic multifocal ulcerating stenosing enteritis associated with homozygous
 
 
 <div id="tab5" class="tab-pane">
-    Rare disease genetics has been revolutionized by the widespread use of exome sequencing. However, the interpretation of sequence data on a large scale raises two major issues. The first issue is technical, related to the limits of short read sequencing, and the artifacts that these tools can generate. The second limitation is the difficulty to interpret rare variants without the knowledge of the genetic variation in large cohorts of individuals.
 
-     These issues can be addressed to a large extent by sharing of clinical sequence data across multiple groups. This allows the identification of shared traits and variants, and the verification of hypotheses by comparing clinical data. Another advantage is the improvement in calling accuracy when the same variants are detected across multiple samples.
+   <b> The UCLex agreement </b>
+<p>
+Rare disease genetics has been revolutionized by the widespread use of exome sequencing. However, the interpretation of sequence data on a large scale raises two major issues. The first issue is technical, related to the limits of short read sequencing, and the artifacts that these tools can generate. The second limitation is the difficulty to interpret rare variants without the knowledge of the genetic variation in large cohorts of individuals.
+</p>
 
-      To this end, we have assembled the UCL-exomes (or UCL-ex) consortium. UCL-ex groups together a dozen clinical investigators (most at UCL but not only) with an analytical lead based at the UGI. Rules are in place to facilitate data sharing while respecting patient privacy. As of now, UCL-ex consists of 1,500 exome samples and this set grows regularly. Data are stored on the UCL computer science cluster and analysis, including a monthly joint calling of the entire set, is centralized at the UCL Genetics Consortium. Owing to an average of 10 Gb size per exome, these sequence data add up to 15 Tb of required storage. This analysis creates significant computational challenges, and technical solutions (hardware/storage) are being developed as the sample size grows to accommodate this analysis. A key tool is the reduced reads format developed by the GATK team.
+<p>
+ These issues can be addressed to a large extent by sharing of clinical sequence data across multiple groups. This allows the identification of shared traits and variants, and the verification of hypotheses by comparing clinical data. Another advantage is the improvement in calling accuracy when the same variants are detected across multiple samples.
+ </p>
 
+ <p>
+ To this end, we have assembled the UCL-exomes (or UCLex) consortium. UCLex groups together a dozen clinical investigators (most at UCL but not only) with an analytical lead based at the UGI. Rules are in place to facilitate data sharing while respecting patient privacy. As of now, UCLex consists of {{total_patients}} exome samples and this set grows regularly. Data are stored on the UCL computer science cluster and analysis, including a monthly joint calling of the entire set, is centralized at the UCL Genetics Consortium. Owing to an average of 10 Gb size per exome, these sequence data add up to {{total_patients / 100}} Tb of required storage. This analysis creates significant computational challenges, and technical solutions (hardware/storage) are being developed as the sample size grows to accommodate this analysis. A key tool is the reduced reads format developed by the <a href=https://software.broadinstitute.org/gatk/>GATK</a> team.
+ </p>
 
 
 <p>
-UCL-ex is a collaboration between clinical groups and analysts to facilitate the analysis of the large amount of exome sequence data being generated. The difficulty is to strike a balance between data confidentiality, data ownership but also the advantages associated with sharing data across multiple groups to facilitate variant calling, case control analysis and generally speaking the dissection of both complex and Mendelian disorders.
+UCLex is a collaboration between clinical groups and analysts to facilitate the analysis of the large amount of exome sequence data being generated. The difficulty is to strike a balance between data confidentiality, data ownership but also the advantages associated with sharing data across multiple groups to facilitate variant calling, case control analysis and generally speaking the dissection of both complex and Mendelian disorders.
 </p>
 
 <p>
@@ -260,15 +277,17 @@ Clinical PIs are typically the “owners” of a exome sequence data and analyst
 </p>
 
 <ul>
-<li> Vincent Plagnol will keep a list of PIs up to date (see below), and if others want to join I will approve it provided that it creates no conflict with other PIs. If there is a conflict, I will check that the relevant PIs are happy with any addition to UCL-ex.
+<li> Vincent Plagnol will keep a list of PIs up to date, and if others want to join he will approve it provided that it creates no conflict with other PIs.
+If there is a conflict, he will check that the relevant PIs are happy with any addition to UCLex.
 
-<li>If any conflict came up (ie related diseases) I will make sure that data are properly separated and no conflict comes up (note that I am not aware of any such issue as of now). Collaborations down the road are obviously welcome.
+<li>If any conflict came up (ie related diseases) he will make sure that data are properly separated and no conflict comes up (note that he is not aware of any such issue as of now).
+Collaborations down the road are obviously welcome.
 
-<li> all the data will remain on the UCL Genetics Institute server and they will only be analyzed within this collaboration. No raw data will be shared without explicit approval.
+<li> All the data will remain on the UCL Genetics Institute server and is only analyzed within this collaboration.
+No raw data is shared without explicit approval.
 
-<li> within that set of analysts, it is appropriate to use the data in any way that is useful for case control type analysis (gene based, single variant based...).
+<li> Within that set of analysts, it is appropriate to use the data in any way that is useful for case control type analysis (gene based, single variant based...).
 
-<li> It is acceptable, if a variant of interest to PI X comes up in another collection (with PI Y in charge), to have PI X ask PI Y whether the individuals in question share a related phenotype to what is of interest to PI X.
 </ul>
 
 
@@ -420,6 +439,12 @@ function draw_hpo(temp){
         all_g
             .on('mouseover', showTooltip)
             .on('mouseout', removeTooltip);
+        $('.node').on('click',function(d) {
+                // get the HPO id
+            var this_node = $(this);
+            var id = this_node.find('title').text();
+            window.location.href = "/hpo/"+id;
+        });
     }
     require(["renderer"],
         function (renderer) {

@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h1> 
-</h1>
+<h1> </h1>
 <link rel="stylesheet"  type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
 <link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
 <style>
@@ -273,6 +272,7 @@ window.variants = [];
     {# <li><a href="#gene-tab_transcript_display" role="tab" class="tab-li" data-toggle="tab">transcript display</a></li> #}
     <li><a href="#gene-tab_hpo" role="tab" class="tab-li" data-toggle="tab">OMIM HPO terms</a></li>
 </ul>
+
 <div class="tab-content">
 <!-- tab 1 -->
 {% include "gene-page-tabs/gene-tab_comp.html" %}
@@ -558,7 +558,7 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
                 if (p.match("^hidden")){
                     modal_content += '<li><span class="tip" title="';
                 } else {
-                    modal_content += '<li><a data-placement="left" class="tip modal-patient" id='+p+' title="';
+                    modal_content += '<li><a data-placement="left" class="tip modal-patient" id='+p+' href="/individual/'+p+'" target="_blank"  title="';
                 }
                 $.each(data[id]['data'][p].hpo, function(i,v){
                     modal_content += v + "<br/>";
@@ -920,6 +920,7 @@ $('.individual_id').on('click',function(){
                 span.attr('data-content', 'no data available');
             }
             var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
+            content += '<p><b>Genes:</b> ' + data.result.genes[0].gene + '</p>';
             content += '<p><b>Features:</b><br/>'
             $.each(data.result.features.sort(), function(i,v){
                 content += '<a href="/hpo/'+v.label+'">'+v.label+'</a><br/>';

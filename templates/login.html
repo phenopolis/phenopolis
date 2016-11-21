@@ -14,15 +14,25 @@
 <div class="container">
 <h1>Please login</h1>
 <br>
+<p>
+Public login: demo/demo123
+</p>
 <form action="" method="POST">
-<input type="text" placeholder="Username" name="username" value="{{request.form.username }}">
-<input type="password" placeholder="Password" name="password" value="{{request.form.password }}">
+<label for="username">Username:</label> 
+<input type="text" placeholder="demo" name="username" value="{{request.form.username }}">
+<label for="password">Password:</label> 
+<input type="password" placeholder="demo123" name="password" value="{{request.form.password }}">
 <input class="btn btn-default" type="submit" value="Login">
 </form>
 {% if error %}
 <p class="error"><strong>Error:</strong> {{ error }}
 {% endif %}
 </div>
+
+<p>
+Source code is available at <a href="https://github.com/pontikos/phenopolis/">Github</a>.
+</p>
+
 
 </html>
 
