@@ -100,6 +100,7 @@ def gene_page(gene_id):
 
 
 @app.route('/gene_json/<gene_id>',methods=['GET','POST'])
+@requires_auth
 def gene_json(gene_id):
     # if gene not ensembl id then translate to
     db=get_db()
@@ -113,45 +114,9 @@ def gene_json(gene_id):
     return json.dumps(gene)
 
 
-
-
-@app.route('/gene2/<gene_id>',methods=['GET'])
-#@requires_auth
-def gene_page2(gene_id):
-    # if gene not ensembl id then translate to
-    db=get_db()
-    hpo_db=get_db('hpo')
-    patient_db=get_db('patients')
-    hpo=request.args.get('hpo')
-    hpo_freq = get_hpo_size_freq('hpo_freq_2016-7.tsv')
-    if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
-    hom_comp_file = os.path.join('dot',gene_id+'_hom_comp.json')
-    het_file = os.path.join('dot',gene_id+'_het.json')
-    gene_name=db.genes.find_one({'gene_id':gene_id})['gene_name']
-    # get lof force
-    # lof_p_hpo = get_lof_p_hpo(gene_id, db, patient_db)
-    # rare_p_hpo = get_rare_var_p_hpo(gene_id, db, patient_db)
-    # force_test = json.dumps(draw_force_graph(rare_p_hpo['het'], hpo_freq, hpo_db))
-    hom_inf = open(hom_comp_file, 'r')
-    het_inf = open(het_file,'r')
-    hom_comp = json.load(hom_inf)
-    het = json.load(het_inf)
-    print '======'
-    print session['user']
-    print '====='
-    #dot_hom_comp = json.dumps(hide_hpo_for_demo(hom_comp)) if session['user'] == 'demo' else json.dumps(hom_comp)
-    dot_hom_comp = json.dumps(hom_comp)
-    #dot_het = json.dumps(hide_hpo_for_demo(het)) if session['user'] == 'demo' else json.dumps(het)
-    dot_het = json.dumps(het)
-    return render_template('gene2.html', 
-            gene_id = gene_id,
-            gene_name = gene_name,
-            dot_hom_comp = dot_hom_comp,
-            dot_het = dot_het,
-            hpo_freq = json.dumps(hpo_freq))
-
 # get sequence given region, and highlight the region. useful for design primers
 @app.route('/sequence')
+@requires_auth
 def sequence():
     var_id = request.args.get('variant_id')
     symbol = request.args.get('symbol')

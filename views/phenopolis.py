@@ -159,7 +159,7 @@ def chisq(variant_str):
     print('hpo_patients',hpo_patients,)
     variant_str=str(variant_str).strip().replace('_','-')
     chrom, pos, ref, alt = variant_str.split('-')
-    tb=pysam.TabixFile('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/chr%s.vcf.gz' % chrom,)
+    tb=pysam.TabixFile('chr%s.vcf.gz' % chrom,)
     region=str('%s:%s-%s'%(chrom, pos, int(pos),))
     headers=[h for h in tb.header]
     headers=(headers[len(headers)-1]).strip().split('\t')
@@ -167,9 +167,6 @@ def chisq(variant_str):
     records=tb.fetch(region=region)
     geno=dict(zip(headers, [r.split('\t') for r in records][0]))
     samples=[h for h in geno if geno[h].split(':')[0]=='0/1' or geno[h].split(':')[0]=='1/1']
-    #d=csv.DictReader(file('/data/uclex_files/UCLexInfo/uclex-samples.csv','r'),delimiter=',')
-    #headers=file('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/headers.txt','r').read().strip().replace('#','').split('\t')
-    #d=csv.DictReader(file('/data/UCLpheno/uclex-hpo.txt','r'),delimiter='\t')
     res=jsonify(result=hpo_patients)
     return res
 
@@ -478,7 +475,7 @@ def hpo_page(hpo_id):
        #print(variant)
        #break
     #print( lookups.get_variants_in_gene(db, 'CNNM4') )
-    #vcf_reader = pysam.VariantFile('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/chr%s.vcf.gz' % '22')
+    #vcf_reader = pysam.VariantFile('chr%s.vcf.gz' % '22')
     #for record in vcf_reader:
         #for s in external_ids:
             #r=record.samples[s]

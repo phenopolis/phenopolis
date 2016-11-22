@@ -120,7 +120,7 @@ def hpo_page(hpo_id):
        #print(variant)
        #break
     #print( lookups.get_variants_in_gene(db, 'CNNM4') )
-    #vcf_reader = pysam.VariantFile('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/chr%s.vcf.gz' % '22')
+    #vcf_reader = pysam.VariantFile('chr%s.vcf.gz' % '22')
     #for record in vcf_reader:
         #for s in external_ids:
             #r=record.samples[s]

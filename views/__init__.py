@@ -588,6 +588,7 @@ def get_patient(patient_str):
 # AJAX
 # Not finished
 @app.route('/chisqu/<variant_str>',methods=['GET','POST'])
+@requires_auth
 def chisq(variant_str):
     if request.method=='POST':
         hpo_patients=request.form['patients'].strip().split(',')
@@ -596,7 +597,7 @@ def chisq(variant_str):
     print('hpo_patients',hpo_patients,)
     variant_str=str(variant_str).strip().replace('_','-')
     chrom, pos, ref, alt = variant_str.split('-')
-    tb=pysam.TabixFile('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/chr%s.vcf.gz' % chrom,)
+    tb=pysam.TabixFile('chr%s.vcf.gz' % chrom,)
     region=str('%s:%s-%s'%(chrom, pos, int(pos),))
     headers=[h for h in tb.header]
     headers=(headers[len(headers)-1]).strip().split('\t')
@@ -604,9 +605,6 @@ def chisq(variant_str):
     records=tb.fetch(region=region)
     geno=dict(zip(headers, [r.split('\t') for r in records][0]))
     samples=[h for h in geno if geno[h].split(':')[0]=='0/1' or geno[h].split(':')[0]=='1/1']
-    #d=csv.DictReader(file('/data/uclex_files/UCLexInfo/uclex-samples.csv','r'),delimiter=',')
-    #headers=file('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/headers.txt','r').read().strip().replace('#','').split('\t')
-    #d=csv.DictReader(file('/data/UCLpheno/uclex-hpo.txt','r'),delimiter='\t')
     res=jsonify(result=hpo_patients)
     return res
 
@@ -650,10 +648,7 @@ def download_csv():
     p=conn.get_patient(eid=p_id,auth=auth)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
-    #if folder=='all_variants_vcf': path = '/slms/UGI/vm_exports/vyp/phenotips/DROPBOX/'
-    #path='/home/rmhanpo/uclex_browser/static/Exomiser/'
-    #else:
-    path = '/slms/UGI/vm_exports/vyp/phenotips/DROPBOX/'
+    path = DROPBOX
     csv_file = os.path.join(path,folder, p_id + '.csv')
     filename = folder+'_'+p_id+'.csv'
     if not os.path.isfile(csv_file):

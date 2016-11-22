@@ -77,7 +77,7 @@ def read_viz2():
     from subprocess import call
     tmpfile=subprocess.Popen('mktemp', shell=True, stdout=subprocess.PIPE).stdout.read().strip()+'.bam'
     print(tmpfile)
-    print(subprocess.Popen("samtools view -b /slms/UGI/vm_exports/vyp/phenotips/uclex_files/bam/%s_sorted_unique.bam %s > %s" % (sample,region, tmpfile), shell=True, stdout=subprocess.PIPE).stdout.read())
+    print(subprocess.Popen("samtools view -b %s/%s_sorted_unique.bam %s > %s" % (BAM_FILES,sample,region, tmpfile), shell=True, stdout=subprocess.PIPE).stdout.read())
     subprocess.Popen('samtools index %s'%tmpfile).stdout.read()
     
 
