@@ -1,19 +1,75 @@
 <html>
 
+<head>
 <style>
     #banner {
         background:url('/static/phenopolis.png');
         width:100%;
         height:10%;
     }
+div.container {
+        margin: auto;
+        width: 50%;
+        /* border: 1px solid gray; */
+}
+
+header, footer {
+        padding: 1em;
+        color: white;
+        background-color: black;
+        clear: left;
+        text-align: center;
+}
+
+nav {
+        float: left;
+        max-width: 160px;
+        margin: 0;
+        padding: 1em;
+}
+
+nav ul {
+        list-style-type: none;
+        padding: 0;
+}
+   
+nav ul a {
+        text-decoration: none;
+}
+
+article {
+        margin-left: 170px;
+        border-left: 1px solid gray;
+        padding: 1em;
+        overflow: hidden;
+}
+
+a {
+  color: white;
+}
+
+/* visited link */
+a:visited {
+      color: gray;
+  }
+
+h1 {
+      font-family: "Lucida Console";
+}
+
 </style>
+</head>
 
 
-<div id="banner"></div>
+<!-- <div id="banner"></div> -->
+
+<header>
+    <h1> Phenopolis </h1>
+</header>
 
 <div class="container">
-<h1>Please login</h1>
 <br>
+<h2>Please login</h2>
 <p>
 Public login: demo/demo123
 </p>
@@ -27,11 +83,12 @@ Public login: demo/demo123
 {% if error %}
 <p class="error"><strong>Error:</strong> {{ error }}
 {% endif %}
-</div>
-
 <p>
 Source code is available at <a href="https://github.com/pontikos/phenopolis/">Github</a>.
-</p>
+</p> 
+</div>
+
+<footer> A UK Inherited Retinal Dystrophy Consortium effort, supported by <a href=http://www.rpfightingblindness.org.uk>RPFB</a>, the <a href=http://www.mrc.ac.uk/>Medical Research Council</a> and <a href=http://www.moorfields.nhs.uk/>Moorfields Eye Hospital</a>. </footer>
 
 
 </html>

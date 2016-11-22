@@ -19,6 +19,11 @@
             width: 2000px;
         }
 
+        h1 {
+              font-family: "Lucida Console";
+        }
+
+
     </style>
 <div class="tabs">
 <ul class="nav nav-tabs" role="tablists">
@@ -59,11 +64,12 @@
                         <h3 align="center"> <a href="/about" style="color: black;">About Phenopolis</a></h3>
                         <div>
                             <p>
-                            Phenopolis is an open platform for harmonization and analysis of sequencing and phenotype data.
-                            The Phenopolis code is available at <a href=https://github.com/pontikos/phenopolis>github</a>.
-                            Funding  is currently provided mainly by NIHR (UCL-Moorfields Eyes Hospital Biomedical Research Center)
+                            <font face="Lucida Console">Phenopolis</font> is an open platform for harmonization
+                            and analysis of sequencing and phenotype data.
+                            The <font face="Lucida Console">Phenopolis</font> code is available at <a href=https://github.com/pontikos/phenopolis>github</a>.
+                            Funding is currently provided mainly by <a href=http://www.rpfightingblindness.org.uk/home.php?home=yes> Retinits Pigmentosa Fighting Blindness </a>, 
+                            NIHR (UCL-Moorfields Eyes Hospital Biomedical Research Center)
                             and in part by the UK Medical Research Council and the British Heart Foundation.
-                            Consumables funding originates from a variety of sources (charities and research councils).
                             </p>
 
                             <h3 align="center"> Samples </h3>
@@ -80,8 +86,6 @@
                             There is a total of {{ '{0:,}'.format(total_variants) }} variants.
                             {{ '{0:,}'.format(pass_variants) }} variants pass the GATK filter.
                             </p>
-
-
                         </div>
                     </div>
                     {% if session["user"]!="demo" %}
