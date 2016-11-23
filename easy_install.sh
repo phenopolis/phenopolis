@@ -1,5 +1,9 @@
 
+git clone git@github.com:pontikos/phenopolis.git
 
+# For local install without Phenotips, approve all logins by uncommenting line in views/__init__.py
+
+sed -i 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
 
 # Basic build of db
 
@@ -56,5 +60,10 @@ mongo patients --eval "db.variants.createIndex({'genes.gene' : 1})"
 mongo patients --eval "db.variants.createIndex({'solved' : 1})"
 mongo patients --eval "db.variants.createIndex({'clinicalStatus.clinicalStatus' : 1})"
 mongo patients --eval "db.variants.createIndex({'specificity.score' : 1})"
+
+# Run server
+
+cd phenopolis 
+python run_server.py
 
 
