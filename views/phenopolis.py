@@ -210,7 +210,8 @@ def download_csv():
     p=conn.get_patient(eid=p_id,auth=auth)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
-    path = '/slms/UGI/vm_exports/vyp/phenotips/DROPBOX/'+session['user']
+    #path = '/slms/UGI/vm_exports/vyp/phenotips/DROPBOX/'+session['user']
+    path = DROPBOX+session['user']
     csv_file = os.path.join(path,folder, p_id + '.csv')
     filename = folder+'_'+p_id+'.csv'
     if not os.path.isfile(csv_file):
