@@ -70,8 +70,9 @@ def hpo_page(hpo_id):
     #patients=[p for p in patients_db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     print hpo_id 
     if not hpo_id.startswith('HP:'):
-        hpo_id=hpo_id.upper()
-        hpo_id=hpo_db.hpo.find_one({'name':hpo_id})['id'][0]
+        hpo_term=hpo_db.hpo.find_one({'name':re.compile('^'+hpo_id+'$',re.IGNORECASE)})
+        if not hpo_term: return hpo_id+' does not exist'
+        hpo_id=hpo_term['id'][0]
     print hpo_id 
     hpo_name=hpo_db.hpo.find_one({'id':hpo_id})['name'][0]
     print('HPO ANCESTORS')
