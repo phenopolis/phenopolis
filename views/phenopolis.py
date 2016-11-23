@@ -210,7 +210,6 @@ def download_csv():
     p=conn.get_patient(eid=p_id,auth=auth)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
-    #path = '/slms/UGI/vm_exports/vyp/phenotips/DROPBOX/'+session['user']
     path = DROPBOX+session['user']
     csv_file = os.path.join(path,folder, p_id + '.csv')
     filename = folder+'_'+p_id+'.csv'
@@ -765,7 +764,7 @@ def faq_page():
 
 @app.route('/samples')
 def samples_page():
-    samples=pandas.read_csv('/slms/UGI/vm_exports/vyp/phenotips/HPO/hpo.txt')
+    samples=pandas.read_csv('HPO/hpo.txt')
     return render_template('samples.html',samples=samples.to_html(escape=False))
 
 
@@ -900,7 +899,7 @@ def load_variants_file():
     db.variants.ensure_index('transcripts')
     db.variants.ensure_index('variant_id')
     #sites_vcfs = app.config['SITES_VCFS']
-    sites_vcfs=['/slms/UGI/vm_exports/vyp/phenotips/ExAC/0.3.1/ExAC.r0.3.1.sites.vep.vcf.gz']
+    sites_vcfs=['ExAC.r0.3.1.sites.vep.vcf.gz']
     print(sites_vcfs)
     #if len(sites_vcfs) > 1: raise Exception("More than one sites vcf file found: %s" % sites_vcfs)
     procs = []
@@ -1294,13 +1293,13 @@ def get_pred_score(obj):
 def plot(gene):
     #db = get_db()
     #var=db.variants.find_one({'VARIANT_ID':'3_8775295_C_T'})
-    d=csv.DictReader(file('/slms/UGI/vm_exports/vyp/phenotips/CARDIO/assoc_3.csv','r'),delimiter=',')
+    d=csv.DictReader(file('CARDIO/assoc_3.csv','r'),delimiter=',')
     x=[i for i, r, in enumerate(d)]
-    d=csv.DictReader(file('/slms/UGI/vm_exports/vyp/phenotips/CARDIO/assoc_3.csv','r'),delimiter=',')
+    d=csv.DictReader(file('CARDIO/assoc_3.csv','r'),delimiter=',')
     y=[-math.log10(float(r['HCM.chisq.p'])) for r in d]
     print(x)
     print(y)
-    d=csv.DictReader(file('/slms/UGI/vm_exports/vyp/phenotips/CARDIO/assoc_3.csv','r'),delimiter=',')
+    d=csv.DictReader(file('CARDIO/assoc_3.csv','r'),delimiter=',')
     #layout = dict( yaxis = dict( type = 'log', tickvals = [ 1.5, 2.53, 5.99999 ]), xaxis = dict( ticktext = [ "green eggs", "& ham", "H2O", "Gorgonzola" ], tickvals = [ 0, 1, 2, 3, 4, 5 ]))
     labels=[r['VARIANT_ID'] for r in d]
     layout = Layout( xaxis = dict( ticktext=labels, tickvals=x ), title="p-value plot" )
