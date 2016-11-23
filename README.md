@@ -35,7 +35,7 @@ If you wish to download the Exomiser stand-alone server, please get in touch wit
 
 First make sure mongoDB is running:
 ```
-DBPATH=
+DBPATH=<path to db>
 mongod --dbpath $DBPATH --port 27017 --smallfiles
 ```
 
@@ -44,7 +44,7 @@ mongod --dbpath $DBPATH --port 27017 --smallfiles
 The variants found in the VCF files are processed with [Variant Effect Predictor (VEP)](http://www.ensembl.org/info/docs/tools/vep/) and the output is written to JSON standard output.
 The standard output is piped into another python script, ```VEP/postprocess_VEP_json.py```, which adds further annotation, formatting and writes output to JSON, which is then imported with mongoimport into the variants collection.
 
-The bash command to run the VEP, assuming your variant files are:
+The bash command to run the VEP, assuming your variant files are in VCF format:
 ```
 bash VEP/runVEP.sh --input <infile> --output <outfile>
 ```
