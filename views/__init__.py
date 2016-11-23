@@ -116,7 +116,7 @@ def check_auth(username, password):
     Will try to connect to phenotips instance.
     """
     print username
-    #return True
+    #NO_PHENOTIPS_INSTALLATION: return True
     conn=PhenotipsClient()
     response=conn.get_patient(auth='%s:%s' % (username, password,),number=1)
     if response:
