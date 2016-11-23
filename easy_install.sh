@@ -1,4 +1,15 @@
 
+pip install myvariant --user
+pip install mygene --user
+pip install pysam --user
+pip install pygr --user
+pip install pyhgvs --user
+
+git clone git@github.com:weiyi-bitw/varnorm.git
+cd varnorm
+python setup.py install --user
+cd ..
+
 git clone git@github.com:pontikos/phenopolis.git
 
 # For local install without Phenotips, approve all logins by uncommenting line in views/__init__.py
