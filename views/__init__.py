@@ -1,13 +1,14 @@
 
 #flask import
-from flask import Flask, session
+from flask import Flask
+from flask import session
 from flask.ext.session import Session
 from flask import Response
-from flask import stream_with_context, request, Response, make_response
-from flask import Flask
+from flask import stream_with_context
+from flask import request
+from flask import make_response
 from flask import request
 from flask import send_file
-from flask import session
 from flask import g
 from flask import redirect
 from flask import url_for
@@ -72,7 +73,6 @@ from plotly.graph_objs import Scatter, Layout
 #import pyRserve 
 import numpy
 import subprocess
-from flask import Flask, render_template, redirect, url_for, request
 
 from load_individual import load_patient 
 from Crypto.Cipher import DES
@@ -99,7 +99,7 @@ auth = HTTPBasicAuth()
 REGION_LIMIT = 1E5
 EXON_PADDING = 50
 # Load default config and override config from an environment variable
-app.config.from_pyfile('uclex.cfg')
+app.config.from_pyfile('../phenopolis.cfg')
 
 # Check Configuration section for more details
 SESSION_TYPE = 'mongodb'
@@ -155,8 +155,8 @@ def requires_auth(f):
           if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
              return f(*args, **kwargs)
           else:
-             return redirect('https://uclex.cs.ucl.ac.uk/login')
-             #return render_template('login.html', error='Invalid Credentials. Please try again.')
+             #return redirect('login')
+             return render_template('login.html', error='Invalid Credentials. Please try again.')
         print 'method', request.method
         error=None
         if request.method == 'POST':
@@ -166,9 +166,9 @@ def requires_auth(f):
              return f(*args, **kwargs)
           else:
              # doesn't redirect
-             #return render_template('login.html', error='Invalid Credentials. Please try again.')
+             return render_template('login.html', error='Invalid Credentials. Please try again.')
              #return login()
-             return redirect('https://uclex.cs.ucl.ac.uk/login')
+             #return redirect('login')
     return decorated
 
 
@@ -185,7 +185,7 @@ def login():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
-           return redirect('https://uclex.cs.ucl.ac.uk')
+           return redirect('/')
     return render_template('login.html', error=error)
 
 # 
@@ -201,7 +201,7 @@ def login2():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
-           return redirect('https://uclex.cs.ucl.ac.uk')
+           return redirect('/')
     return render_template('login2.html', error=error)
 
 
@@ -216,7 +216,7 @@ def logout():
         del session['password2']
         del session
     except NameError:
-        return redirect('https://uclex.cs.ucl.ac.uk/login')
+        return redirect('/')
     return render_template('login.html', error="You have been logged out")
 
 
