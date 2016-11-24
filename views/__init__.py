@@ -100,14 +100,13 @@ REGION_LIMIT = 1E5
 EXON_PADDING = 50
 # Load default config and override config from an environment variable
 app.config.from_pyfile('uclex.cfg')
+#NO_PHENOTIPS_INSTALLATION: app.config.from_pyfile('local.cfg')
 
 # Check Configuration section for more details
 SESSION_TYPE = 'mongodb'
 app.config.from_object(__name__)
 sess=Session()
 sess.init_app(app)
-
-RELEASE='mainset_July2016'
 
 
 def check_auth(username, password):
