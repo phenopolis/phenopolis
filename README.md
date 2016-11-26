@@ -11,7 +11,7 @@ Note you will need to use python2 as we are not python3 compatible since package
 
 ### Quick Install Demo for Coders
 
-I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.
+I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
 When this is installed you should be able to browse to:
 [http://localhost:8000/gene/TTLL5](http://localhost:8000/gene/TTLL5)
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
