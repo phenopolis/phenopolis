@@ -1,4 +1,5 @@
 
+# python packages required
 pip install myvariant --user
 pip install mygene --user
 pip install pysam --user
@@ -12,11 +13,19 @@ cd ..
 
 git clone git@github.com:pontikos/phenopolis.git
 
-# For local install without Phenotips, approve all logins by uncommenting line in views/__init__.py
-
+# For local install without Phenotips this will:
+# 1) approve all logins as Phenotips is not running
+# 2) let Flask serve static files instead of webserver
 sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
 
+# Make sure mongodb is running
+DBPATH=<path to db>
+mongod --dbpath $DBPATH --port 27017
+
 # Basic build of db
+# download minimal files
+# import them
+# create indexes
 
 wget --no-check-certificate https://uclex.cs.ucl.ac.uk/static/demo/uclex-genes.json
 mongoimport --db uclex --collection genes --file uclex-genes.json --drop
