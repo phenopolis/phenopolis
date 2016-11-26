@@ -10,6 +10,8 @@ demo/demo123
 ### Quick Install Demo for Coders
 
 I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.
+When this is installed you should be able to browse to:
+[http://localhost:8000/gene/TTLL5](http://localhost:8000/gene/TTLL5)
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
 We are especially interested in contributions to the UI (html, css, js) which could be greatly refactored and vastly improved.
 Also any performance improvements to the db queries would be also greatly appreciated.
