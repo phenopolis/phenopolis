@@ -1,4 +1,8 @@
 from views import *
+# Load default config and override config from an environment variable
+#app.config.from_pyfile('uclex.cfg')
+#NO_PHENOTIPS_INSTALLATION: app.config.from_pyfile('local.cfg')
+
 
 if __name__ == "__main__":
     # use ssl
@@ -16,7 +20,7 @@ if __name__ == "__main__":
     #context.use_privatekey_file('phenotips.key')
     #context.use_certificate_file('phenotips.crt')
     # this is now handled by Apache
-    app.run(host='0.0.0.0',port=8000,threaded=True)
+    app.run(host='0.0.0.0',port=8000,threaded=True,debug=True)
     # threaded
     #app.run(threaded=True)
     #app.run(host='127.0.0.1',port=8000, debug = True, ssl_context=context)

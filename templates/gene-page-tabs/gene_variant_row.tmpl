@@ -16,7 +16,7 @@
 
 
 <!-- variant_id cell -->
-<td class="variant_id-cell">
+<td class="variant-id-cell">
     <span style='word-break: break-all;' data-placement='right' class='pop pointer variant_id'>{{ v.variant_id }}</span><br/>
     {% if v.ID.startswith('rs') %}
         <a href='http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{v.ID}}'><small>{{ v.ID }}</small></a> <br/>
@@ -28,15 +28,17 @@
 
 <!-- UCLex allele_freq -->
 <td class='allele-freq-cell'>
-<span class='tip' title='{{ v.allele_count~'/'~v.allele_num }}<br /><b>Missing cases: </b>{{ v.MISS_COUNT }}'>{{'%0.4f' % v.allele_freq|float }}</span>
+<span class='tip' title='{{ v.allele_count|round|int~'/'~v.allele_num|round|int }}<br /><b>Missing cases: </b>{{ v.MISS_COUNT|round|int }}'>{{'%0.4f' % v.allele_freq|float }}</span>
 </td>
 
 
 <!-- ExAC allele_freq -->
-<td class='ExAC_freq-cell'>
+<td class='ExAC-freq-cell'>
     {% if v.EXAC %}
         <span class='tip' title="{% for k in v.EXAC|sort %}
-               <b>{{k}}: </b> {{'%0.2f' % v.EXAC[k]|float }}<br />
+                {% if k[0]=='H' and  v.EXAC[k]|float>0 %}
+                   <b>{{k}}: </b> {{'%0.0f' % v.EXAC[k]|float }}<br />
+               {% endif %}
             {% endfor %}
             ">{{'%0.6f' % v.EXAC['AF'] }}</span>
     {% else %}
@@ -44,8 +46,9 @@
     {% endif %}
 </td> 
 
+
 <!-- kaviar -->
-<td class='kaviar-cell'>
+<td class='kaviar-freq-cell'>
 {% if v.kaviar %}
     <span class='tip'>{{'%0.6f' % v.kaviar|float }}</span>
 {% else %}
@@ -54,50 +57,62 @@
 </td>
 
 <!-- consequence -->
-<td class=most_severe_consequence-cell>
-    {{v.most_severe_consequence}}
+<td class=most-severe-consequence-cell>
+    <span class='tip' title="{{v.most_severe_consequence}}">{{v.most_severe_consequence}}</span>
 </td>
 
 <!-- protein change cell -->
-<td class="hgvsp-cell">
-<span class='tip' title="{{v.transcripts|length}}"> <b></b> </span>
-{{v.canonical_hgvsc}}
-{{ v.canonical_hgvsp }}
+<td class="mutation-cell">
+{% for pm in v.protein_mutations %}
+   <span class='tip' title="{{ v.protein_mutations[pm] }}<br>{{v.canonical_hgvs[pm]}}">{{ v.protein_mutations[pm] }}</span>
+{% endfor %}
 </td>
 
+
+
 <!-- cadd score cell -->
-<td class="canonical_cadd-cell">
+<td class="canonical-cadd-cell">
 {{ v.canonical_cadd[0] }}
 </td>
 
 
 <!-- first 10 het individuals -->
-<td class="het_individuals-cell">
+<td class="het-individuals-cell">
 {% for s in v.het_samples[:10]|sort %}
 <!-- <span class='tip' title='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'> -->
 {% if individuals[s]|length > 1 %}
-<!-- <b> <a href="/individual/{{ s }}">{{s}}</a> </b> -->
-<b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% endif %}
 {% else %}
-<!-- <a href="/individual/{{ s }}">{{s}}</a> -->
-<span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+    {% endif %}
 {% endif %}
-<!-- </span> -->
 {% endfor %}
 </td>
 
 <!-- first 10 hom individuals -->
-<td class="hom_individuals-cell">
+<td class="hom-individuals-cell">
 {% for s in v.hom_samples[:10]|sort %}
 <!-- <span class='tip' title='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'> -->
 {% if individuals[s]|length > 1 %}
-<!-- <b> <a href="/individual/{{ s }}">{{s}}</a> </b> -->
-<b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% endif %}
 {% else %}
-<!-- <a href="/individual/{{ s }}">{{s}}</a> -->
-<span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+    {% endif %}
 {% endif %}
-<!-- </span> -->
 {% endfor %}
 </td>
 

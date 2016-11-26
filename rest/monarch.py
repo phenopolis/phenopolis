@@ -7,7 +7,7 @@ import sys
 
 
 conn=PhenotipsClient()
-client = pymongo.MongoClient(host='phenotips', port=27017)
+client = pymongo.MongoClient(port=27017)
 patients_db = client['patients']
 
 
@@ -52,7 +52,7 @@ def compare(individual,individual2):
     return r.json()
 
 def get_phenotype_score(hpo):
-    client = pymongo.MongoClient(host='phenotips', port=27017)
+    client = pymongo.MongoClient(port=27017)
     db = client['patients']
     for ind in db.patients.find():
         hpo2='+'.join([h['id'] for h in hpo_terms(ind)])

@@ -16,7 +16,7 @@ import orm
 @requires_auth
 def individuals_page():
     page=int(request.args.get('page',0))
-    number=int(request.args.get('number',500))
+    number=int(request.args.get('number',200))
     hpo_db=get_db('hpo')
     def f(p):
         print p['external_id']
@@ -41,6 +41,8 @@ def individuals_page():
         return p
     conn=PhenotipsClient()
     auth='%s:%s' % (session['user'],session['password2'],)
+    all_patients=conn.get_patient(auth=auth).get('patientSummaries',[])
+    total=len(all_patients)
     patients=conn.get_patient(auth=auth,start=page*number,number=number).get('patientSummaries',[])
     eids=[p['eid'] for p in patients]
     print(eids)
@@ -49,6 +51,6 @@ def individuals_page():
     individuals=[f(p) for p in patients if 'external_id' in p]
     # family_history":{"consanguinity":true}
     #if session['user']=='demo': for ind in individuals: ind['external_id']=encrypt(ind['external_id'])
-    return render_template('individuals_page.html',individuals=individuals)
+    return render_template('individuals_page.html',individuals=individuals,page=page,number=number,total=total)
 
 

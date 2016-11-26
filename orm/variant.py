@@ -271,6 +271,18 @@ class Variant(object):
         print(self.save())
         return self.__dict__['genes']
     @property
+    def canonical_hgvsp(self):
+        if 'canonical_hgvsp' in self.__dict__:
+            return self.__dict__['canonical_hgvsp']
+        else:
+            return []
+    @property
+    def canonical_hgvsc(self):
+        if 'canonical_hgvsc' in self.__dict__:
+            return self.__dict__['canonical_hgvsc']
+        else:
+            return []
+    @property
     def p_hgvs(self):
         """
         Takes consequence dictionary, returns proper variant formatting for synonymous variants

@@ -20,12 +20,11 @@ class Individual(object):
                     print db.patients.update({'external_id':eid},{'$set':{k+'_count':variants_count}},upsert=True)
     def load_patient_from_file(self, filename, hpo='HP:0000001'):
         # Some constant
-        RETNET  = json.load(open('/home/rmhanpo/uclex_browser/retnet.json', 'r'))
         #HEADER = ['HUGO', 'HPO', 'consequence', 'ref(pubmedID)', 'description', 'OMIM', 'allele_freq', 'ExAC_freq', 'variant_id', 'p_change']
         # get db
         client = pymongo.MongoClient()
         hpo_db = client['hpo']
-        db = client['uclex-old']
+        db = client['uclex']
         patient_db = client['patients']
         patient_id=os.path.basename(filename.replace('.csv','')) 
         parent_dir=os.path.basename(os.path.abspath(os.path.join(filename, os.pardir)))

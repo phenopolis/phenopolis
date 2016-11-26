@@ -1,7 +1,7 @@
 //tooltip
 $('.tip').tooltip({html:true});
 //popover
-$('.pop').popover({html:true,title:'edit'});
+$('.pop').popover({html:true});
 
 //check if an object is in an array
 function include(arr,obj) {
@@ -358,5 +358,30 @@ function onVisibilityChange(el, callback) {
         }
     }
 }
+
+
+
+// get variant_id in real time
+$('.variant_id').hover(function(){
+    // get variant_id
+    var span = $(this);
+    var id = span.text();
+    $.get('/variant_json/' + id,
+        function(data){
+            var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
+            $.each(data.result.hom_samples.sort(), function(i,v){
+                if (session_user=='demo') { var v='hidden'; }
+                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
+            });
+            content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
+            $.each(data.result.het_samples.sort(), function(i,v){
+                if (session_user=='demo') { var v='hidden'; }
+                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
+            });
+            content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
+            span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a>');
+            span.attr('data-content', content);
+    });
+});
 
 

@@ -11,7 +11,7 @@ import orm
 
 
 
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 @requires_auth
 def homepage():
     cache_key = 't-homepage'
@@ -28,8 +28,9 @@ def homepage():
     female_patients=patients_db.patients.find( {'sex':'F'}).count()
     print('female_patients',female_patients,)
     unknown_patients=patients_db.patients.find( {'sex':'U'}).count()
-    hpo_file='uclex_stats/overall_hpo_2016_Aug_2.json'
-    hpo_json = json.load(open(hpo_file,'r'))
+    #hpo_file='uclex_stats/overall_hpo_2016_Aug_2.json'
+    #hpo_json = json.load(open(hpo_file,'r'))
+    hpo_json={}
     exac_variants=0
     print('exac_variants',exac_variants,)
     pass_variants=db.variants.find({'FILTER':'PASS'}).count()

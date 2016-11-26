@@ -177,8 +177,6 @@ function convert_to_dot(data,style){
         }else if (d.q_value <= 0.05){
             d.label = d.name + '*';
         }
-        //if (d.id == 'HP:0000510' || d.id == 'HP:0000007' || d.id == 'HP:0012712' || d.id == 'HP:0000001'){ d.label = ''; }
-        d.label='';
         var fillcolor = [d.fillcolor];
         if (style == 'filled'){
         }else if (style == 'wedged'){

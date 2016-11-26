@@ -1,13 +1,16 @@
+LOCAL=False
+#NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
-from flask import Flask, session
+from flask import Flask
+from flask import session
 from flask.ext.session import Session
 from flask import Response
-from flask import stream_with_context, request, Response, make_response
-from flask import Flask
+from flask import stream_with_context
+from flask import request
+from flask import make_response
 from flask import request
 from flask import send_file
-from flask import session
 from flask import g
 from flask import redirect
 from flask import url_for
@@ -44,7 +47,6 @@ import gzip
 import logging
 import lookups
 import random
-import sys
 from utils import * 
 from collections import defaultdict, Counter
 from collections import OrderedDict
@@ -64,7 +66,6 @@ from urlparse import urlparse
 import pickle 
 #import pdb 
 # handles live plotting if necessary
-import math
 import plotly
 print plotly.__version__  # version >1.9.4 required
 from plotly.graph_objs import Scatter, Layout 
@@ -72,12 +73,10 @@ from plotly.graph_objs import Scatter, Layout
 #import pyRserve 
 import numpy
 import subprocess
-from flask import Flask, render_template, redirect, url_for, request
 
 from load_individual import load_patient 
 from Crypto.Cipher import DES
 import base64
-from flask_httpauth import HTTPBasicAuth
 
 import orm
 from lookups import *
@@ -87,26 +86,32 @@ logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
 
 
-app = Flask(__name__)
+if LOCAL:
+    app = Flask(__name__,static_url_path='/static')
+else:
+    app = Flask(__name__)
+
 ADMINISTRATORS = ( 'n.pontikos@ucl.ac.uk',)
-app = Flask(__name__)
 mail_on_500(app, ADMINISTRATORS)
 Compress(app)
 #app.config['COMPRESS_DEBUG'] = True
 cache = SimpleCache(default_timeout=70*60*24)
-auth = HTTPBasicAuth()
+
+#from flask_httpauth import HTTPBasicAuth
+#auth = HTTPBasicAuth()
 
 REGION_LIMIT = 1E5
 EXON_PADDING = 50
 # Load default config and override config from an environment variable
-app.config.from_pyfile('uclex.cfg')
-#NO_PHENOTIPS_INSTALLATION: app.config.from_pyfile('local.cfg')
+app.config.from_pyfile('../phenopolis.cfg')
 
 # Check Configuration section for more details
 SESSION_TYPE = 'mongodb'
 app.config.from_object(__name__)
 sess=Session()
 sess.init_app(app)
+
+print app.root_path
 
 
 def check_auth(username, password):
@@ -115,7 +120,14 @@ def check_auth(username, password):
     Will try to connect to phenotips instance.
     """
     print username
-    #NO_PHENOTIPS_INSTALLATION: return True
+    session['password2'] = password
+    password=md5.new(password).hexdigest()
+    session['user'] = username
+    session['password'] = password
+    if LOCAL:
+        return True
+    else:
+        return False
     conn=PhenotipsClient()
     response=conn.get_patient(auth='%s:%s' % (username, password,),number=1)
     if response:
@@ -127,7 +139,6 @@ def check_auth(username, password):
     else: return False
     # check that user name and hash of password exist in database
     db_users=get_db('users')
-    # setting a session key for pubmedBatch to save result
     session['password2'] = password
     password=md5.new(password).hexdigest()
     session['user'] = username
@@ -150,11 +161,13 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        print session
         if session:
           if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
              return f(*args, **kwargs)
           else:
-             return redirect('https://uclex.cs.ucl.ac.uk/login')
+             print 'login'
+             return redirect('login')
              #return render_template('login.html', error='Invalid Credentials. Please try again.')
         print 'method', request.method
         error=None
@@ -165,9 +178,9 @@ def requires_auth(f):
              return f(*args, **kwargs)
           else:
              # doesn't redirect
-             #return render_template('login.html', error='Invalid Credentials. Please try again.')
+             return render_template('login.html', error='Invalid Credentials. Please try again.')
              #return login()
-             return redirect('https://uclex.cs.ucl.ac.uk/login')
+             #return redirect('login')
     return decorated
 
 
@@ -184,7 +197,8 @@ def login():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
-           return redirect('https://uclex.cs.ucl.ac.uk')
+           print 'SUCESS'
+           return redirect('/')
     return render_template('login.html', error=error)
 
 # 
@@ -200,7 +214,7 @@ def login2():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
-           return redirect('https://uclex.cs.ucl.ac.uk')
+           return redirect('/')
     return render_template('login2.html', error=error)
 
 
@@ -215,7 +229,7 @@ def logout():
         del session['password2']
         del session
     except NameError:
-        return redirect('https://uclex.cs.ucl.ac.uk/login')
+        return redirect('/')
     return render_template('login.html', error="You have been logged out")
 
 
@@ -987,7 +1001,7 @@ def faq_page():
 
 @app.route('/samples')
 def samples_page():
-    samples=pandas.read_csv('/slms/UGI/vm_exports/vyp/phenotips/HPO/hpo.txt')
+    samples=pandas.read_csv('HPO/hpo.txt')
     return render_template('samples.html',samples=samples.to_html(escape=False))
 
 
@@ -1122,7 +1136,7 @@ def load_variants_file():
     db.variants.ensure_index('transcripts')
     db.variants.ensure_index('variant_id')
     #sites_vcfs = app.config['SITES_VCFS']
-    sites_vcfs=['/slms/UGI/vm_exports/vyp/phenotips/ExAC/0.3.1/ExAC.r0.3.1.sites.vep.vcf.gz']
+    sites_vcfs=['ExAC.r0.3.1.sites.vep.vcf.gz']
     print(sites_vcfs)
     #if len(sites_vcfs) > 1: raise Exception("More than one sites vcf file found: %s" % sites_vcfs)
     procs = []
@@ -1516,13 +1530,13 @@ def get_pred_score(obj):
 def plot(gene):
     #db = get_db()
     #var=db.variants.find_one({'VARIANT_ID':'3_8775295_C_T'})
-    d=csv.DictReader(file('/slms/UGI/vm_exports/vyp/phenotips/CARDIO/assoc_3.csv','r'),delimiter=',')
+    d=csv.DictReader(file('CARDIO/assoc_3.csv','r'),delimiter=',')
     x=[i for i, r, in enumerate(d)]
-    d=csv.DictReader(file('/slms/UGI/vm_exports/vyp/phenotips/CARDIO/assoc_3.csv','r'),delimiter=',')
+    d=csv.DictReader(file('CARDIO/assoc_3.csv','r'),delimiter=',')
     y=[-math.log10(float(r['HCM.chisq.p'])) for r in d]
     print(x)
     print(y)
-    d=csv.DictReader(file('/slms/UGI/vm_exports/vyp/phenotips/CARDIO/assoc_3.csv','r'),delimiter=',')
+    d=csv.DictReader(file('CARDIO/assoc_3.csv','r'),delimiter=',')
     #layout = dict( yaxis = dict( type = 'log', tickvals = [ 1.5, 2.53, 5.99999 ]), xaxis = dict( ticktext = [ "green eggs", "& ham", "H2O", "Gorgonzola" ], tickvals = [ 0, 1, 2, 3, 4, 5 ]))
     labels=[r['VARIANT_ID'] for r in d]
     layout = Layout( xaxis = dict( ticktext=labels, tickvals=x ), title="p-value plot" )

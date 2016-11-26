@@ -920,7 +920,11 @@ $('.individual_id').on('click',function(){
                 span.attr('data-content', 'no data available');
             }
             var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
+            if (typeof data.result.genes != 'undefined') {
             content += '<p><b>Genes:</b> ' + data.result.genes[0].gene + '</p>';
+            } else {
+            content += '<p><b>Genes:</b>  </p>';
+            }
             content += '<p><b>Features:</b><br/>'
             $.each(data.result.features.sort(), function(i,v){
                 content += '<a href="/hpo/'+v.label+'">'+v.label+'</a><br/>';

@@ -16,7 +16,7 @@
 
 
 <!-- Gene cell -->
-<td class='Gene-cell'>
+<td class='Genes-cell'>
 {% if v.canonical_gene_name_upper in gene_info %}
     {% set gene=gene_info[v.canonical_gene_name_upper]  %}
 {% if gene.known %}
@@ -25,8 +25,7 @@
 {% if gene.disease %}
     <span class='pop pointer' 
         data-toggle='popover' 
-        title='<a href="https://sph.uth.edu/Retnet/disease.htm" target="_blank">A RetNet gene</a>'                                   
-        data-content='
+        title='<a href="https://sph.uth.edu/Retnet/disease.htm" target="_blank">A RetNet gene</a>' data-content='
             {% if gene.omim %}
                 <p style="color:black;margin-bottom:0"><b>OMIM:</b>
                 {% for o in gene.omim %}
@@ -39,28 +38,52 @@
     </span>
 {% endif %}
 {% endif %}
-<a class='tip' title="<b>score:</b> {{v.exomiser['score']}}" href='/gene/{{ v.canonical_gene_name_upper }}'>{{ v.canonical_gene_name_upper }}</a>
+{{ v.transcript_consequences|map(attribute='gene_symbol')|unique|href(link='gene') }}
 </td>
 
 <!-- Exomiser -->
-<td class=exomiser-gene-score-cell>
-{{v.exomiser['score']}}
+<td class='exomiser-gene-score-cell'>
+{%if v.exomiser and v.exomiser.score %}
+<a tabindex="0" data-html="true" data-toggle="popover" data-placement="right" title="Exomiser evidence" data-trigger="focus" data-content='
+ <p style="color:black;margin-bottom:0">
+    {% for pe in v.exomiser.phenotypeEvidence %}
+<b>org: </b>{{pe.organism}}<br>
+<b>score: </b>{{"%0.2f" % pe.score}}<br>
+<b>model: </b>
+{% set modelId=pe.model.modelId.split('_')[0] %}
+{% if pe.organism=="HUMAN" %}
+{% set modelId=pe.model.modelId.split('_')[0] %}
+{% set modelId=modelId.split(':')[1] %}
+<a href="http://www.omim.org/{{modelId}}" target="_blank">{{pe.modelId}}</a>
+{% elif pe.organism=="MOUSE" %}
+<a href="http://www.informatics.jax.org/marker//{{modelId}}" target="_blank">{{pe.modelId}}</a>
+{% elif pe.organism=="FISH" %}
+<a href="https://zfin.org/{{modelId}}" target="_blank">{{pe.modelId}}</a>
+{% endif %}
+<br>
+<hr>
+{% endfor %}
+</p>
+'>{{'%0.2f' % v.exomiser['score']}}</a>
+{% endif %}
 </td>
 
 <!-- gene-hpo -->
-<td class='gene-hpo-cell'>
+<td class='Pheno-genon-gene-score-cell'>
 {% if variant_type == 'rare' %}
     {% set gene_hpo_mode = 'dominant' %}
 {% else %}
     {% set gene_hpo_mode = 'recessive' %}
 {% endif %}
 {% if v.gene_id in retinal_genes[gene_hpo_mode] %}
-    {{ retinal_genes[gene_hpo_mode][v.gene_id] }}
+{% if retinal_genes[gene_hpo_mode][v.gene_id] %}
+    {{ '%0.2f' % retinal_genes[gene_hpo_mode][v.gene_id] }}
+{% endif %}
 {% endif %}
 </td>
 
 <!-- HPO term -->
-<td class=HPO-cell>
+<td class=OMIM-HPO-cell>
 {% if v["HPO"] %}
     {% for h in v["HPO"] %}
         <a href='/hpo/{{ h.hpo_id }}' class='tip' title="{{ h.hpo_term }}" target='_blank'>{{ h.hpo_term | truncate(10)}}...</a><br />
@@ -69,20 +92,14 @@
 </td>
 
 <!-- pubmed cell -->
-<td class='pubmed-gene-cell'>
-    {% if genes_pubmed[v.canonical_gene_name_upper]  %}
-    {% set pub=genes_pubmed[v.canonical_gene_name_upper]  %}
-    <span class='hidden' style='visibility:hidden;'>{{ pub['score'] }}</span> 
-            {% for r in pub['result']['results'] %}
-                <span class='pop-modal pointer' data-toggle='popover' title='<a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ r.id }}" target="_blank">{{ r.title|replace("'",'&#39;')|replace('"','&#34;')|replace('<','&#60;')|replace('>','&#62;') }}</a>' data-content='{{ r.abstract|replace("'",'&#39;')|replace('"','&#34;')|replace('<','&#60;')|replace('>','&#62;')|highlight([v.canonical_gene_name_upper],'gene-emphasis')|highlight(patient.pubmed_key.split('-') ,'OR-emphasis')  }} '> 
-                    {{ r.id }}
-                </span>
-            {% endfor %}
-    {% endif %}
+<td class='pubmed-gene-cell' pubmedkey="{{ v.canonical_gene_name_upper }}_{{ patient.pubmed_key }}">
+    {% set pubmed_key=v.canonical_gene_name_upper+'_'+patient.pubmed_key %}
+    <span class='hidden'>{{ pubmedbatch[pubmed_key] }}</span>
+    <img src='/static/Loading_icon.gif' style="width:60px;height:60px;" >
 </td>
 
 <!-- variant_id cell -->
-<td class="variant_id-cell">
+<td class="variant-id-cell">
     <span style='word-break: break-all;' data-placement='right' class='pop pointer variant_id'>{{ v.variant_id }}</span><br/>
     {% if v.ID.startswith('rs') %}
         <a href='http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{v.ID}}'><small>{{ v.ID }}</small></a> <br/>
@@ -91,10 +108,9 @@
 </td>
 
 
-
 <!-- UCLex allele_freq -->
 <td class='allele-freq-cell'>
-<span class='tip' title='{{ v.allele_count~'/'~v.allele_num }}<br /><b>Missing cases: </b>{{ v.MISS_COUNT }}'>{{'%0.4f' % v.allele_freq|float }}</span>
+<span class='tip' title='{{ v.allele_count|round|int~'/'~v.allele_num|round|int }}<br /><b>Missing cases: </b>{{ v.MISS_COUNT|round|int }}'>{{'%0.4f' % v.allele_freq|float }}</span>
 </td>
 
 
@@ -102,7 +118,9 @@
 <td class='ExAC-freq-cell'>
     {% if v.EXAC %}
         <span class='tip' title="{% for k in v.EXAC|sort %}
-               <b>{{k}}: </b> {{'%0.2f' % v.EXAC[k]|float }}<br />
+                {% if k[0]=='H' and  v.EXAC[k]|float>0 %}
+                   <b>{{k}}: </b> {{'%0.0f' % v.EXAC[k]|float }}<br />
+               {% endif %}
             {% endfor %}
             ">{{'%0.6f' % v.EXAC['AF'] }}</span>
     {% else %}
@@ -121,45 +139,62 @@
 
 <!-- consequence -->
 <td class=most-severe-consequence-cell>
-    {{v.most_severe_consequence}}
+    <span class='tip' title="{{v.most_severe_consequence}}">{{v.most_severe_consequence}}</span>
 </td>
 
 <!-- protein change cell -->
 <td class="hgvsp-cell">
-<span class='tip' title="{{v.transcripts|length}}"> <b></b> </span>
-{{v.canonical_hgvsc}}
-{{ v.canonical_hgvsp }}
+{% for pm in v.protein_mutations %}
+   <span class='tip' title="{{ v.protein_mutations[pm] }}<br>{{v.canonical_hgvs[pm]}}">{{ v.protein_mutations[pm] }}</span>
+{% endfor %}
 </td>
 
 <!-- cadd score cell -->
-<td class="canonical_cadd-cell">
+<td class="canonical-cadd-cell">
 {{ v.canonical_cadd[0] }}
 </td>
 
 
 <!-- first 10 het individuals -->
-<td class="het_individuals-cell">
+<td class="het-individuals-cell">
 {% for s in v.het_samples[:10]|sort %}
 {% if individuals[s]|length > 1 %}
-<b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% endif %}
 {% else %}
-<span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'">{{s}}</span><br/>
+    {% endif %}
 {% endif %}
 {% endfor %}
 </td>
 
 <!-- first 10 hom individuals -->
-<td class="hom_individuals-cell">
+<td class="hom-individuals-cell">
 {% for s in v.hom_samples[:10]|sort %}
 {% if individuals[s]|length > 1 %}
-<b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
+    {% endif %}
 {% else %}
-<span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+    {% if session['user'] == 'demo' %}
+        hidden
+    {% else %}
+        <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
+    {% endif %}
 {% endif %}
 {% endfor %}
 </td>
 
 
+{% if session['user'] != 'demo' %}
 {% if patient is defined %}
 <!-- status -->
 <td class="status-cell">
@@ -181,6 +216,7 @@
   > M</input>
 </form>
 </td>
+{% endif %}
 {% endif %}
 
 </tr>

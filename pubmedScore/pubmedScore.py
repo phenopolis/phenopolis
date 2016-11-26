@@ -18,7 +18,8 @@ import sys
 import re
 from collections import defaultdict, Counter
 
-Entrez.email = 'jing.yu@ndcn.ox.ac.uk'
+# username used to connect to pubmed
+Entrez.email = 
 
 # Some constant
 today = strftime("%Y-%m-%d", gmtime())

@@ -117,6 +117,7 @@ def go_cleanup(d):
         cons['go']=cons['go'].split(',')
 
 def canonical(d):
+    # more than 1 stupid canonical gene
     for cons in d['transcript_consequences']:
         if 'canonical' not in cons: continue
         d['canonical_cadd']=d.get('canonical_cadd',[])+[cons.get('cadd','')]

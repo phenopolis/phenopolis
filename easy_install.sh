@@ -5,6 +5,10 @@ pip install mygene --user
 pip install pysam --user
 pip install pygr --user
 pip install pyhgvs --user
+pip install plotly --user
+pip install flask_httpauth --user
+pip install primer3-py --user
+pip install neo4j-driver --user
 
 git clone git@github.com:weiyi-bitw/varnorm.git
 cd varnorm
@@ -18,14 +22,27 @@ git clone git@github.com:pontikos/phenopolis.git
 # 2) let Flask serve static files instead of webserver
 sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
 
+<<<<<<< HEAD
 # Make sure mongodb is running
 DBPATH=<path to db>
 mongod --dbpath $DBPATH --port 27017
+=======
+# Start mongod
+
+DBPATH=db
+mkdir -p $DBPATH
+mongod --dbpath $DBPATH --port 27017 --smallfiles
+>>>>>>> 575c81e0f342d1b93b33372cbb615ae6a54c2712
 
 # Basic build of db
 # download minimal files
 # import them
 # create indexes
+
+wget --no-check-certificate https://uclex.cs.ucl.ac.uk/static/demo/hpo-hpo.json
+mongoimport --db hpo --collection hpo --file hpo-hpo.json --drop
+mongo hpo --eval "db.variants.createIndex({'id' : 1})"
+mongo hpo --eval "db.variants.createIndex({'name' : 1})"
 
 wget --no-check-certificate https://uclex.cs.ucl.ac.uk/static/demo/uclex-genes.json
 mongoimport --db uclex --collection genes --file uclex-genes.json --drop
@@ -81,9 +98,12 @@ mongo patients --eval "db.variants.createIndex({'solved' : 1})"
 mongo patients --eval "db.variants.createIndex({'clinicalStatus.clinicalStatus' : 1})"
 mongo patients --eval "db.variants.createIndex({'specificity.score' : 1})"
 
-# Run server
 
+
+# Run server
 cd phenopolis 
-python run_server.py
+ln -s static views/static
+ln -s templates views/templates
+python runserver.py
 
 
