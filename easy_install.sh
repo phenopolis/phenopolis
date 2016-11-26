@@ -87,9 +87,12 @@ mongo patients --eval "db.variants.createIndex({'solved' : 1})"
 mongo patients --eval "db.variants.createIndex({'clinicalStatus.clinicalStatus' : 1})"
 mongo patients --eval "db.variants.createIndex({'specificity.score' : 1})"
 
-# Run server
 
+
+# Run server
 cd phenopolis 
+ln -s static views/static
+ln -s templates views/templates
 python runserver.py
 
 
