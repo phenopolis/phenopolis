@@ -1,5 +1,5 @@
 LOCAL=False
-#NO_PHENOTIPS_INSTALLATION: LOCAL=True
+LOCAL=True
 
 #flask import
 from flask import Flask
