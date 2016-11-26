@@ -22,17 +22,10 @@ git clone git@github.com:pontikos/phenopolis.git
 # 2) let Flask serve static files instead of webserver
 sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
 
-<<<<<<< HEAD
 # Make sure mongodb is running
 DBPATH=<path to db>
-mongod --dbpath $DBPATH --port 27017
-=======
-# Start mongod
-
-DBPATH=db
 mkdir -p $DBPATH
-mongod --dbpath $DBPATH --port 27017 --smallfiles
->>>>>>> 575c81e0f342d1b93b33372cbb615ae6a54c2712
+mongod --dbpath $DBPATH --port 27017
 
 # Basic build of db
 # download minimal files
@@ -99,9 +92,9 @@ mongo patients --eval "db.variants.createIndex({'clinicalStatus.clinicalStatus' 
 mongo patients --eval "db.variants.createIndex({'specificity.score' : 1})"
 
 
-
 # Run server
 cd phenopolis 
+# create necessary symlinks
 ln -s static views/static
 ln -s templates views/templates
 python runserver.py
