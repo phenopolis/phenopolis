@@ -4,7 +4,6 @@ pip install myvariant --user
 pip install mygene --user
 pip install pysam --user
 pip install pygr --user
-pip install pyhgvs --user
 pip install plotly --user
 pip install flask_httpauth --user
 pip install primer3-py --user
@@ -12,6 +11,11 @@ pip install neo4j-driver --user
 
 git clone git@github.com:weiyi-bitw/varnorm.git
 cd varnorm
+python setup.py install --user
+cd ..
+
+git clone git@github.com:counsyl/hgvs.git
+cd hgvs
 python setup.py install --user
 cd ..
 
@@ -23,7 +27,7 @@ git clone git@github.com:pontikos/phenopolis.git
 sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
 
 # Make sure mongodb is running
-DBPATH=<path to db>
+DBPATH=db
 mkdir -p $DBPATH
 mongod --dbpath $DBPATH --port 27017
 
