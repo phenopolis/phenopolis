@@ -167,7 +167,6 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        print session
         if session:
           if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
              return f(*args, **kwargs)
