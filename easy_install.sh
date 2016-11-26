@@ -13,7 +13,7 @@ pip install Flask-Session --user
 pip install Flask-Runner --user
 pip install Flask-Mail --user
 pip install Flask-Compress --user
-pip install Flash-Error --user
+pip install Flask-Error --user
 
 git clone git@github.com:weiyi-bitw/varnorm.git
 cd varnorm
