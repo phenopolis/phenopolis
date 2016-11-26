@@ -132,9 +132,8 @@ def check_auth(username, password):
     session['user'] = username
     session['password'] = password
     if LOCAL:
+        print 'LOCAL'
         return True
-    else:
-        return False
     conn=PhenotipsClient()
     response=conn.get_patient(auth='%s:%s' % (username, password,),number=1)
     if response:
