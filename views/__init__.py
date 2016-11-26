@@ -87,8 +87,10 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 if LOCAL:
+    print 'LOCAL'
     app = Flask(__name__,static_url_path='/static')
 else:
+    print 'SERVER'
     app = Flask(__name__)
 
 ADMINISTRATORS = ( 'n.pontikos@ucl.ac.uk',)
@@ -104,8 +106,10 @@ REGION_LIMIT = 1E5
 EXON_PADDING = 50
 # Load default config and override config from an environment variable
 if LOCAL:
+    print 'LOCAL'
     app.config.from_pyfile('../local.cfg')
 else:
+    print 'SERVER'
     app.config.from_pyfile('../phenopolis.cfg')
 
 # Check Configuration section for more details
