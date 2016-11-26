@@ -127,11 +127,7 @@ def check_auth(username, password):
     Will try to connect to phenotips instance.
     """
     print username
-    session['password2'] = password
-    password=md5.new(password).hexdigest()
-    session['user'] = username
-    session['password'] = password
-    if LOCAL:
+    if LOCAL and username=='demo' and password=='demo123':
         print 'LOCAL'
         return True
     conn=PhenotipsClient()
@@ -169,10 +165,14 @@ def requires_auth(f):
     def decorated(*args, **kwargs):
         if session:
           if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
+             print 'SESSION', session
              return f(*args, **kwargs)
           else:
              print 'login'
-             return redirect('login')
+             if LOCAL:
+                 return redirect('login')
+             else:
+                 return redirect('https://uclex.cs.ucl.ac.uk/login')
              #return render_template('login.html', error='Invalid Credentials. Please try again.')
         print 'method', request.method
         error=None
@@ -182,10 +182,10 @@ def requires_auth(f):
           if check_auth(username,password):
              return f(*args, **kwargs)
           else:
-             # doesn't redirect
-             return render_template('login.html', error='Invalid Credentials. Please try again.')
-             #return login()
-             #return redirect('login')
+             if LOCAL:
+                 return render_template('login.html', error='Invalid Credentials. Please try again.')
+             else:
+                 return redirect('https://uclex.cs.ucl.ac.uk/login')
     return decorated
 
 
@@ -202,8 +202,11 @@ def login():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
-           print 'SUCESS'
-           return redirect('/')
+           print 'LOGIN SUCCESS'
+           if LOCAL:
+               return redirect('/')
+           else:
+               return redirect('https://uclex.cs.ucl.ac.uk/')
     return render_template('login.html', error=error)
 
 # 
@@ -219,7 +222,10 @@ def login2():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
-           return redirect('/')
+           if LOCAL:
+               return redirect('/')
+           else:
+               return redirect('https://uclex.cs.ucl.ac.uk')
     return render_template('login2.html', error=error)
 
 
@@ -234,7 +240,10 @@ def logout():
         del session['password2']
         del session
     except NameError:
-        return redirect('/')
+        if LOCAL:
+            return redirect('/')
+        else:
+            return redirect('https://uclex.cs.ucl.ac.uk')
     return render_template('login.html', error="You have been logged out")
 
 
