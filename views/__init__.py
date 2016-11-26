@@ -236,17 +236,16 @@ def login2():
 @app.route('/logout')
 @requires_auth
 def logout():
-    return redirect('https://uclex.cs.ucl.ac.uk/login')
+    if LOCAL:
+        return redirect('/')
+    else:
+        return redirect('https://uclex.cs.ucl.ac.uk/login')
     print('DELETE SESSION')
     del session['user']
     del session['password']
     del session['password2']
     del session
     print('DELETED SESSION',session)
-    if LOCAL:
-        return redirect('/')
-    else:
-        return redirect('https://uclex.cs.ucl.ac.uk/login')
     #return render_template('login.html', error="You have been logged out")
 
 
