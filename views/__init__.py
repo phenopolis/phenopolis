@@ -1,5 +1,5 @@
 LOCAL=False
-LOCAL=True
+#NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
 from flask import Flask
@@ -120,16 +120,22 @@ sess.init_app(app)
 
 print app.root_path
 
-
 def check_auth(username, password):
     """
     This function is called to check if a username / password combination is valid.
     Will try to connect to phenotips instance.
     """
     print username
-    if LOCAL and username=='demo' and password=='demo123':
+    if LOCAL:
         print 'LOCAL'
-        return True
+        if username=='demo' and password=='demo123':
+            session['password2'] = password
+            password=md5.new(password).hexdigest()
+            session['user'] = username
+            session['password'] = password
+            return True
+        else:
+            return False
     conn=PhenotipsClient()
     response=conn.get_patient(auth='%s:%s' % (username, password,),number=1)
     if response:
@@ -231,21 +237,19 @@ def login2():
     return render_template('login2.html', error=error)
 
 
-
 # 
 @app.route('/logout')
-@requires_auth
 def logout():
+    print('DELETE SESSION')
+    print(session)
+    session.pop('user',None)
+    session.pop('password',None)
+    session.pop('password2',None)
+    print(session)
     if LOCAL:
-        return redirect('/')
+        return redirect('/login')
     else:
         return redirect('https://uclex.cs.ucl.ac.uk/login')
-    print('DELETE SESSION')
-    del session['user']
-    del session['password']
-    del session['password2']
-    del session
-    print('DELETED SESSION',session)
     #return render_template('login.html', error="You have been logged out")
 
 
@@ -614,7 +618,8 @@ def awesome():
 
 @app.route('/patient/<patient_str>')
 def get_patient(patient_str):
-    pass
+    print(session)
+    return patient_str
 
 # AJAX
 # Not finished
