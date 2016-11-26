@@ -28,9 +28,11 @@ def homepage():
     female_patients=patients_db.patients.find( {'sex':'F'}).count()
     print('female_patients',female_patients,)
     unknown_patients=patients_db.patients.find( {'sex':'U'}).count()
-    #hpo_file='uclex_stats/overall_hpo_2016_Aug_2.json'
-    #hpo_json = json.load(open(hpo_file,'r'))
-    hpo_json={}
+    if LOCAL:
+        hpo_json={}
+    else:
+        hpo_file='uclex_stats/overall_hpo_2016_Aug_2.json'
+        hpo_json = json.load(open(hpo_file,'r'))
     exac_variants=0
     print('exac_variants',exac_variants,)
     pass_variants=db.variants.find({'FILTER':'PASS'}).count()
@@ -93,6 +95,7 @@ def homepage():
         #image=image.decode('utf8'))
         image="")
     #cache.set(cache_key, t)
+    print(session)
     return t
 
 
