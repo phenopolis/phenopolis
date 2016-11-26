@@ -181,11 +181,12 @@ def hpo_page(hpo_id):
             variants=[])
 
 
-@auth.verify_password
-def verify_pw(username,password): return check_auth(username, password)
+#@auth.verify_password
+#def verify_pw(username,password): return check_auth(username, password)
 
 @app.route('/hpo_json/<hpo_id>')
-@auth.login_required
+#@auth.login_required
+@requires_auth
 def hpo_json(hpo_id):
     patients_db=get_db('patients')
     db=get_db()

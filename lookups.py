@@ -4,7 +4,6 @@ import itertools
 import pysam
 import csv
 #hpo lookup
-import phizz
 import random
 import pickle
 import hashlib
@@ -218,22 +217,6 @@ def get_hpo_patients(hpo_db, patients_db, hpo_id):
     #remove duplicates
     patients={v['external_id']:v for v in patients}.values()
     return patients
-
-# return hpo terms found in people in which variant is found
-def get_hpo(variant_str):
-    samples=get_samples(variant_str)
-    #chrom,pos,ref,alt,=str(variant_str.strip()).split('-')
-    d=csv.DictReader(file('/data/uclex_data/UCLexInfo/uclex-samples.csv','r'),delimiter=',')
-    hpo=[]
-    for r in d:
-        if r['sample'] not in samples: continue
-        pheno=r['phenotype']
-        print((r['sample'],pheno,))
-        if pheno.startswith('HP'):
-            hpo+=[phizz.query_hpo([pheno])]
-        elif pheno.startswith('MIM'):
-            hpo+=[phizz.query_disease([pheno])]
-    return(hpo)
 
 def get_hpo_children(hpo_db, hpo_id):
     hpo=[hpo_db.hpo.find_one({'id':hpo_id})]

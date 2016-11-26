@@ -1,3 +1,5 @@
+LOCAL=False
+#NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
 from flask import Flask
@@ -45,7 +47,6 @@ import gzip
 import logging
 import lookups
 import random
-import sys
 from utils import * 
 from collections import defaultdict, Counter
 from collections import OrderedDict
@@ -65,7 +66,6 @@ from urlparse import urlparse
 import pickle 
 #import pdb 
 # handles live plotting if necessary
-import math
 import plotly
 print plotly.__version__  # version >1.9.4 required
 from plotly.graph_objs import Scatter, Layout 
@@ -77,7 +77,6 @@ import subprocess
 from load_individual import load_patient 
 from Crypto.Cipher import DES
 import base64
-from flask_httpauth import HTTPBasicAuth
 
 import orm
 from lookups import *
@@ -87,14 +86,19 @@ logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
 
 
-app = Flask(__name__)
+if LOCAL:
+    app = Flask(__name__,static_url_path='/static')
+else:
+    app = Flask(__name__)
+
 ADMINISTRATORS = ( 'n.pontikos@ucl.ac.uk',)
-app = Flask(__name__)
 mail_on_500(app, ADMINISTRATORS)
 Compress(app)
 #app.config['COMPRESS_DEBUG'] = True
 cache = SimpleCache(default_timeout=70*60*24)
-auth = HTTPBasicAuth()
+
+#from flask_httpauth import HTTPBasicAuth
+#auth = HTTPBasicAuth()
 
 REGION_LIMIT = 1E5
 EXON_PADDING = 50
@@ -107,7 +111,7 @@ app.config.from_object(__name__)
 sess=Session()
 sess.init_app(app)
 
-RELEASE='mainset_July2016'
+print app.root_path
 
 
 def check_auth(username, password):
@@ -116,7 +120,14 @@ def check_auth(username, password):
     Will try to connect to phenotips instance.
     """
     print username
-    return True
+    session['password2'] = password
+    password=md5.new(password).hexdigest()
+    session['user'] = username
+    session['password'] = password
+    if LOCAL:
+        return True
+    else:
+        return False
     conn=PhenotipsClient()
     response=conn.get_patient(auth='%s:%s' % (username, password,),number=1)
     if response:
@@ -128,7 +139,6 @@ def check_auth(username, password):
     else: return False
     # check that user name and hash of password exist in database
     db_users=get_db('users')
-    # setting a session key for pubmedBatch to save result
     session['password2'] = password
     password=md5.new(password).hexdigest()
     session['user'] = username
@@ -151,12 +161,14 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        print session
         if session:
           if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
              return f(*args, **kwargs)
           else:
-             #return redirect('login')
-             return render_template('login.html', error='Invalid Credentials. Please try again.')
+             print 'login'
+             return redirect('login')
+             #return render_template('login.html', error='Invalid Credentials. Please try again.')
         print 'method', request.method
         error=None
         if request.method == 'POST':
@@ -185,6 +197,7 @@ def login():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
+           print 'SUCESS'
            return redirect('/')
     return render_template('login.html', error=error)
 

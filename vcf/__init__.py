@@ -6,8 +6,7 @@ def vcf_query(chrom=None, pos=None, ref=None, alt=None, variant_str=None, indivi
     if variant_str:
         variant_str=str(variant_str).strip().replace('_','-')
         chrom, pos, ref, alt = variant_str.split('-')
-    #tb=pysam.TabixFile('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/chr%s.vcf.gz' % chrom,)
-    tb=pysam.TabixFile('/slms/gee/research/vyplab/UCLex/%s/%s_chr%s.vcf.gz' % (release, release, chrom,))
+    tb=pysam.TabixFile('UCLex/%s/%s_chr%s.vcf.gz' % (release, release, chrom,))
     #mainset_February2016_chrX_filtered.vcf.gz
     region=str('%s:%s-%s'%(chrom, pos, int(pos),))
     headers=[h for h in tb.header]
@@ -75,7 +74,7 @@ def vcf_query2(chrom=None, pos=None, ref=None, alt=None, variant_str=None, indiv
     if variant_str:
         variant_str=str(variant_str).strip().replace('_','-')
         chrom, pos, ref, alt = variant_str.split('-')
-    tb=pysam.TabixFile('/slms/UGI/vm_exports/vyp/phenotips/uclex_files/current/chr%s.vcf.gz' % chrom,)
+    tb=pysam.TabixFile('uclex_files/current/chr%s.vcf.gz' % chrom,)
     #mainset_February2016_chrX_filtered.vcf.gz
     region=str('%s:%s-%s'%(chrom, pos, int(pos),))
     headers=[h for h in tb.header]

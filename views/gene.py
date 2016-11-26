@@ -85,6 +85,7 @@ def gene_page(gene_id):
         pli=pli['pLI']
     else:
         pli=-1
+    print hpo_terms_dict
     return render_template('gene.html', 
             title=gene['gene_name_upper'],
             gene=gene,

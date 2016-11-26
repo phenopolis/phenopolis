@@ -4,6 +4,10 @@ pip install mygene --user
 pip install pysam --user
 pip install pygr --user
 pip install pyhgvs --user
+pip install plotly --user
+pip install flask_httpauth --user
+pip install primer3-py --user
+pip install neo4j-driver --user
 
 git clone git@github.com:weiyi-bitw/varnorm.git
 cd varnorm
@@ -16,7 +20,18 @@ git clone git@github.com:pontikos/phenopolis.git
 
 sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
 
+# Start mongod
+
+DBPATH=db
+mkdir -p $DBPATH
+mongod --dbpath $DBPATH --port 27017 --smallfiles
+
 # Basic build of db
+
+wget --no-check-certificate https://uclex.cs.ucl.ac.uk/static/demo/hpo-hpo.json
+mongoimport --db hpo --collection hpo --file hpo-hpo.json --drop
+mongo hpo --eval "db.variants.createIndex({'id' : 1})"
+mongo hpo --eval "db.variants.createIndex({'name' : 1})"
 
 wget --no-check-certificate https://uclex.cs.ucl.ac.uk/static/demo/uclex-genes.json
 mongoimport --db uclex --collection genes --file uclex-genes.json --drop
@@ -75,6 +90,6 @@ mongo patients --eval "db.variants.createIndex({'specificity.score' : 1})"
 # Run server
 
 cd phenopolis 
-python run_server.py
+python runserver.py
 
 
