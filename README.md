@@ -7,11 +7,13 @@ https://phenopolis.github.io
 username/password:
 demo/demo123
 
-### Quick Install Demo
+### Quick Install Demo for Coders
 
-I have a written as shell script for quick installation [https://github.com/pontikos/phenopolis/blob/master/easy_install.sh](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.
-This is for people who want to get a local version up and running to contribute to the project.
-We are especially interested in contributions to the UI which could be refactored and vastly improved.
+I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.
+This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
+We are especially interested in contributions to the UI (html, css, js) which could be greatly refactored and vastly improved.
+Also any performance improvements to the db queries would be also greatly appreciated.
+Let us know if you run into difficulties getting the code running.
 
 ### Installation
 
