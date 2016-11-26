@@ -137,9 +137,11 @@ def check_auth(username, password):
         password=md5.new(password).hexdigest()
         session['user'] = username
         session['password'] = password
+        print(session)
         return True
     else: return False
-    # check that user name and hash of password exist in database
+    # can also check that user name and hash of password exist in database
+    # if we don't use phenotips for authentication
     db_users=get_db('users')
     session['password2'] = password
     password=md5.new(password).hexdigest()
@@ -232,19 +234,19 @@ def login2():
 
 # 
 @app.route('/logout')
+@requires_auth
 def logout():
-    try:
-        print session
-        del session['user']
-        del session['password']
-        del session['password2']
-        del session
-    except NameError:
-        if LOCAL:
-            return redirect('/')
-        else:
-            return redirect('https://uclex.cs.ucl.ac.uk')
-    return render_template('login.html', error="You have been logged out")
+    if LOCAL:
+        return redirect('/')
+    else:
+        return redirect('https://uclex.cs.ucl.ac.uk/login')
+    print('DELETE SESSION')
+    del session['user']
+    del session['password']
+    del session['password2']
+    del session
+    print('DELETED SESSION',session)
+    #return render_template('login.html', error="You have been logged out")
 
 
 @app.route('/set/<query>')
@@ -568,6 +570,7 @@ def rathergood_autocomplete(query):
 
 
 @app.route('/awesome')
+@requires_auth
 def awesome():
     db = get_db()
     query = str(request.args.get('query'))
