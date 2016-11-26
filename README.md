@@ -7,8 +7,7 @@ https://phenopolis.github.io
 username/password:
 demo/demo123
 
-Note you will need to use python2 as we are not python3 compatible.
-Packages such as pygr which use the old ```print``` syntax are not compatible with python3.
+Note you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3.
 
 ### Quick Install Demo for Coders
 
