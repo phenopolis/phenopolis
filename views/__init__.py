@@ -103,7 +103,10 @@ cache = SimpleCache(default_timeout=70*60*24)
 REGION_LIMIT = 1E5
 EXON_PADDING = 50
 # Load default config and override config from an environment variable
-app.config.from_pyfile('../phenopolis.cfg')
+if LOCAL:
+    app.config.from_pyfile('../local.cfg')
+else:
+    app.config.from_pyfile('../phenopolis.cfg')
 
 # Check Configuration section for more details
 SESSION_TYPE = 'mongodb'
