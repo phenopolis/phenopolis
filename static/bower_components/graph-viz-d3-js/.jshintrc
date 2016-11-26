@@ -1,0 +1,23 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "sub": true,
+  "undef": true,
+  "expr": true,
+  "boss": true,
+  "eqnull": true,
+  "node": true,
+  "jasmine": true,
+  "require": true,
+  "globals": {
+    "define": false,
+    "require": false,
+    "using": false,
+    "window": false,
+    "importScripts": false
+  }
+}
