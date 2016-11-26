@@ -17,7 +17,7 @@ When this is installed you should be able to browse to:
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
 We are especially interested in contributions to the UI (html, css, js) which could be greatly refactored and vastly improved.
 Also any performance improvements to the db queries would be also greatly appreciated.
-Let us know if you run into difficulties getting the code running!
+Let us know if you run into difficulties getting the code running!  Our goal is to make it easy for you to contribute so the project continues to grow!
 
 ### Installation
 
