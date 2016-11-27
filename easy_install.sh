@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # python packages required
 
@@ -112,9 +113,14 @@ mongo patients --eval "db.variants.createIndex({'specificity.score' : 1})"
 
 # Run server
 cd phenopolis 
+
 # create necessary symlinks
-ln -s static views/static
-ln -s templates views/templates
+VIEWS_DIR_PATH="$(readlink -f views)"
+TEMPLATE_DIR_PATH="$(readlink -f templates)"
+STATIC_DIR_PATH="$(readlink -f static)"
+ln -s $STATIC_DIR_PATH $VIEWS_DIR_PATH/static
+ln -s $TEMPLATE_DIR_PATH $VIEWS_DIR_PATH/templates
+
 python runserver.py
 
 
