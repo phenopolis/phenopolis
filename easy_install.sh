@@ -1,5 +1,13 @@
 
 # python packages required
+
+pip install pycrypto
+psycopg2
+hgvs
+bson 
+phizz 
+pymongo
+
 pip install myvariant --user
 pip install mygene --user
 pip install pysam --user
