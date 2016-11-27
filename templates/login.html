@@ -64,27 +64,36 @@ h1 {
 <!-- <div id="banner"></div> -->
 
 <header>
-    <h1> Phenopolis </h1>
+<h1> Phenopolis </h1>
+<img src='/static/phenopolis-icon.png' width=50 height=50></img>
 <p> Source code is available at <a href="https://github.com/pontikos/phenopolis/">Github</a>.  </p> 
 </header>
 
+
 <div class="container">
-<br>
-<h2>Please login</h2>
-<p>
-Public login: demo/demo123
-</p>
-<form action="/login" method="POST">
-<label for="username">Username:</label> 
-<input type="text" placeholder="demo" name="username" value="{{request.form.username }}">
-<label for="password">Password:</label> 
-<input type="password" placeholder="demo123" name="password" value="{{request.form.password }}">
-<input class="btn btn-default" type="submit" value="Login">
-</form>
-{% if error %}
-<p class="error"><strong>Error:</strong> {{ error }}
-{% endif %}
+  <div class="tab-content">
+            <div id="tab1" class="tab-pane active">
+            <br>
+            <h2>Please login</h2>
+            <p>
+            Public login: demo/demo123
+            </p>
+            <form action="/login" method="POST">
+            <label for="username">Username:</label> 
+            <input type="text" placeholder="demo" name="username" value="{{request.form.username }}">
+            <label for="password">Password:</label> 
+            <input type="password" placeholder="demo123" name="password" value="{{request.form.password }}">
+            <input class="btn btn-default" type="submit" value="Login">
+            </form>
+            {% if error %}
+            <p class="error"><strong>Error:</strong> {{ error }}
+            {% endif %}
+            </div>
+  </div>
 </div>
+
+
+<script src="/static/bower_components/requirejs/require.js"></script>
 
 <footer> A UK Inherited Retinal Dystrophy Consortium effort, supported by <a href=http://www.rpfightingblindness.org.uk>RPFB</a>, the <a href=http://www.mrc.ac.uk/>Medical Research Council</a> and <a href=http://www.moorfields.nhs.uk/>Moorfields Eye Hospital</a>. </footer>
 
