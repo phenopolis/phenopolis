@@ -12,7 +12,7 @@ class Gene(object):
     @property
     def variants(self):
         #if 'variant_ids' not in self.__dict__:
-        variants=[v for v in Gene.db.variants.find({'genes': self.gene_id}, fields={'_id': False})]
+        variants=[v for v in Gene.db.variants.find({'genes': self.gene_id}, projection={'_id': False})]
         print('number of variants', len(variants))
         self.__dict__['variant_ids']=[v['variant_id'] for v in variants]
         #self.save()
@@ -27,7 +27,7 @@ class Gene(object):
     @property
     def variant_ids(self):
         if 'variant_ids' in self.__dict__: return self.__dict__['variant_ids']
-        variants=[v for v in Gene.db.variants.find({'genes': self.gene_id}, fields={'_id': False})]
+        variants=[v for v in Gene.db.variants.find({'genes': self.gene_id}, projection={'_id': False})]
         self.__dict__['variant_ids']=[v['variant_id'] for v in variants]
         self.save()
         return self.__dict__['variant_ids']

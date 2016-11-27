@@ -1,4 +1,4 @@
-LOCAL=False
+LOCAL=True
 #NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
@@ -832,7 +832,7 @@ def fetch_variant():
     db=get_db()
     req_len=len(variants)
     variant_ids=map(lambda x: x.replace('_','-'),variants)
-    variants=[v for v in db.variants.find({'variant_id':{'$in':variant_ids}}, fields={'_id': False})]
+    variants=[v for v in db.variants.find({'variant_id':{'$in':variant_ids}}, projection={'_id': False})]
     ans_len=len(variants)
     print(req_len==ans_len)
     res=jsonify(result=variants)

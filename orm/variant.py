@@ -123,7 +123,7 @@ def get_variants_by_rsid(db, rsid):
         int(rsid.lstrip('rs'))
     except Exception, e:
         return None
-    variants = list([Variant(data=v) for v in db.variants.find({'rsid': rsid}, fields={'_id': False})])
+    variants = list([Variant(data=v) for v in db.variants.find({'rsid': rsid}, projection={'_id': False})])
     #add_consequence_to_variants(variants)
     return variants
 

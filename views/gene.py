@@ -33,7 +33,7 @@ def gene_page(gene_id):
     hpo=request.args.get('hpo')
     if not gene_id.startswith('ENSG'):
         gene=db.genes.find_one({'gene_name': gene_id}, projection={'_id': False})
-        #if not gene: gene=db.genes.find_one({'other_names': gene_id}, fields={'_id': False})
+        #if not gene: gene=db.genes.find_one({'other_names': gene_id}, projection={'_id': False})
         if not gene: return gene_id+' does not exist'
         gene_id=gene['gene_id']
     else:
