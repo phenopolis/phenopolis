@@ -1,5 +1,3 @@
-![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-banner.png)
-
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
 
 ![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-pipeline.png)
