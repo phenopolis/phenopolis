@@ -20,18 +20,20 @@ pip install Flask-Runner --user
 pip install Flask-Mail --user
 pip install Flask-Compress --user
 pip install Flask-Error --user
+pip install biopython --user
+pip install pandas --user
 
-git clone git@github.com:weiyi-bitw/varnorm.git
+git clone https://github.com/weiyi-bitw/varnorm.git
 cd varnorm
 python setup.py install --user
 cd ..
 
-git clone git@github.com:counsyl/hgvs.git
+git clone https://github.com/counsyl/hgvs.git
 cd hgvs
 python setup.py install --user
 cd ..
 
-git clone git@github.com:pontikos/phenopolis.git
+git clone https://github.com/pontikos/phenopolis.git
 
 # For local install without Phenotips this will:
 # 1) approve all logins as Phenotips is not running
