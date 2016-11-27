@@ -1,4 +1,8 @@
+![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-banner.png)
+
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
+
+![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-pipeline.png)
 
 Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
 
