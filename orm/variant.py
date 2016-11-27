@@ -137,7 +137,7 @@ class Variant(object):
         #if q is None: raise Exception('NOT IN VCF',self.variant_id)
         #self.__dict__.update(q)
         Variant.db=db
-        data=Variant.db.variants.find_one({'variant_id':self.variant_id},fields={'_id':False})
+        data=Variant.db.variants.find_one({'variant_id':self.variant_id},projection={'_id':False})
         self.__dict__.update(data)
     def __getattribute__(self, key):
         "Emulate type_getattro() in Objects/typeobject.c"

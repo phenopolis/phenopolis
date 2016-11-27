@@ -32,15 +32,14 @@ def gene_page(gene_id):
     patient_db=get_db('patients')
     hpo=request.args.get('hpo')
     if not gene_id.startswith('ENSG'):
-        #gene=db.genes.find_one({'gene_name': gene_id}, fields={'_id': False})
-        gene=db.genes.find_one({'gene_name': gene_id})
+        gene=db.genes.find_one({'gene_name': gene_id}, projection={'_id': False})
         #if not gene: gene=db.genes.find_one({'other_names': gene_id}, fields={'_id': False})
         if not gene: return gene_id+' does not exist'
         gene_id=gene['gene_id']
     else:
         gene=db.genes.find_one({'gene_id':gene_id})
         if not gene: return gene_id+' does not exist'
-    variants=db.variants.find({'genes':gene_id})
+    variants=db.variants.find({'genes':gene_id},projection={'_id':False})
     gene['variants']=[Variant(variant_id=v['variant_id'],db=db) for v in variants]
     individuals=dict()
     for v in gene['variants']:
