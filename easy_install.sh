@@ -1,10 +1,7 @@
-#!/usr/bin/env bash
-
 # python packages required
 
 pip install pycrypto --user
 pip install psycopg2 --user
-pip install bson  --user
 pip install phizz  --user
 pip install pymongo --user
 pip install myvariant --user
@@ -19,9 +16,11 @@ pip install Flask --user
 pip install Flask-Session --user
 pip install Flask-Runner --user
 pip install Flask-Mail --user
+pip install Flask-ErrorMail --user
 pip install Flask-Compress --user
 pip install Flask-Error --user
-pip install Flask-ErrorMail --user
+pip install flask_errormail --user
+pip install flask_debugtoolbar --user
 pip install biopython --user
 pip install pandas --user
 pip install scipy --user
@@ -46,7 +45,7 @@ sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
 # Make sure mongodb is running
 DBPATH=db
 mkdir -p $DBPATH
-mongod --dbpath $DBPATH --port 27017
+mongod --dbpath $DBPATH --port 27017 &
 
 # Basic build of db
 # download minimal files

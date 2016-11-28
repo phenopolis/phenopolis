@@ -1,4 +1,5 @@
-LOCAL=True
+global LOCAL
+LOCAL=False
 #NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
@@ -700,12 +701,16 @@ def download():
     conn=PhenotipsClient()
     p_id = request.args.get('p_id')
     auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=p_id,auth=auth)
+    p=conn.get_patient(eid=p_id,auth=auth,number=1)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     filetype = request.args.get('filetype')
     index = request.args.get('index')
     path=app.config[str(filetype)]
-    filename=os.path.join(path, p_id)
+    print(path)
+    if p_id:
+        filename=os.path.join(path, p_id)
+    else:
+        filename=os.path.join(path)
     if filetype=='VCF_DIR':
         if index=='true':
             filename=os.path.join(path, p_id,'all.vcf.gz.tbi')
@@ -720,6 +725,12 @@ def download():
         else:
             filename=os.path.join(path, p_id+'_sorted_unique.bam')
             attachment_filename=p_id+'.bam'
+    elif filetype=='IRDC_VARIANT_FILES':
+        filename=os.path.join(path)
+        attachment_filename='IRDC_VARIANTS.zip'
+    elif filetype=='IRDC_CNV_FILES':
+        filename=os.path.join(path)
+        attachment_filename='IRDC_CNV.zip'
     return send_file(filename,
                      mimetype='*/*',
                      attachment_filename=attachment_filename,
@@ -991,10 +1002,6 @@ def error_page(query):
         query=query
     )
 
-
-@app.route('/downloads')
-def downloads_page():
-    return render_template('downloads.html')
 
 
 @app.route('/about')
