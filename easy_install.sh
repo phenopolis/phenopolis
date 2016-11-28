@@ -14,6 +14,8 @@ pip install Flask-Runner --user
 pip install Flask-Mail --user
 pip install Flask-Compress --user
 pip install Flask-Error --user
+pip install flask_errormail --user
+pip install flask_debugtoolbar --user
 
 git clone git@github.com:weiyi-bitw/varnorm.git
 cd varnorm
