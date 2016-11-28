@@ -1,0 +1,185 @@
+#header {
+    background: #222;
+    /*padding: 10px 0;*/
+}
+
+#header-links {
+    float: right;
+    color: white;
+}
+
+#transcript_dropdown {
+    margin: 0px 0px 20px 0px;
+}
+
+#header-links a {
+    color: white;
+    font-weight: bold;
+}
+
+.navbar {
+    margin-bottom: 0px;
+}
+
+.navbar .navbar-form{
+    padding: 0 15px;
+    border: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.nav>li>a {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+#home-title {
+    text-align: center;
+    padding: 30px;
+}
+
+#home-searchbox {
+    margin: 20px 0;
+}
+
+.twitter-typeahead {
+    width: 100%;
+}
+
+.link {
+    cursor: pointer;
+}
+
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+.tt-query {
+  color: #000;
+}
+
+.tt-hint {
+  color: #999;
+}
+
+.lof_variant {
+    color: #cd2932 !important;
+    fill: #cd2932 !important;
+}
+
+.missense_variant {
+    color: #a96500 !important;
+    fill: #a96500 !important;
+}
+
+.synonymous_variant {
+    color: #157e28 !important;
+    fill: #157e28 !important;
+}
+
+.section_header {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+.table_hover {
+    background-color: #b5f7ff !important;
+}
+
+th.allele_frequency_column {
+    width: 150px;
+}
+
+/* tooltips - based on http://cbracco.me/a-simple-css-tooltip/ */
+/* Add this attribute to the element that needs a tooltip */
+[data-tooltip] {
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+
+/* Hide the tooltip content by default */
+[data-tooltip]:before,
+[data-tooltip]:after {
+    visibility: hidden;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Position tooltip above the element */
+[data-tooltip]:before {
+    position: absolute;
+    white-space: pre;
+    bottom: 150%;
+    left: 50%;
+    margin-bottom: 5px;
+    margin-left: -40px;
+    padding: 7px;
+    width: auto;
+    -webkit-border-radius: 3px;
+    -moz-border-radius:    3px;
+    border-radius:         3px;
+    background-color: #000;
+    background-color: hsla(0, 0%, 20%, 0.9);
+    color: #fff;
+    content: attr(data-tooltip);
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+/* Triangle hack to make tooltip look like a speech bubble */
+[data-tooltip]:after {
+    position: absolute;
+    bottom: 150%;
+    left: 50%;
+    margin-left: -5px;
+    width: 0;
+    border-top: 5px solid #000;
+    border-top: 5px solid hsla(0, 0%, 20%, 0.9);
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    content: " ";
+    font-size: 0;
+    line-height: 0;
+}
+
+/* Show tooltip content on hover */
+[data-tooltip]:hover:before,
+[data-tooltip]:hover:after {
+    visibility: visible;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+    opacity: 1;
+}
+
+
+/** @bw2 - class that shifts tooltip down to make it look better on variant table headers
+TODO: come up with a better way to position tooltip
+*/
+.tooltip-table-header:hover:before,
+.tooltip-table-header:hover:after,
+.tooltip-table-header:focus:before,
+.tooltip-table-header:focus:after {
+    -webkit-transform: translate(-5px, 7px);
+    -moz-transform:    translate(-5px, 7px);
+    transform:         translate(-5px, 7px);
+}
