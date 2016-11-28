@@ -2,7 +2,6 @@
 
 pip install pycrypto --user
 pip install psycopg2 --user
-pip install bson  --user
 pip install phizz  --user
 pip install pymongo --user
 pip install myvariant --user
