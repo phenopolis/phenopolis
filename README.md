@@ -1,5 +1,7 @@
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
 
+![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-pipeline.png)
+
 Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
 
 You can access a demo version of the server at:
@@ -9,7 +11,7 @@ demo/demo123
 
 Note you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3.
 
-### Quick Install Demo for Coders
+### Quick Install Demo for Coders (no Phenotips required)
 
 I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
 When this is installed you should be able to browse to:
@@ -19,7 +21,7 @@ We are especially interested in contributions to the UI (html, css, js) which co
 Also any performance improvements to the db queries would be also greatly appreciated.
 Let us know if you run into difficulties getting the code running!  Our goal is to make it easy for you to contribute so the project continues to grow!
 
-### Installation
+### Full Installation
 
 Phenopolis requires:
 * a running mongo database

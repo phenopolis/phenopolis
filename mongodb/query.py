@@ -26,7 +26,7 @@ hom_per_gene=dict()
 for code in POPS: 
     print(code,pheno)
     pheno=POPS[code]
-    hom_per_gene[code]=[ len([v['pop_homs'][pheno] for v in db.variants.find({'genes': gid}, fields={'_id': False})]) for gid in gene_ids ]
+    hom_per_gene[code]=[ len([v['pop_homs'][pheno] for v in db.variants.find({'genes': gid}, projection={'_id': False})]) for gid in gene_ids ]
 
 hom_per_gene=pickle.load(open('hom_per_gene.pkl','rb'))
 
@@ -69,7 +69,7 @@ get_gene_by_name(db, 'TITIN')
 
 print(genes[0])
 
-variants_per_gene=[ len([v for v in db.variants.find({'genes': gid}, fields={'_id': False})]) for gid in gene_ids ]
+variants_per_gene=[ len([v for v in db.variants.find({'genes': gid}, projection={'_id': False})]) for gid in gene_ids ]
 
 
 x = np.array(variants_per_gene)
