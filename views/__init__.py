@@ -1079,10 +1079,11 @@ def read_viz_files(path):
 
 @app.after_request
 def apply_caching(response):
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     # prevent click-jacking vulnerability identified by BITs
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     return response
-
 
 ### all the mongodb reading/writing code
 
