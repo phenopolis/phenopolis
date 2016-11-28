@@ -21,8 +21,10 @@ pip install Flask-Runner --user
 pip install Flask-Mail --user
 pip install Flask-Compress --user
 pip install Flask-Error --user
+pip install Flask-ErrorMail --user
 pip install biopython --user
 pip install pandas --user
+pip install scipy --user
 
 git clone https://github.com/weiyi-bitw/varnorm.git
 cd varnorm
