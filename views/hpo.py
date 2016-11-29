@@ -17,24 +17,37 @@ import vcf
 
 
 def phenogenon(hpo_id,lit_genes,omim_genes,recessive_genes,dominant_genes):
+    cache_db=get_db('cache')
+    temp=cache_db.phenogenon_cache.find_one({'hpo_id':hpo_id})
+    if temp:
+        lit_genes.extend(temp['lit_genes'])
+        omim_genes.extend(temp['omim_genes'])
+        recessive_genes.extend(temp['recessive_genes'])
+        dominant_genes.extend(temp['dominant_genes'])
+        return
     hpo_db=get_db('hpo')
     db=get_db()
-    for r in hpo_db.hpo_gene.find({'HPO-ID':hpo_id}):
+    def f(g):
         g=db.genes.find_one({'gene_name_upper':r['Gene-Name'].upper()},{'_id':0})
-        if not g: continue
+        if not g: return
         phenogenon=db.gene_hpo.find_one({'gene_id':g['gene_id']})
-        if not phenogenon: continue
-        g['phenogenon']={
-                'het':phenogenon.get('het',{}).get(hpo_id,{}),
-                'hom_comp':phenogenon.get('hom_comp',{}).get(hpo_id,{})
-                }
-        lit_genes+=[g]
+        if not phenogenon: return
+        het=phenogenon.get('het',{}).get(hpo_id,{})
+        hom_comp=phenogenon.get('hom_comp',{}).get(hpo_id,{})
+        if 'data' in het: del het['data']
+        if 'data' in hom_comp: del hom_comp['data']
+        g['phenogenon']={ 'het':het, 'hom_comp': hom_comp}
+        return g
+    lit_genes=[f(g) for r in hpo_db.hpo_gene.find({'HPO-ID':hpo_id})]
+    lit_genes=[lg for lg in lit_genes if lg]
     omim_genes.extend(map(lambda x: x['gene_id'], lit_genes))
     phenogenon=db.hpo_gene.find_one({'hpo_id':hpo_id})
     if phenogenon: phenogenon=phenogenon['data']['unrelated']
     else: phenogenon={'recessive':[],'dominant':[]}
     recessive_genes.extend([{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'],'known':x['gene_id'] in omim_genes} for x in phenogenon['recessive']])
     dominant_genes.extend([{'gene_id':x['gene_id'],'gene_name':db.genes.find_one({'gene_id':x['gene_id']})['gene_name'],'p_val':x['p_val'], 'known':x['gene_id'] in omim_genes} for x in phenogenon['dominant']])
+    #print({'hpo_id':hpo_id,'dominant_genes':dominant_genes,'recessive_genes':recessive_genes,'omim_genes':omim_genes,'lit_genes':lit_genes})
+    cache_db.phenogenon_cache.insert_one({'hpo_id':hpo_id,'dominant_genes':dominant_genes,'recessive_genes':recessive_genes,'omim_genes':omim_genes,'lit_genes':lit_genes})
 
 
 @app.route('/phenogenon_json/<hpo_id>')
@@ -62,6 +75,7 @@ def phenogenon_json(hpo_id):
 
 @app.route('/hpo/<hpo_id>')
 @requires_auth
+@cache.cached(timeout=3600)
 def hpo_page(hpo_id):
     patients_db=get_db('patients')
     db=get_db()

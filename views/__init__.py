@@ -24,6 +24,7 @@ from flask.ext.compress import Compress
 from flask.ext.runner import Runner
 from flask_errormail import mail_on_500
 from flask_debugtoolbar import DebugToolbarExtension 
+from flask.ext.cache import Cache
 import sys
 import StringIO
 import urllib, base64 
@@ -98,7 +99,8 @@ ADMINISTRATORS = ( 'n.pontikos@ucl.ac.uk',)
 mail_on_500(app, ADMINISTRATORS)
 Compress(app)
 #app.config['COMPRESS_DEBUG'] = True
-cache = SimpleCache(default_timeout=70*60*24)
+#cache = SimpleCache(default_timeout=70*60*24)
+cache = Cache(app,config={'CACHE_TYPE': 'simple'})
 
 #from flask_httpauth import HTTPBasicAuth
 #auth = HTTPBasicAuth()
