@@ -56,12 +56,15 @@ class PhenotipsClient():
                 return r
             else:
                 r=requests.get(url, headers=headers)
-                r=r.json()
-                r.update({'key':k})
-                self.db.phenotips_cache.insert_one(r)
-                return r
+                try:
+                    r=r.json()
+                    r.update({'key':k})
+                    self.db.phenotips_cache.insert_one(r)
+                    return r
+                except:
+                    return None
         else:
-            url='http://%s/rest/patients/eid/%s' % (self.site,eid)
+            url='http://%s/rest/patients/eid/%s' % (self.site,str(eid))
             k={'url':url}
             k.update(headers)
             k = hashlib.md5(bencode.bencode(k)).hexdigest()
@@ -70,10 +73,13 @@ class PhenotipsClient():
                 return r
             else:
                 r=requests.get(url, headers=headers)
-                r=r.json()
-                r.update({'key':k})
-                self.db.phenotips_cache.insert_one(r)
-                return r
+                try:
+                    r=r.json()
+                    r.update({'key':k})
+                    self.db.phenotips_cache.insert_one(r)
+                    return r
+                except:
+                    return None
 
     def patient_exists(self,auth,eid):
         p=self.get_patient(auth,eid)
