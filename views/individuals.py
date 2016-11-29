@@ -43,6 +43,7 @@ def individuals_page():
     auth='%s:%s' % (session['user'],session['password2'],)
     all_patients=conn.get_patient(auth=auth).get('patientSummaries',[])
     total=len(all_patients)
+    print('TOTAL NUMBER OF PATIENTS',total)
     patients=conn.get_patient(auth=auth,start=page*number,number=number).get('patientSummaries',[])
     eids=[p['eid'] for p in patients]
     print(eids)

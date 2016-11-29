@@ -24,6 +24,7 @@ def hide_hpo_for_demo(data):
 routes
 '''
 @app.route('/gene/<gene_id>',methods=['GET'])
+@cache.cached(timeout=24*3600)
 @requires_auth
 def gene_page(gene_id):
     # if gene not ensembl id then translate to

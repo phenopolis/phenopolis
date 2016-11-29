@@ -89,11 +89,14 @@ def individual_page(individual):
     patient['solved'] = patient2.get('solved',[])
     genes = {}
     # is this still updating?
-    update_status = pubmedbatch.get('status', 0);
+    if type(pubmedbatch) is dict:
+        update_status = pubmedbatch.get('status', 0)
+    else:
+        update_status=0
     # get known and retnet genes
     #known_genes = open('gene_list/ret_known_genes.txt', 'r').readline().strip().split()
     known_genes=[x['gene_name'] for x in db.retnet.find()]
-    RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},{'_id':False})])
+    RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},projection={'_id':False})])
     # get combinatorics of features to draw venn diagram
     feature_combo = []
     feature_venn = []

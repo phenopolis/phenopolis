@@ -1,5 +1,6 @@
-#!/bin/env python
 from __future__ import print_function
+import requests
+from binascii import b2a_base64, a2b_base64
 import re
 import os.path
 import sys 
@@ -17,13 +18,26 @@ from binascii import b2a_base64, a2b_base64
 #from email.utils import fix_eols
 import json
 import pandas
-from browser import Browser
+import hashlib
+import bencode
 
-class PhenotipsClient(Browser):
+
+#import requests_cache
+#requests_cache.install_cache('phenotips_cache')
+#from cachecontrol import CacheControl
+#from cachecontrol.caches import FileCache
+#sess = CacheControl(requests.Session(), cache=FileCache('.webcache'))
+#sess = cachecontrol.CacheControl(requests.Session())
+
+import pymongo
+#requests_cache.backends.mongo.MongoCache(db_name='phenotips_cache', connectoin)
+
+class PhenotipsClient():
 
     def __init__(self, host='localhost', port='8080',debug=True,print_requests=True):
-        site='%s:%s'%(host,port,)
-        Browser.__init__(self,site=site,debug=debug,print_requests=print_requests)
+        self.site='%s:%s'%(host,port,)
+        conn = pymongo.MongoClient(host='localhost', port=27017)
+        self.db=conn.cache
 
     def get_patient(self,auth,eid=None,number=10000,start=0):
         """
@@ -33,20 +47,39 @@ class PhenotipsClient(Browser):
         auth=b2a_base64(auth).strip()
         headers={'Authorization':'Basic %s'%auth, 'Accept':'application/json'}
         if not eid:
-            p=self.get_page('/rest/patients?start=%d&number=%d' % (start,number), headers=headers)
-            io = StringIO(p)
-            try:
-                d=json.load( io )
-            except:
-                return None
+            url='http://%s/rest/patients?start=%d&number=%d' % (self.site,start,number)
+            k={'url':url}
+            k.update(headers)
+            k = hashlib.md5(bencode.bencode(k)).hexdigest()
+            r=self.db.phenotips_cache.find_one({'key':k})
+            if r:
+                return r
+            else:
+                r=requests.get(url, headers=headers)
+                try:
+                    r=r.json()
+                    r.update({'key':k})
+                    self.db.phenotips_cache.insert_one(r)
+                    return r
+                except:
+                    return None
         else:
-            p=self.get_page('/rest/patients/eid/%s'%eid, headers=headers)
-            io = StringIO(p)
-            try:
-                d=json.load( io )
-            except:
-                return None
-        return d
+            url='http://%s/rest/patients/eid/%s' % (self.site,str(eid))
+            k={'url':url}
+            k.update(headers)
+            k = hashlib.md5(bencode.bencode(k)).hexdigest()
+            r=self.db.phenotips_cache.find_one({'key':k})
+            if r:
+                return r
+            else:
+                r=requests.get(url, headers=headers)
+                try:
+                    r=r.json()
+                    r.update({'key':k})
+                    self.db.phenotips_cache.insert_one(r)
+                    return r
+                except:
+                    return None
 
     def patient_exists(self,auth,eid):
         p=self.get_patient(auth,eid)
@@ -61,8 +94,9 @@ class PhenotipsClient(Browser):
         """
         auth=b2a_base64(auth).strip()
         headers={'Authorization':'Basic %s'%auth, 'Accept':'application/json; application/xml'}
-        p=self.get_page('/patients/%s/permissions',ID, headers=headers)
-        return p
+        #p=self.get_page('/patients/%s/permissions',ID, headers=headers)
+        r=requests.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
+        return r.json()
 
     # create patient
     def create_patient(self, auth, patient):
@@ -70,7 +104,7 @@ class PhenotipsClient(Browser):
         io=StringIO()
         json.dump(patient,io)
         json_patient=io.getvalue()
-        p=self.get_page('/rest/patients', headers=headers, post=json_patient)
+        #p=self.get_page('/rest/patients', headers=headers, post=json_patient)
         print(p)
         return(p)
 
