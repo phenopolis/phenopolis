@@ -1,5 +1,5 @@
 global LOCAL
-LOCAL=False
+LOCAL=True
 #NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
