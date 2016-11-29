@@ -1,5 +1,6 @@
 # python packages required
 
+pip install Cython --install-option="--no-cython-compile" --user
 pip install pycrypto --user
 pip install psycopg2 --user
 pip install phizz  --user
