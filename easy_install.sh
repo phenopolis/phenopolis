@@ -1,5 +1,6 @@
 # python packages required
 
+pip install python-bencode --user
 pip install Cython --install-option="--no-cython-compile" --user
 pip install pycrypto --user
 pip install psycopg2 --user
