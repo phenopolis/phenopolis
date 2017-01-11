@@ -1,6 +1,4 @@
-body {
-        padding-top: 51px;
-}
+body { padding-top: 70px; }
     
 #topcontainer {
     	text-align: center;
@@ -321,5 +319,4 @@ li.active a, li.active a:hover {
 
 /* css needed to get compare selector & slider in-line */
 .compare-select-wrapper { min-width: 60%; float: right; }
-
 
