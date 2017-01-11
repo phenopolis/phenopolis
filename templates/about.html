@@ -1,34 +1,25 @@
 {% extends "layout.html" %}
 {% block body %}
-    <div class="container">
+<div class="container">
+    <div class="col-md-12">
         <h1>About Phenopolis</h1>
-        <div class="row" style="font-size: 16px;">
-            <div>
-                <p>
-                    The Phenopolis is a coalition of investigators seeking to aggregate and harmonize sequencing and phenotype data using the Human Phenotype Ontology.
-                </p>
-                <p>
-                    The data set provided on this website spans <span class="number_samples">{{ total_patients }}</span> individuals sequenced 
-                    All of the raw data from these projects have been reprocessed through the same pipeline, and jointly variant-called to increase consistency across projects.
-                </p>
-                <p>
-                    A list of the Principal Investigators and groups that have contributed data to the current release is available below.
-                </p>
-                <p>
-                </p>
-                <p>
-                </p>
-                <p>
-                </p>
-            </div>
-            <p>
-            </p>
-            <p>
-            Please send feedback to: <a href="mailto:n.pontikos@ucl.ac.uk">email</a>
-            </p>
-        </div>
+        <p class="lead">
+            The Phenopolis is a coalition of investigators seeking to aggregate and harmonize sequencing and phenotype data using the Human Phenotype Ontology.
+        </p>
+        <p class="lead">
+            The data set provided on this website spans <span class="number_samples">{{ total_patients }}</span> individuals sequenced All of the raw data from these projects have been reprocessed through the same pipeline, and jointly variant-called to increase consistency across projects.
+        </p>
+        <p class="lead">
+            A list of the Principal Investigators and groups that have contributed data to the current release is available below.
+        </p>
+        <p style="padding-top: 10px;" class="lead">
+            Please send feedback to: <a href="mailto:n.pontikos@ucl.ac.uk">n.pontikos@ucl.ac.uk</a>.
+        </p>
+    </div>
+    <div class="col-md-12">
+        <h2>Individuals involved in Phenopolis</h2>
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <h4>Principal Investigators</h4>
                 <ul>
                     <li>Tony Segal</li>
@@ -36,15 +27,18 @@
                     <li>Alison Hardcastle</li>
                     <li>Tom Vulliamy</li>
                 </ul>
-            </div>
-            <div class="col-md-4">
                 <h4>Contributing projects</h4>
                 <ul>
                     <li>Institue of Ophthalmology</li>
                     <li>Tony Segal Lab</li>
                 </ul>
+                <h4>Funding</h4>
+                <ul>
+                    <li> (PI: Vincent Plagnol)</li>
+                    <li> (PI: Alison Hardcastle)</li>
+                </ul>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <h4>Production team</h4>
                 <ul>
                     <li>Vincent Plagnol</li>
@@ -59,7 +53,7 @@
                     <li>Jing Yu</li>
                 </ul>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <h4>Website team</h4>
                 <ul>
                     <li>Jing Yu</li>
@@ -75,14 +69,8 @@
                     <li>David Gregory</li>
                 </ul>
                 <br>
-                <h4>Funding</h4>
-                <ul>
-                    <li> (PI: Vincent Plagnol)</li>
-                    <li> (PI: Alison Hardcastle)</li>
-                </ul>
             </div>
-
         </div>
     </div>
-
+</div>
 {% endblock %}

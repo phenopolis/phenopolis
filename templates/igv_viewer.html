@@ -27,7 +27,7 @@
 <!-- script type="text/javascript" src="/igv.min.js"></script -->
 
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/igv.css') }}">
-<script type="text/javascript" src="{{ url_for('static', filename='igv.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/igv.min.js') }}"></script>
 
 <!-- link rel="stylesheet" type="text/css" href="http://igv.org/web/beta/igv-beta.css" -->
 <!-- script type="text/javascript" src="http://igv.org/web/beta/igv-beta.min.js"></script -->
@@ -39,7 +39,7 @@ var get_bam_track_config = function(read_viz_data, het_or_hom, i) {
         type: 'bam',   
         indexed: true,
         alignmentShading: 'strand',
-        url: '/static/bam/OXF_3018_sorted_unique.bam'
+        url: '/static/bam/OXF_3018_sorted_unique.bam',
         name: '',
         height: 300,
         minHeight: 300,

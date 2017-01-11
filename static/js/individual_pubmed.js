@@ -3,7 +3,7 @@
 //tooltip
 $('.tip').tooltip({html:true});
 //popover
-$('.pop').popover({html:true,title:'loading...'});
+$('.pop').popover({html:true,title:'loading...', trigger: 'hover manual'});
 
 //check if an object is in an array
 function include(arr,obj) {
@@ -252,7 +252,7 @@ function displayPubmedTable(data) {
 	$('#old-name').val(data[3]);
 	
 	//popover
-	$("[data-toggle='popover']").popover({html:true});
+	$("[data-toggle='popover']").popover({html:true, trigger: 'hover manual'});
 	//sortable
 	$("table").tablesorter();
 	// delete row

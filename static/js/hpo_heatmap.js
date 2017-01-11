@@ -61,7 +61,7 @@ var colLabels = svg.append("g")
         .attr("x", function(d) { return hccol.indexOf(d.col) * cellSize; })
         .attr("y", function(d) { return hcrow.indexOf(d.row) * cellSize; })
         .attr("class", function(d){return "cell cell-border cr"+(d.row-1)+" cc"+(d.col-1);})
-        .attr("width", cellSize)
+        .attr("width", '100%')
         .attr("height", cellSize)
         .style("fill", function(d) { return colors[d.value]; })
         /* .on("click", function(d) {
