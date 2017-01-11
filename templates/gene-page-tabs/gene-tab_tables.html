@@ -3,79 +3,8 @@
 
 <div class='row'>
 
-    <!-- recessive -->
-        <div class='col-md-6 panel-like'>
-            <h3 class='grey'>Recessive <small id='hom_comp_small'></small></h3>
-            {#
-            <div class='row'>
-                    <div class='col-md-11 col-md-offset-1'>
-                        <h3>Number of affected patients: <span id='dot-hom_comp-pNum'></span><br>
-                            Number of matching variants: <span id='dot-hom_comp-vNum'></span>
-                        </h3>
-                        <div class='row'>
-                            <input id="hom-comp_exac_graph_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.01" data-slider-step="0.0001" data-slider-value="0.01"/>
-                            &nbsp;&nbsp;<span id="hom-comp_exac_graphCurrentSliderValLabel">ExAC_AF cutoff: <span id="hom-comp_exac_graphSliderVal">0.01</span></span>
-                            <button class='btn btn-success' id='copy-hom-comp'>Convert to png</button>
-                        </div>
-                        <div class='row'>
-                            <input id="hom-comp_cadd_graph_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="15"/>
-                            &nbsp;&nbsp;<span id="hom-comp_cadd_graphCurrentSliderValLabel">CADD Phred cutoff: <span id="hom-comp_cadd_graphSliderVal">15</span></span>
-                        </div>
-                    </div>
-                    <div class='copy col-md-5' id='copy-hom-comp-div'></div>
-              </div>
-              <div class='row'> <div class='hpo col-md-10 col-md-offset-1' id='dot-hom_comp'> </div> </div>
-              #}
-              <div class='col-md-11 col-md-offset-1'>
-                    <div class='row'>
-                        <input id="hom-comp_exac_table_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.01" data-slider-step="0.0001" data-slider-value="0.01"/>
-                        &nbsp;&nbsp;<span id="hom-comp_exac_tableCurrentSliderValLabel">ExAC_AF cutoff: <span id="hom-comp_exac_tableSliderVal">0.01</span></span>
-                    </div>
-                    <div class='row'>
-                        <input id="hom-comp_cadd_table_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="15"/>
-                        &nbsp;&nbsp;<span id="hom-comp_cadd_tableCurrentSliderValLabel">CADD Phred cutoff: <span id="hom-comp_cadd_tableSliderVal">15</span></span>
-                    </div>
-               </div>
-               <div class='row'> <div class='col-md-12' id="gene-hpo-hom_comp-tableDiv"> <table id="gene-hpo-hom_comp-table" class="table-sorter"> </table> </div> </div>
-        </div>
-
 <!-- dominant -->
-        <div class='col-md-6 panel-like'>
-            <h3 class='grey'>Dominant <small id='het_small'></small></h3>
-            {#
-            <div class='row'>
-                <div class='col-md-5 col-md-offset-1'>
-                    <h3>Number of affected patients: <span id='dot-het-pNum'></span><br>
-                        Number of matching variants: <span id='dot-het-vNum'></span>
-                    </h3>
-                    <div class='row'>
-                        <input id="het_exac_graph_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.001" data-slider-step="0.0001" data-slider-value="0.0001"/>
-                        &nbsp;&nbsp;<span id="het_exac_graphCurrentSliderValLabel">ExAC_AF cutoff: <span id="het_exac_graphSliderVal">0.0001</span></span>
-                        <button class='btn btn-success' id='copy-het'>Convert to png</button>
-                    </div>
-                <div class='row'>
-                    <input id="het_cadd_graph_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="15"/>
-                    &nbsp;&nbsp;<span id="het_cadd_graphCurrentSliderValLabel">CADD Phred cutoff: <span id="het_cadd_graphSliderVal">15</span></span>&nbsp;&nbsp;
-                    <label> <input class='remove' id='graph-remove-hom' type="checkbox"> Remove hom-comp </label>
-                </div>
-            </div>
-            <div class='copy col-md-5' id='copy-het-div'></div>
-          </div>
-          <div class='row'> <div class='col-md-10 col-md-offset-1 hpo' id='dot-het'> </div> </div>
-          #}
-          <div class='col-md-11 col-md-offset-1'>
-                <div class='row'>
-                    <input id="het_exac_table_slider" class='slider' type="text" data-slider-min="0" data-slider-max="0.001" data-slider-step="0.0001" data-slider-value="0.0001"/>
-                    &nbsp;&nbsp;<span id="het_exac_tableCurrentSliderValLabel">ExAC_AF cutoff: <span id="het_exac_tableSliderVal">0.0001</span></span>
-                </div>
-                <div class='row'>
-                    <input id="het_cadd_table_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="15"/>
-                    &nbsp;&nbsp;<span id="het_cadd_tableCurrentSliderValLabel">CADD Phred cutoff: <span id="het_cadd_tableSliderVal">15</span></span>
-                    <label> <input class='remove' id='table-remove-hom' type="checkbox"> Remove hom-comp </label>
-                </div>
-          </div>
-          <div class='row'> <div class='col-md-12' id="gene-hpo-het-tableDiv"> <table id="gene-hpo-het-table" class="table-sorter"> </table> </div> </div>
-       </div>
+
 
 
 </div>

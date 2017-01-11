@@ -263,11 +263,10 @@ window.variants = [];
 </label>&nbsp;
 
 <ul class="nav nav-tabs" id='data-nav' role="tablist">
-    <li class="active"> <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">Phenogenon Recessive</a> </li>
-    <li><a href="#gene-tab_het" role="tab" class="tab-li" data-toggle="tab" id="het-tab">Phenogenon Dominant</a></li>
-    <li> <a href="#gene-tab_tables" role="tab" class="tab-li" data-toggle="tab" id="table-tab">Phenogenon tables</a> </li> 
-    <li><a href="#gene-tab_simreg_tables" role="tab" class="tab-li" data-toggle="tab" id="simreg-table-tab">Simreg tables</a></li>
-    <li> <a href="#gene-tab_variant_table" role="tab" class="tab-li" data-toggle="tab">variant table</a></li>
+    <li class="active"> <a href="#gene-tab_comp" class="tab-li" role="tab" data-toggle="tab" id="hom-comp-tab">Recessive</a> </li>
+    <li><a href="#gene-tab_het" role="tab" class="tab-li" data-toggle="tab" id="het-tab">Dominant</a></li>
+    <li><a href="#gene-tab_simreg_tables" role="tab" class="tab-li" data-toggle="tab" id="simreg-table-tab">Simreg Tables</a></li>
+    <li> <a href="#gene-tab_variant_table" role="tab" class="tab-li" data-toggle="tab">Variant Table</a></li>
     {# <li><a href="#gene-tab_transcript_display" role="tab" class="tab-li" data-toggle="tab">transcript display</a></li> #}
     <li><a href="#gene-tab_hpo" role="tab" class="tab-li" data-toggle="tab">OMIM HPO terms</a></li>
 </ul>
@@ -398,23 +397,32 @@ $('div.tab-content').on('slideStop','input.slider',function(slideEvt){
     if ($('#graph-remove-hom').is(':checked')){
         remove_hom = true;
     }
-    // draw graph
-    if (section == 'graph'){
-        $('svg').remove();
-        if (mode=='hom-comp'){
-            draw_hpo(hom, 'hom_comp', exac, cadd, false, remove_bad_vars);
-        } else if (mode=='het'){
-            draw_hpo(het, 'het', exac, cadd, remove_hom, remove_bad_vars);
-        }
-    } else {
-    // draw table
-        if (mode=='hom-comp'){
-            getTable(hom,'hom_comp',exac,cadd,false,remove_bad_vars);
-        } else if (mode=='het'){
-            getTable(het,'het',exac,cadd,remove_hom,remove_bad_vars);
-        }
+    // Redraw graph & table
+    $('svg').remove();
+    if (mode=='hom-comp'){
+        draw_hpo(hom, 'hom_comp', exac, cadd, false, remove_bad_vars);
+        getTable(hom,'hom_comp',exac,cadd,false,remove_bad_vars);
+    } else if (mode=='het'){
+        draw_hpo(het, 'het', exac, cadd, remove_hom, remove_bad_vars);
+        getTable(het,'het',exac,cadd,remove_hom,remove_bad_vars);
     }
 });
+$('#hom-comp_exac_table_slider').on('change', function(){
+  $('#hom-comp_exac_graph_slider').val($('#hom-comp_exac_table_slider').val())
+})
+$('#hom-comp_cadd_table_slider').on('change', function(){
+  $('#hom-comp_cadd_graph_slider').val($('#hom-comp_cadd_table_slider').val())
+})
+$('#het_exac_table_slider').on('change', function(){
+  $('#het_exac_graph_slider').val($('#het_exac_table_slider').val())
+})
+$('#het_cadd_table_slider').on('change', function(){
+  $('#graph-remove-hom').val($('#het_cadd_table_slider').val())
+})
+$('#table-remove-hom').on('change', function(){
+  $('#het_cadd_graph_slider').val($('#table-remove-hom').val())
+})
+
 // remove hom-comp or dubious variants
 $('body').on('click','.remove',function(){
     $('svg').remove();
@@ -671,7 +679,7 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
         $(this).popover({
                 placement: 'auto top',
                 container: '#dot-'+mode,
-                trigger: 'manual',
+                trigger: 'hover',
                 position: 'fixed',
                 html : true,
                 title: function() { return d.id; },
@@ -870,11 +878,9 @@ $('.table-sorter').tablesorter({
         }*/
     }
 });
-$('.pop').popover({html:true});
-
 
 // get variant_id in real time
-$('.variant_id').hover(function(){
+$('.variant_id').hover(function(e){
     // get variant_id
     var span = $(this);
     var id = span.text();
@@ -892,7 +898,7 @@ $('.variant_id').hover(function(){
             });
             content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
             span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a>');
-            span.attr('data-content', content);
+            span.attr('data-content', content).data('bs.popover').setContent();
     });
 });
 /*
@@ -901,22 +907,16 @@ $.get('http://whateverorigin.org/get?url=' + encodeURIComponent('http://exac.bro
             });
 */
 
-
 // get individual_id in real time
-$('.individual_id').on('click',function(){
+$('.individual_id').hover(function(){
     // get variant_id
     var span = $(this);
     var id = span.text();
     $.get('/individual_json/' + id,
         function(data){
-            if ($('h3.popover-title').text() == 'loading...'){
-                $('div.popover.in').remove();
-                span.trigger('click');
-                span.trigger('click');
-            }
             if (!data.result) {
                 span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-                span.attr('data-content', 'no data available');
+                span.attr('data-content', 'No Data Available').data('bs.popover').setContent();
             }
             var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
             if (typeof data.result.genes != 'undefined') {
@@ -930,13 +930,10 @@ $('.individual_id').on('click',function(){
             });
             content += '</p>';
             span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-            span.attr('data-content', content);
+            span.attr('data-content', content).data('bs.popover').setContent();
     });
 });
 
-
 </script>
-
-
 
 {% endblock %}
