@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h1> </h1>
 <link rel="stylesheet"  type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
 <link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
 <style>
@@ -306,12 +305,12 @@ window.variants = [];
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
-<script type="text/javascript" src="/static/jquery.tablesorter.js"></script>
-<script type="text/javascript" src="/static/jquery.tablesorter.widgets.js"></script>
+<script type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
 <script src="/static/bower_components/requirejs/require.js"></script>
-<script src="/static/binomial.js"></script>
-<script src="/static/fisher.js"></script>
-<script src="/static/hpo.js"></script>
+<script src="/static/js/binomial.js"></script>
+<script src="/static/js/fisher.js"></script>
+<script src="/static/js/hpo.js"></script>
 <script type="text/javascript">
 
 var session_user= "{{session['user']}}" ;
@@ -830,7 +829,7 @@ function formatFloat(v,n){
 </script>
 
 
-<script type="text/javascript" src="/static/individual_pubmed.js"></script>
+<script type="text/javascript" src="/static/js/individual_pubmed.js"></script>
 
 <script type="text/javascript">
 $('.table-sorter').tablesorter({
