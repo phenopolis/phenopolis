@@ -12,14 +12,15 @@ from bson.json_util import dumps
 defs
 '''
 def hide_hpo_for_demo(data):
-    for mode in ['hom_comp','het']:
-        for k1,v1 in data[mode].iteritems():
-            # hide hpo
-            for k2,v2 in v1['data'].iteritems():
-                v2['hpo'] = ['hidden']
-            # hide p_id
-            for k2 in v1['data'].keys():
-                v1['data']['hidden_'+hashlib.sha224(k2).hexdigest()[:6]] = v1['data'].pop(k2)
+    if data:
+        for mode in ['hom_comp','het']:
+            for k1,v1 in data[mode].iteritems():
+                # hide hpo
+                for k2,v2 in v1['data'].iteritems():
+                    v2['hpo'] = ['hidden']
+                # hide p_id
+                for k2 in v1['data'].keys():
+                    v1['data']['hidden_'+hashlib.sha224(k2).hexdigest()[:6]] = v1['data'].pop(k2)
 '''
 routes
 '''
@@ -93,8 +94,8 @@ def gene_page(gene_id):
             gene=gene,
             pli=pli,
             table_headers=table_headers,
-            dot_hom_comp = json.dumps(gene_hpo['hom_comp']),
-            dot_het = json.dumps(gene_hpo['het']),
+            dot_hom_comp = json.dumps(gene_hpo['hom_comp']) if gene_hpo else {},
+            dot_het = json.dumps(gene_hpo['het']) if gene_hpo else {},
             simreg = simreg,
             individuals=individuals,
             hpo_terms_json = json.dumps(hpo_terms),
