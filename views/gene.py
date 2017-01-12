@@ -24,7 +24,7 @@ def hide_hpo_for_demo(data):
 routes
 '''
 @app.route('/gene/<gene_id>',methods=['GET'])
-@cache.cached(timeout=24*3600)
+#@cache.cached(timeout=24*3600)
 @requires_auth
 def gene_page(gene_id):
     # if gene not ensembl id then translate to
@@ -40,6 +40,7 @@ def gene_page(gene_id):
     else:
         gene=db.genes.find_one({'gene_id':gene_id})
         if not gene: return gene_id+' does not exist'
+    if session['user'] == 'demo' and gene_id not in ['ENSG00000156171','ENSG00000119685']: return 'Sorry you are not permitted to see these genes in demo account, please contact us to setup an account!'
     variants=db.variants.find({'genes':gene_id},projection={'_id':False})
     gene['variants']=[Variant(variant_id=v['variant_id'],db=db) for v in variants]
     individuals=dict()
