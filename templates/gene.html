@@ -672,7 +672,7 @@ function draw_hpo(temp, mode, exac, cadd, remove_hom, remove_bad_vars){
         $(this).popover({
                 placement: 'auto top',
                 container: '#dot-'+mode,
-                trigger: 'manual',
+                trigger: 'hover',
                 position: 'fixed',
                 html : true,
                 title: function() { return d.id; },
