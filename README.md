@@ -24,7 +24,7 @@ This section includes guides to a quick install and a full installation.
 * Python 2 - you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3. https://www.python.org/downloads/
 * MongoDB - https://www.mongodb.com/download-center#community
 
-## Quick Install Demo for Coders (no Phenotips required)
+##Quick Install Demo for Coders (no Phenotips required)
 
 I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
 When this is installed you should be able to browse to:
