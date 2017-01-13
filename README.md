@@ -4,22 +4,53 @@
 
 Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
 
+Phenopolis is used for research into the molecular diagnosis of rare genetic diseases by clinicians, geneticists and bioinformaticians at UCL, University of Leeds, University of Manchester and University of Oxford.
+
+##The Phenopolis Website 
 You can access a demo version of the server at:
 https://phenopolis.github.io
 username/password:
 demo/demo123
 
-Note you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3.
+#Contributors
+We are especially interested in contributions to the UI (html, css, js) which could be greatly refactored and vastly improved.
+Also any performance improvements to the db queries would be also greatly appreciated.
+Let us know if you run into difficulties getting the code running!  Our goal is to make it easy for you to contribute so the project continues to grow!
+​
+#Installation
+This section includes guides to a quick install and a full installation.
+​
+##Prerequisites
+* Python 2 - you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3. https://www.python.org/downloads/
+* MongoDB - https://www.mongodb.com/download-center#community
 
-### Quick Install Demo for Coders (no Phenotips required)
+## Quick Install Demo for Coders (no Phenotips required)
 
 I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
 When this is installed you should be able to browse to:
 [http://localhost:8000/gene/TTLL5](http://localhost:8000/gene/TTLL5)
+
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
-We are especially interested in contributions to the UI (html, css, js) which could be greatly refactored and vastly improved.
-Also any performance improvements to the db queries would be also greatly appreciated.
-Let us know if you run into difficulties getting the code running!  Our goal is to make it easy for you to contribute so the project continues to grow!
+
+###Prerequisites
+* wget - https://www.gnu.org/software/wget/
+​
+###Windows - additional prerequisites and steps
+Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.
+* VCForPython27 - install this from http://aka.ms/vcpython27
+* Execute [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) 
+* pysam - disable the pysam imports. This package won't install on Windows.
+* primer3 (package name primer3-py) - disable the primer3 imports. This package won't install on Windows.
+* The following line in easy_install.sh fails 
+```sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py```
+instead, ensure that ```LOCAL=True``` is set in [views/\_\_init__.py](https://github.com/pontikos/phenopolis/blob/master/views/__init__.py) 
+* Rerun [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) (you may disable the commands ```git clone```, ```wget```, ```mongoimport``` and ```mongo```.)
+
+###Post-installation
+When this is installed you should be able to browse to:
+[http://localhost:8000/gene/TTLL5](http://localhost:8000/gene/TTLL5)
+
+The example dataset covers only gene TTLL5. Web pages for other genes will show no information. 
 
 ### Full Installation
 
@@ -39,10 +70,7 @@ Download Phenotips:
 ```
 https://phenotips.org/Download
 ```
-Install latest version of mongo:
-```
-https://www.mongodb.com/download-center#community
-```
+
 If you wish to download the Exomiser stand-alone server, please get in touch with [Julius Jacobsen](https://github.com/julesjacobsen).
 
 ### Creating database, importing data
@@ -129,7 +157,7 @@ https://monarch-exomiser-prod.monarchinitiative.org/exomiser/api/prioritise/
 Run Phenopolis:
 ```
 cd phenopolis
-python run_server.py
+python runserver.py
 ```
 
 
