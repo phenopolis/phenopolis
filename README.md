@@ -33,7 +33,7 @@ When this is installed you should be able to browse to:
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
 
 ###Prerequisites
-* wget - https://www.gnu.org/software/wget/
+* wget - https://www.gnu.org/software/wget/ .
 ​
 ###Windows - additional prerequisites and steps
 Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.
@@ -44,7 +44,7 @@ Phenopolis can be developed under Windows but requires some additional steps and
 * The following line in easy_install.sh fails 
 ```sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py```
 instead, ensure that ```LOCAL=True``` is set in [views/\_\_init__.py](https://github.com/pontikos/phenopolis/blob/master/views/__init__.py) 
-* Rerun [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) (you may disable the commands ```git clone```, ```wget```, ```mongoimport``` and ```mongo```.)
+* Rerun [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) (you may disable the commands ```git clone```, ```wget```, ```mongoimport``` and ```mongo```).
 
 ###Post-installation
 When this is installed you should be able to browse to:
@@ -52,7 +52,7 @@ When this is installed you should be able to browse to:
 
 The example dataset covers only gene TTLL5. Web pages for other genes will show no information. 
 
-### Full Installation
+### Full Installation (including Phenotips)
 
 Phenopolis requires:
 * a running mongo database
