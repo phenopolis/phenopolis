@@ -35,11 +35,9 @@ This is for people who want to get a local version up and running quickly to con
 ###Prerequisites
 * wget - https://www.gnu.org/software/wget
 ​
-###Test heading
-some test text.
+
 
 ### Windows - additional prerequisites and steps
-###Second Test heading
 Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.
 * VCForPython27 - install this from http://aka.ms/vcpython27
 * Execute [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) 
