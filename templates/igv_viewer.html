@@ -34,6 +34,8 @@
 
 <script type="text/javascript">
 
+var het_or_hom="het";
+
 var get_bam_track_config = function(read_viz_data, het_or_hom, i) {
     return {
         type: 'bam',   
@@ -67,6 +69,7 @@ igv.BamReader.prototype.readFeatures = function(chr, min, max, continuation, tas
     //tracks.push({ url: '/read_viz/exome_calling_regions.v1.bed', name: "UCLex calling regions" });
     //tracks.push({ url: '/read_viz/self_chain.sorted.bed',        name: "UCSC self chain" });
     //add track #1 for het and hom (assuming they're available)
+    //tracks.push(get_bam_track_config(read_viz_data, het_or_hom, 0));
     tracks.push(get_bam_track_config(read_viz_data, het_or_hom, 0));
     tracks_counter[het_or_hom] += 1;
     var load_one_more = function (het_or_hom) {
