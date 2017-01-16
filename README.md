@@ -39,7 +39,12 @@ This is for people who want to get a local version up and running quickly to con
 
 ### Windows - additional prerequisites and steps
 Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.
+* pip - make sure it is up to date by running ```python -m pip install -U pip```
 * VCForPython27 - install this from http://aka.ms/vcpython27
+* scipy and biopython - get and install the .whl files below from http://www.lfd.uci.edu/~gohlke/pythonlibs/
+ * pip install numpy-1.11.3+mkl-cp27-cp27m-win32.whl –user
+ * pip install scipy-0.18.1-cp27-cp27m-win32.whl –user
+ * pip install biopython-1.68-cp27-cp27m-win32.whl –user
 * Execute [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) 
 * pysam - disable the pysam imports. This package won't install on Windows.
 * primer3 (package name primer3-py) - disable the primer3 imports. This package won't install on Windows.
@@ -47,6 +52,8 @@ Phenopolis can be developed under Windows but requires some additional steps and
 ```sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py```
 instead, ensure that ```LOCAL=True``` is set in [views/\_\_init__.py](https://github.com/pontikos/phenopolis/blob/master/views/__init__.py) 
 * Rerun [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) (you may disable the commands ```git clone```, ```wget```, ```mongoimport``` and ```mongo```).
+
+To debug in Visual Studio, first turn off the Flask debug by setting ```app.run(..,..,..,debug=False)``` in ```runserver.py```.
 
 ###Post-installation
 When this is installed you should be able to browse to:
