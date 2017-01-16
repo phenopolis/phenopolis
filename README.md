@@ -42,9 +42,9 @@ Phenopolis can be developed under Windows but requires some additional steps and
 * pip - make sure it is up to date by running ```python -m pip install -U pip```
 * VCForPython27 - install this from http://aka.ms/vcpython27
 * scipy and biopython - get and install the .whl files below from http://www.lfd.uci.edu/~gohlke/pythonlibs/
-** pip install numpy-1.11.3+mkl-cp27-cp27m-win32.whl –user
-** pip install scipy-0.18.1-cp27-cp27m-win32.whl –user
-** pip install biopython-1.68-cp27-cp27m-win32.whl –user
+<space>* pip install numpy-1.11.3+mkl-cp27-cp27m-win32.whl –user
+<space>* pip install scipy-0.18.1-cp27-cp27m-win32.whl –user
+<space>* pip install biopython-1.68-cp27-cp27m-win32.whl –user
 * Execute [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) 
 * pysam - disable the pysam imports. This package won't install on Windows.
 * primer3 (package name primer3-py) - disable the primer3 imports. This package won't install on Windows.
