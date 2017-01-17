@@ -45,6 +45,13 @@ install:
 services:
   - mongodb
   
+before script:
+  - VIEWS_DIR_PATH="$(readlink -f views)"
+  - TEMPLATE_DIR_PATH="$(readlink -f templates)"
+  - STATIC_DIR_PATH="$(readlink -f static)"
+  - ln -s $STATIC_DIR_PATH $VIEWS_DIR_PATH/static
+  - ln -s $TEMPLATE_DIR_PATH $VIEWS_DIR_PATH/templates  
+  
 script: 
 # command to run coveralls (test coverage) and run tests 
 #  - coverage run --source=phenopolis phenopolis/tests/test_login.py
