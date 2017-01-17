@@ -1,5 +1,7 @@
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
 
+[![Build Status](https://travis-ci.org/Withington/phenopolis.svg?branch=make_varnorm_submodule)](https://travis-ci.org/Withington/phenopolis)
+
 ![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-pipeline.png)
 
 Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
