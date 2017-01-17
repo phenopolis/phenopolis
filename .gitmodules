@@ -1,0 +1,4 @@
+[submodule "varnorm"]
+	path = varnorm
+	url = https://github.com/weiyi-bitw/varnorm.git
+	branch = master
