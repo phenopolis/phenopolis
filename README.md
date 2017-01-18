@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pontikos/phenopolis.svg?branch=master)](https://travis-ci.org/pontikos/phenopolis)
+
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
 
 ![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-pipeline.png)
