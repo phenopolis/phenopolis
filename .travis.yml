@@ -32,7 +32,7 @@ install:
   - source activate test-environment
   
 # end of conda install
-  - pip install Cython --install-option="--no-cython-compile" 
+  - pip install Cython==0.25.2 --install-option="--no-cython-compile" 
   - pip install -r requirements.txt
 
   - cd varnorm
