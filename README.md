@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/pontikos/phenopolis.svg?branch=master)](https://travis-ci.org/pontikos/phenopolis)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/pontikos/phenopolis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
 
