@@ -8,7 +8,7 @@ cd ../..
 
 # python packages required
 pip install Cython==0.25.2 --install-option="--no-cython-compile" --user 
-pip install -r requirements.txt --user
+pip install -r phenopolis/requirements.txt --user
 
 # For local install without Phenotips this will:
 # 1) approve all logins as Phenotips is not running
