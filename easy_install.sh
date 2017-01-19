@@ -1,44 +1,13 @@
-# python packages required
-
-pip install python-bencode --user
-pip install Cython --install-option="--no-cython-compile" --user
-pip install pycrypto --user
-pip install psycopg2 --user
-pip install phizz  --user
-pip install pymongo --user
-pip install myvariant --user
-pip install mygene --user
-pip install pysam --user
-pip install pygr --user
-pip install plotly --user
-pip install flask_httpauth --user
-pip install primer3-py --user
-pip install neo4j-driver --user
-pip install Flask --user
-pip install Flask-Session --user
-pip install Flask-Runner --user
-pip install Flask-Mail --user
-pip install Flask-ErrorMail --user
-pip install Flask-Compress --user
-pip install Flask-Error --user
-pip install Flask-Cache --user
-pip install flask_errormail --user
-pip install flask_debugtoolbar --user
-pip install biopython --user
-pip install pandas --user
-pip install scipy --user
-
-git clone https://github.com/weiyi-bitw/varnorm.git
+# Get phenopolis and its submodule.
+git clone https://github.com/pontikos/phenopolis.git
+cd phenopolis
+git submodule update --init --remote --recursive
 cd varnorm
 python setup.py install --user
 cd ..
 
-git clone https://github.com/counsyl/hgvs.git
-cd hgvs
-python setup.py install --user
-cd ..
-
-git clone https://github.com/pontikos/phenopolis.git
+# python packages required
+pip install -r requirements.txt --user
 
 # For local install without Phenotips this will:
 # 1) approve all logins as Phenotips is not running
@@ -127,4 +96,5 @@ ln -s $TEMPLATE_DIR_PATH $VIEWS_DIR_PATH/templates
 
 python runserver.py
 
+exec $SHELL
 

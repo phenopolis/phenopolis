@@ -24,4 +24,5 @@ pygr==0.8.2
 pymongo==3.4.0
 pysam==0.9.1.4
 python-bencode==1.0.2
+scipy==0.18.1 # This will fail for Travis or Windows, they use alternative means of installation.
 
