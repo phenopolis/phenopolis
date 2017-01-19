@@ -7,6 +7,7 @@ python setup.py install --user
 cd ..
 
 # python packages required
+pip install Cython --install-option="--no-cython-compile" --user 
 pip install -r requirements.txt --user
 
 # For local install without Phenotips this will:
