@@ -9,20 +9,19 @@ Flask-HTTPAuth==3.2.1
 Flask-Mail==0.9.1
 Flask-Runner==2.1.1
 Flask-Session==0.3.0
-hgvs
+hgvs==0.5.0a6
 mygene==3.0.0
 myvariant==0.3.1
 neo4j-driver==1.0.2
 pandas==0.19.1
 phizz==0.2.3
 plotly==1.12.12
-primer3-py
+primer3-py==0.5.1
 psycopg2==2.6.2
 pycrypto==2.6.1
-pycryptodome==3.4.3
 pygr==0.8.2
 pymongo==3.4.0
-pysam
-pytest==3.0.5
+pysam==0.9.1.4
 python-bencode==1.0.2
-#scipy==0.18.1
+scipy==0.18.1 # This will fail for Travis or Windows, they use alternative means of installation.
+
