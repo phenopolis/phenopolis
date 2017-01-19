@@ -4,7 +4,7 @@ cd phenopolis
 git submodule update --init --remote --recursive
 cd varnorm
 python setup.py install --user
-cd ..
+cd ../..
 
 # python packages required
 pip install Cython==0.25.2 --install-option="--no-cython-compile" --user 
