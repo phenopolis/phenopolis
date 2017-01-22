@@ -1,0 +1,16 @@
+{
+    "description":"define filters for Simreg/Phenogenon/SKAT... analyses",
+    "cnv":{
+        "description":"set upper and lower ratio limits to consider it as hom",
+        "upper_ratio":1.75,
+        "lower_ratio":0.3
+    },
+    "cutoffs":{
+        "description":"vp_ratio is variants_to_patients ratio. It is a good place to check and help remove negative results. For dominant cases, this ratio should be close to 1, if most of the carriers have distinctive variants on the gene. For recessive cases, this ratio should be close to 2. Should do some stats to determine the best cutoffs.",
+        "vp_ratio_dom":0.5,
+        "vp_ratio_rec":1,
+        "exac_af":1e-3,
+        "kaviar_af":1e-3,
+        "cadd_phred":15
+    }
+}

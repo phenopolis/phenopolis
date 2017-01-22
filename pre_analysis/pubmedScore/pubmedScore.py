@@ -1,5 +1,7 @@
 #!/bin/env python
-
+'''
+currently fetch_from_pubmed, parse_authors and parse_abstract are not in use
+'''
 from pprint import pprint
 import os
 import json
@@ -19,7 +21,7 @@ import re
 from collections import defaultdict, Counter
 
 # username used to connect to pubmed
-Entrez.email = 
+email = 'me@example.com'
 
 # Some constant
 today = strftime("%Y-%m-%d", gmtime())
@@ -104,124 +106,119 @@ def find_item(obj, key):
                     if item is not None:
                         return item
 
-"""
-for pubmedBatch
-check title and abstract is truely relevant. Assign to both this gene and each ref
-"""
-def fetch_from_pubmed(query, lag=None):
-    smashed_all=query['smashed_all']
-    reg=query['reg']
+'''
+query pubmed, and get result
+'''
+def pubmed_query(gene,keywords,lag=0,email='me@example.com'):
+    Entrez.email = email
+    # get reg
+    reg = '\\b|\\b'.join(keywords)
+    reg = '\\b' + reg + '\\b'
+    reg = re.compile(reg, re.IGNORECASE)
+    # get term
+    term = gene + ' AND (' + ' OR '.join(['"' + t + '"' + '[Title/Abstract]' for t in keywords]) + ')'
     if lag:
-        lag = lag/3600/24 # convert it to days
+        lag = int(lag/3600/24) # convert it to days, at least 1 day
+        lag = 1 if lag < 1 else lag
+            # need to update
         attempt = 1
         while attempt <= 10:
             try:
-                search_results = Entrez.read(Entrez.esearch(db='pubmed', term=smashed_all, reldate=lag, datetype='pdat', usehistory='y'))
+                search_results = Entrez.read(Entrez.esearch(db='pubmed', term=term, reldate=lag, datetype='pdat', usehistory='y'))
                 break
             except URLError as err:
-                print ('PubmedBatch URLError: %s' % err)
+                print ('!!URLError %s' % err)
                 time.sleep(2)
                 attempt += 1
     else:
         # just search
         attempt = 1
-        while attempt <=10:
+        while attempt <= 10:
             try:
-                print 'QUERY:', query
-                search_results = Entrez.read(Entrez.esearch(db='pubmed',retmax=50, term=smashed_all, usehistory='y'))
+                search_results = Entrez.read(Entrez.esearch(db='pubmed',retmax=50, term=term, usehistory='y'))
                 break
             except URLError as err:
-                print ('URLError')
+                print ('URLError: %s at line 249' % err)
+                time.sleep(2)
+                attempt += 1
+            except RuntimeError as err:
+                print ('Runtime error: %s at line 276' % err)
                 time.sleep(2)
                 attempt += 1
     # now done the search. let's get results
     count = int(search_results["Count"])
+    print count
     results = {'results':[], 'total_score':0}
     # get search content
-    attempt = 1
-    while attempt <= 10:
-        try:
-            handle = Entrez.efetch("pubmed", restart=0, retmax=50, retmode="xml", webenv=search_results['WebEnv'], query_key=search_results['QueryKey'])
-            break
-        except HTTPError as err:
-            if 500 <= err.code <= 599: print('Received error from server %s' % err)
-            else: print('Something is wrong while efetch..')
-            print('Attempt %i of 10' % attempt)
-            attempt += 1
-            time.sleep(5)
-    record = Entrez.parse(handle)
-    if not peek(record): return []
-    # got something. let's do some calculation
-    for r in record:
-        # calculate score
-        score = 0
-        pid = str(r['MedlineCitation']['PMID'])
-        abstract_list = r['MedlineCitation']['Article']['Abstract']['AbstractText']
-        # parse abstract
-        abstract = ''
-        if abstract_list:
-            for a in abstract_list:
-                if hasattr(a, 'attributes') and 'Label' in a.attributes:
-                    abstract = abstract + '<b>' + a.attributes['Label'] + ': </b>'
-                    abstract = abstract + a + '<br/>'
+    if count:
+        attempt = 1
+        while attempt <= 10:
+            try:
+                handle = Entrez.efetch("pubmed",
+                                       restart=0,
+                                       retmax=50,
+                                       retmode="xml",
+                                       webenv=search_results['WebEnv'],
+                                       query_key=search_results['QueryKey']
+                                       )
+                break
+            except HTTPError as err:
+                if 500 <= err.code <= 599:
+                    print('Received error from server %s' % err)
                 else:
-                    abstract = abstract + a
-        title = find_item(r, 'ArticleTitle')
-        if title: score = score + len(reg.findall(title))
-        if abstract: score = score + len(reg.findall(abstract))
-        # add result to genes[gene_name]
-        if score:
-            results['results'].append({
-                'id': pid,
-                'title': title,
-                'abstract': abstract,
-                'score': score
-            })
-            results['total_score'] = results['total_score'] + score
-    results['results'] = sorted(results['results'], key=lambda k: k['score'], reverse=True)
-    results['query']=query
+                    print('Something is wrong while efetch..')
+                print('Attempt %i of 10' % attempt)
+                attempt += 1
+                time.sleep(5)
+            except SocketError as err:
+                print('Socket error')
+                time.sleep(2)
+            except URLError as err:
+                print ('URLError')
+                time.sleep(2)
+        record = Entrez.read(handle)
+        if record:
+            # got something. let's do some calculation
+            for r in record['PubmedArticle']:
+                # calculate score
+                score = 0
+                pid = str(find_item(r, 'PMID'))
+                abstract_list = find_item(r, 'AbstractText')
+                # parse abstract
+                abstract = ''
+                if abstract_list:
+                    for a in abstract_list:
+                        if hasattr(a, 'attributes') and 'Label' in a.attributes:
+                            abstract = abstract + '<b>' + a.attributes['Label'] + ': </b>'
+                            abstract = abstract + a + '<br/>'
+                        else:
+                            abstract = abstract + a
+
+                title = find_item(r, 'ArticleTitle')
+                if title:
+                    score = score + len(reg.findall(title))
+                if abstract:
+                    score = score + len(reg.findall(abstract))
+
+                # add result to genes[gene_name]
+                if score:
+                    results['results'].append({
+                        'id': pid,
+                        'title': title,
+                        'abstract': abstract,
+                        'score': score
+                    })
+                    results['total_score'] = results['total_score'] + score
+        results['results'] = sorted(results['results'], key=lambda k: k['score'], reverse=True)
     return results
-
-'''
-construct hpo_db to get HPO relative to eye
-'''
-def construct_hpo(individual):
-    patient=db.patients.find_one({'external_id':individual})
-    #print('number of variants',len(patient['variants']))
-    #patient['variants']=db.variants.find({'variant_id':{'$in': map(lambda x: x.replace('_','-'), patient['variants']) }})
-    #patient['variants']=map(lambda x: x.replace('_','-'), patient['variants'])
-    patient['name']=patient['external_id']
-    hpo_terms=[(f['id'],f['label'],) for f in patient_db.patients.find_one({'external_id':individual})['features'] if f['observed']=='yes']
-    gene_hpo=dict()
-    for hpo_id,hpo_term, in hpo_terms:
-        #for gene_name in [x['gene_name'] for x in hpo_db.gene_hpo.find({'hpo_terms': hpo_id},{'gene_name':1,'_id':0})]:
-        for gene_name in [x['Gene-Name'] for x in hpo_db.ALL_SOURCES_ALL_FREQUENCIES_phenotype_to_genes.find({'HPO-ID':hpo_id},{'Gene-Name':1,'_id':0})]:
-            gene_hpo[gene_name]=gene_hpo.get(gene_name,[])+[{'hpo_id':hpo_id,'hpo_term':hpo_term}]
-    return gene_hpo
-
-
-def parse_abstract(x):
-    x['MedlineCitation']['Article']['Abstract']['AbstractText']
-
-
-def parse_authors(x):
-    for author in x['MedlineCitation']['Article']['AuthorList']: author
-
 '''
 Extraction, pubmed search, and database insertion
 dominant only used in the scoring
+
 '''
-def pubmed(gene_name, keywords, now):
+def pubmed(gene_name, keywords, now, test=False):
     keywords.sort()
-    # make reg term for later use (calculating pubmed score)
-    reg = '\\b|\\b'.join(keywords)
-    reg = '\\b' + reg + '\\b'
-    reg = re.compile(reg, re.IGNORECASE)
     # constructing searching term and cache database key
-    smashed_OR = ['"' + t + '"' + '[Title/Abstract]' for t in keywords]
-    smashed_OR = ' OR '.join(smashed_OR)
-    smashed_term = ' AND (' + smashed_OR + ')'
-    smashed_all = gene_name + smashed_term
     term = '_'.join([gene_name.upper(), '-'.join(keywords).lower()])
     # check if the pubmed result already in the database, and if it is outdated
     lag = 0 # use it as a flag of how to search. 0 = search; now-saved['date'] = update; 
@@ -235,97 +232,16 @@ def pubmed(gene_name, keywords, now):
             # up to date
             #print 'already in the database, and up to date'
             return None
-    if lag > 0:
-        lag = int(lag/3600/24) # convert to days
-        attempt = 1
-        while attempt <= 10:
-            try:
-                search_results = Entrez.read(Entrez.esearch(db='pubmed', term=smashed_all, reldate=lag, datetype='pdat', usehistory='y'))
-                break
-            except URLError as err:
-                print ('PubmedBatch URLError: %s' % err)
-                time.sleep(2)
-                attempt += 1
-    else:
-        # just search
-        attempt = 1
-        while attempt <=10:
-            try:
-                search_results = Entrez.read(Entrez.esearch(db='pubmed',retmax=50, term=smashed_all, usehistory='y'))
-                break
-            except URLError as err:
-                print ('URLError')
-                time.sleep(2)
-                attempt += 1
-    # get search content
-    attempt = 1
-    while attempt <= 10:
-        try:
-            handle = Entrez.efetch("pubmed",
-                                   restart=0,
-                                   retmax=50,
-                                   retmode="xml",
-                                   webenv=search_results['WebEnv'],
-                                   query_key=search_results['QueryKey']
-                                   )
-            break
-        except HTTPError as err:
-            if 500 <= err.code <= 599:
-                print('Received error from server %s' % err)
-            else:
-                print('Something is wrong while efetch..')
-            print('Attempt %i of 10' % attempt)
-            attempt += 1
-            time.sleep(5)
-    record = Entrez.parse(handle)
-    count = int(search_results["Count"])
-    #print 'count', count
-    results = {'results':[], 'total_score':0}
-    record = peek(record)
-    print record
-    if not record: 
-        if saved:
-            db_pubmed.cache.update({'key': term}, {'$set': {'date': now}})
-        else:
-            db_pubmed.cache.update({'key': term}, {'$set': {'score':results['total_score'],'data':results['results'],'date':now}},upsert=True)
-        return None
-    for r in record:
-        # calculate score
-        score = 0
-        try:
-            pid = str(r['MedlineCitation']['PMID'])
-            abstract_list = r['MedlineCitation']['Article']['Abstract']['AbstractText']
-        except:
-            print 'problem with abstract list'
-            continue
-        # parse abstract
-        abstract = ''
-        if abstract_list:
-            for a in abstract_list:
-                if hasattr(a, 'attributes') and 'Label' in a.attributes:
-                    abstract = abstract + '<b>' + a.attributes['Label'] + ': </b>'
-                    abstract = abstract + a + '<br/>'
-                else:
-                    abstract = abstract + a
-        title = find_item(r, 'ArticleTitle')
-        if title: score = score + len(reg.findall(title))
-        if abstract: score = score + len(reg.findall(abstract))
-        # add result to genes[gene_name]
-        if score:
-            results['results'].append({
-                'id': pid,
-                'title': title,
-                'abstract': abstract,
-                'score': score,
-                'vote':0, # customer opinion on the paper's relevance to the gene and the phenotypes
-            })
-            results['total_score'] = results['total_score'] + score
     #print 'number of results', len([r for r in results['results']])
     # update the database, and maybe results
     # update database now
+    results = pubmed_query(gene_name,keywords,lag,email)
     if saved:
         results['results'].extend(saved['data'])
-    db_pubmed.cache.update({'key': term}, {'$set': {'score':results['total_score'],'data':results['results'],'date':now}},upsert=True)
+    if test:
+        return results
+    else:
+        db_pubmed.cache.update({'key': term}, {'$set': {'score':results['total_score'],'data':results['results'],'date':now}},upsert=True)
 
 
 if __name__ == '__main__':
