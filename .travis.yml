@@ -50,11 +50,9 @@ script:
   - STATIC_DIR_PATH="$(readlink -f static)"
   - ln -s $STATIC_DIR_PATH $VIEWS_DIR_PATH/static
   - ln -s $TEMPLATE_DIR_PATH $VIEWS_DIR_PATH/templates  
-   
 # command to run coveralls (test coverage) and run tests 
-#  - coverage run --source=phenopolis phenopolis/tests/test_login.py
-#  - python tests/test_login.py
-  - python -m unittest discover
+  - coverage run --omit */site-packages/* -m unittest discover
+  
 after_success:
   coveralls
 
