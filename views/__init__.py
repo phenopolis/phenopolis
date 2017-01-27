@@ -1624,7 +1624,7 @@ import views.uclex_irdc
 import views.variant
 import views.individual
 import views.individuals
-import views.pubmedbatch
+#import views.pubmedbatch
 import views.igv
 import views.hpo
 import views.home
