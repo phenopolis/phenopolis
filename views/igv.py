@@ -19,6 +19,7 @@ def bam_viewer():
 
 @app.route('/read_viz/bam/<sample>')
 def read_viz(sample):
+    BAM_FILES=app.config['BAM_FILES']
     print(request.method)
     headers=Headers()
     #headers.add('Content-Type','application/octet-stream')
