@@ -1,14 +1,19 @@
 from views import *
+import sys
+
 # Load default config and override config from an environment variable
 #app.config.from_pyfile('uclex.cfg')
-#NO_PHENOTIPS_INSTALLATION: app.config.from_pyfile('local.cfg')
+#NO_PHENOTIPS_INSTALLATION:
+config='local.cfg'
+if sys.argv[1]: config=sys.argv[1]
+print('config', config)
+app.config.from_pyfile(config)
 
 
 if __name__ == "__main__":
     # use ssl
     # add some common url. Would be good if can generate the url in real time
     home = ''
-    home_pubmedbatch = '/pubmedbatch/'
     #from OpenSSL import SSL
     # altnerative
     #context = SSL.Context(SSL.SSLv23_METHOD)
