@@ -9,7 +9,7 @@ import os
 '''
 parse config file, and make config global. If test, set DB_HOST as 'localhost'
 '''
-def _parse_config(test=None):
+def _parse_config():
     # basic settings are under the `default` section
     # return {'section':{'key1':'value1'...},...}
     config = ConfigParser.ConfigParser()
@@ -23,8 +23,6 @@ def _parse_config(test=None):
         result[section] = {}
         for option in options:
             result[section][option] = config.get(section, option)
-    if test:
-        result['mongodb']['db_host'] = 'localhost'
     return result
 
 OFFLINE_CONFIG = _parse_config()
