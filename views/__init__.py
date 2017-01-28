@@ -1,6 +1,4 @@
 global LOCAL
-LOCAL=False
-#NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
 from flask import Flask
@@ -83,10 +81,13 @@ import base64
 import orm
 from lookups import *
 
-
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
 
+if sys.argv[1]=='SERVER':
+    LOCAL=False
+else:
+    LOCAL=True
 
 if LOCAL:
     print 'LOCAL'

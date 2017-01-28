@@ -1,13 +1,16 @@
-from views import *
 import sys
+from views import *
 
 # Load default config and override config from an environment variable
-#app.config.from_pyfile('uclex.cfg')
-#NO_PHENOTIPS_INSTALLATION:
-config='local.cfg'
-if sys.argv[1]: config=sys.argv[1]
-print('config', config)
-app.config.from_pyfile(config)
+global LOCAL
+
+if sys.argv[1]=='SERVER':
+    LOCAL=False
+    app.config.from_pyfile('../phenopolis.cfg')
+else:
+    LOCAL=True
+    app.config.from_pyfile('../local.cfg')
+
 
 
 if __name__ == "__main__":
