@@ -5,12 +5,12 @@ from __future__ import print_function, division
 import pymongo
 import ConfigParser
 import os
+import errno
 
 '''
 parse config file, and make config global. If test, set DB_HOST as 'localhost'
 '''
 def _parse_config():
-    # basic settings are under the `default` section
     # return {'section':{'key1':'value1'...},...}
     config = ConfigParser.ConfigParser()
     
@@ -26,6 +26,7 @@ def _parse_config():
     return result
 
 OFFLINE_CONFIG = _parse_config()
+
 '''
 get useful mongo collections
 '''
@@ -39,3 +40,18 @@ def get_mongo_collections():
             'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['db_name']],
             'patient_db': conn['patients'],
     }
+
+'''
+mkdir -p
+http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
+basically, it only makes one system call, therefore avoid racing problems.
+not required for python3, can use `os.makedirs(name,mode,exist_ok=True)
+'''
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
