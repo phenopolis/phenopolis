@@ -32,27 +32,22 @@ def rv_sharing(individual_id,thresh,allele_freq,limit):
     neo=get_db('neo4j')
     q= """ MATCH (k:Person)
     WITH count(k) as numberOfPeople
-    MATCH (p:Person {{personId:"{personId}"}})<-[:PRESENT_IN]-(v:Variant)-[:HAS_ANNOTATION]->(av:AnnotatedVariant)
-    WHERE (av.allele_freq < {allele_freq} or av.hasExac = false)
-    WITH size(()<-[:PRESENT_IN]-(v)) as count , v, p, numberOfPeople
+    MATCH (p:Person {{personId:"{personId}"}})<-[:PRESENT_IN]-(gv:GeneticVariant)
+    WHERE (gv.allele_freq < {allele_freq} or gv.hasExac = false)
+    WITH size(()<-[:PRESENT_IN]-(gv)) as count , gv, p, numberOfPeople
     WHERE count > 1 
     AND ((count / toFloat(numberOfPeople))  <= {thresh})
-    MATCH (v)-[:PRESENT_IN]->(q:Person)
+    MATCH (gv)-[:PRESENT_IN]->(q:Person)
     WHERE p <> q
-    WITH p,q,count(v) as intersection, numberOfPeople
-    order by intersection DESC limit {limit}
-    MATCH (x:Person)<-[:PRESENT_IN]-(v:Variant)-[:HAS_ANNOTATION]->(av:AnnotatedVariant)
+    WITH p,q,count(gv) as intersection, numberOfPeople
+    ORDER BY intersection DESC limit {limit}
+    MATCH (x:Person)<-[:PRESENT_IN]-(v:GeneticVariant)
     WHERE (x.personId = p.personId or x.personId = q.personId)
-        AND (av.allele_freq < {allele_freq} or av.hasExac = false)
-        AND ((size(()<-[:PRESENT_IN]-(v)) / toFloat(numberOfPeople))  <= {thresh})
+    AND (v.allele_freq < {allele_freq} or v.hasExac = false)
+    AND ((size(()<-[:PRESENT_IN]-(v)) / toFloat(numberOfPeople))  <= {thresh})
     WITH p, q, v, intersection
-    RETURN
-        p.personId as person1,
-        q.personId as person2,
-        intersection,
-        size(collect(distinct v)) as unionSum,
-        (round((intersection/toFloat(size(collect(distinct v))))*100.0*10)/10) as PercentShared
-        ORDER BY PercentShared DESC
+    RETURN p.personId, q.personId, intersection, size(collect(distinct v)) as unionSum, (round((intersection/toFloat(size(collect(distinct v))))*100.0*10)/10) as PercentShared
+    ORDER BY PercentShared DESC;
     """.format(thresh=float(thresh), personId=individual_id,allele_freq=float(allele_freq),limit=int(limit))
     result = neo.run(q)
     get_db('neo4j').close()
