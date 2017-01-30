@@ -25,7 +25,7 @@ def phenogenon(hpo_id,lit_genes,omim_genes,recessive_genes,dominant_genes):
         recessive_genes.extend(temp['recessive_genes'])
         dominant_genes.extend(temp['dominant_genes'])
         return
-    hpo_db=get_db('hpo')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
     db=get_db()
     def f(g):
         g=db.genes.find_one({'gene_name_upper':r['Gene-Name'].upper()},{'_id':0})
@@ -77,10 +77,9 @@ def phenogenon_json(hpo_id):
 @requires_auth
 @cache.cached(timeout=24*3600)
 def hpo_page(hpo_id):
-    patients_db=get_db('patients')
     db=get_db()
-    hpo_db=get_db('hpo')
-    patients_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     #patients=[p for p in patients_db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     print hpo_id 
     if not hpo_id.startswith('HP:'):
@@ -140,7 +139,7 @@ def hpo_page(hpo_id):
         #for s in external_ids:
             #r=record.samples[s]
             #if 'GT' in r: print(r['GT'])
-    hpo_db=get_db('hpo')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
     def f(p):
         print p['external_id']
         p['features']=[f for f in p.get('features',[]) if f['observed']=='yes']
@@ -166,8 +165,8 @@ def hpo_page(hpo_id):
         return p
     #eids=[p['eid'] for p in patients]
     #print(eids)
-    #patients=get_db('patients').patients.find({'external_id':{'$in':eids}})
-    #patients=get_db('patients').patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
+    #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
+    #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
     patients=[f(p) for p in patients[:500] if 'external_id' in p]
     #print recessive_genes
     #print dominant_genes
@@ -202,10 +201,9 @@ def hpo_page(hpo_id):
 #@auth.login_required
 @requires_auth
 def hpo_json(hpo_id):
-    patients_db=get_db('patients')
     db=get_db()
-    hpo_db=get_db('hpo')
-    patients_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     #patients=[p for p in patients_db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     print(hpo_id)
     if not hpo_id.startswith('HP:'):
