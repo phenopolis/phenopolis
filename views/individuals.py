@@ -17,7 +17,7 @@ import orm
 def individuals_page():
     page=int(request.args.get('page',0))
     number=int(request.args.get('number',200))
-    hpo_db=get_db('hpo')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
     def f(p):
         print p['external_id']
         p['features']=[f for f in p.get('features',[]) if f['observed']=='yes']
@@ -47,8 +47,8 @@ def individuals_page():
     patients=conn.get_patient(auth=auth,start=page*number,number=number).get('patientSummaries',[])
     eids=[p['eid'] for p in patients]
     print(eids)
-    patients=get_db('patients').patients.find({'external_id':{'$in':eids}})
-    #patients=get_db('patients').patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
+    patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
+    #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
     individuals=[f(p) for p in patients if 'external_id' in p]
     # family_history":{"consanguinity":true}
     #if session['user']=='demo': for ind in individuals: ind['external_id']=encrypt(ind['external_id'])
