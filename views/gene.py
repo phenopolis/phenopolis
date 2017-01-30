@@ -108,8 +108,8 @@ def gene_page(gene_id):
 def gene_json(gene_id):
     # if gene not ensembl id then translate to
     db=get_db()
-    hpo_db=get_db('hpo')
-    patient_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
     hpo=request.args.get('hpo')
     if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
     gene=db.genes.find_one({'gene_id':gene_id})

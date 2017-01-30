@@ -43,7 +43,7 @@ def vcf_query(chrom=None, pos=None, ref=None, alt=None, variant_str=None, indivi
         else:
             variant['allele_freq'] = float(variant['HET_COUNT']+2*variant['HOM_COUNT']) / float(2*variant['WT_COUNT'])
         samples=variant['het_samples']+variant['hom_samples']
-        #variant['hpo']=[p for p in get_db('patients').patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
+        #variant['hpo']=[p for p in get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
         return variant
     for r in records:
         geno=dict(zip(headers, r))
@@ -111,7 +111,7 @@ def vcf_query2(chrom=None, pos=None, ref=None, alt=None, variant_str=None, indiv
         else:
             variant['allele_freq'] = float(variant['HET_COUNT']+2*variant['HOM_COUNT']) / float(2*variant['WT_COUNT'])
         samples=variant['het_samples']+variant['hom_samples']
-        #variant['hpo']=[p for p in get_db('patients').patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
+        #variant['hpo']=[p for p in get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
         return variant
     for r in records:
         geno=dict(zip(headers, r))
@@ -178,7 +178,7 @@ def vcf_query3(chrom=None, pos=None, ref=None, alt=None, variant_str=None, indiv
         else:
             variant['allele_freq'] = float(variant['HET_COUNT']+2*variant['HOM_COUNT']) / float(2*variant['WT_COUNT'])
         samples=variant['het_samples']+variant['hom_samples']
-        #variant['hpo']=[p for p in get_db('patients').patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
+        #variant['hpo']=[p for p in get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
         return variant
     for r in records:
         geno=dict(zip(headers, r))

@@ -23,7 +23,7 @@ import os
 @requires_auth
 def variant_page(variant_str):
     try:
-        variant=orm.Variant(variant_id=variant_str,db=get_db('uclex'))
+        variant=orm.Variant(variant_id=variant_str,db=get_db())
     except:
         return 'Variant does not exist'
     if not variant: return 'Variant does not exist'
@@ -53,7 +53,7 @@ def variant_json(variant_str):
 @app.route('/variant_json_db_new/<variant_str>')
 def variant_json_db_new(variant_str):
     if session['user'] == 'demo': return ''
-    variant=orm.Variant(variant_id=variant_str,db=get_db('uclex'))
+    variant=orm.Variant(variant_id=variant_str,db=get_db())
     return jsonify(result=variant.__dict__)
 
 @app.route('/set_variant_causal/<individual>/<variant_str>')
@@ -71,7 +71,7 @@ def set_variant_causal(individual, variant_str):
     p=conn.get_patient(eid=individual,auth=auth)
     p['genes']=p.get('genes',[])+[{'gene':gene_name}]
     print conn.update_patient( eid=p['external_id'], auth=auth, patient=p )
-    print get_db('patients').patients.update({'external_id':individual},{'$set':p},w=0)
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p},w=0)
     p=db.patients.find_one({'external_id':individual})
     p['causal_variants']=list(frozenset(p.get('causal_variants',[])+[variant_str]))
     db.patients.update({'external_id':individual},{'$set':{'causal_variants':p['causal_variants']}},w=0)
@@ -103,7 +103,7 @@ def unset_variant_causal(individual, variant_str):
         p2['genes']=list(frozenset(p2.get('genes',[])+[{'gene':gene_name}]))
     # update Gene in phenotips
     print conn.update_patient( eid=p2['external_id'], auth=auth, patient=p2 )
-    print get_db('patients').patients.update({'external_id':individual},{'$set':p2},w=0)
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p2},w=0)
     if request.referrer:
         referrer=request.referrer
         u = urlparse(referrer)
@@ -164,7 +164,7 @@ def rare_variants(individual,AC=10):
             if ',' in d['ALT']: d['ALT']=d['ALT'].split(',')[0]
             d['variant_id']='-'.join([d['#CHROM'],d['POS'],d['REF'],d['ALT']])
             try:
-                var=orm.Variant(variant_id=d['variant_id'],db=get_db('uclex'))
+                var=orm.Variant(variant_id=d['variant_id'],db=get_db())
             except Exception, e:
                 print(e)
                 print(d)
@@ -210,7 +210,7 @@ def common_rare_variants(individual,individual2,AC=1):
         #pv.append(d)
         d['variant_id']='-'.join([d['#CHROM'],d['POS'],d['REF'],d['ALT']])
         try:
-            var=orm.Variant(variant_id=d['variant_id'],db=get_db('uclex'))
+            var=orm.Variant(variant_id=d['variant_id'],db=get_db())
         except Exception, e:
             print(e)
             print(d)
