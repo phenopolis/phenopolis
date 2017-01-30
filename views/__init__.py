@@ -464,7 +464,7 @@ def response(POS, REF, ALT, index, geno, chrom, pos):
     variant['variant_id']=var2
     samples=variant['het_samples']+variant['hom_samples']
     print(samples)
-    variant['hpo']=[p for p in get_db('patients').patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
+    variant['hpo']=[p for p in get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':samples}},{'_id':0,'features':1,'external_id':1})]
     return(jsonify(result=variant))
 
 
@@ -476,9 +476,9 @@ def get_rathergood_suggestions(query):
     If it is the prefix for a gene, return list of gene names
     """
     regex = re.compile('^' + re.escape(query), re.IGNORECASE)
-    patient_results = [x['external_id'] for x in get_db('patients').patients.find({'external_id':regex})]
+    patient_results = [x['external_id'] for x in get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':regex})]
     gene_results = [x['gene_name'] for x in get_db().genes.find({'gene_name':regex})]
-    hpo_results = [x['name'][0] for x in get_db('hpo').hpo.find({'name':regex})]
+    hpo_results = [x['name'][0] for x in get_db(app.config['DB_NAME_HPO']).hpo.find({'name':regex})]
     results = patient_results+gene_results+hpo_results
     results = itertools.islice(results, 0, 20)
     return list(results)
@@ -507,7 +507,7 @@ def get_rathergood_result(db, query):
         description=phizz.query_hpo([query])
         #description=hpo_db.hpo.find_one({'hpo_id':query})
         return 'hpo', query
-    hpo=get_db('hpo').hpo.find_one({'name':query})
+    hpo=get_db(app.config['DB_NAME_HPO']).hpo.find_one({'name':query})
     if hpo:
         hpo_id=hpo['id'][0]
         return 'hpo', hpo_id
@@ -515,7 +515,7 @@ def get_rathergood_result(db, query):
         disease=phizz.query_disease([query])
         return 'mim', query
     # patient
-    patient=get_db('patients').patients.find_one({'external_id':query})
+    patient=get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':query})
     if patient:
         return 'individual', patient['external_id']
     # Variant
@@ -778,8 +778,8 @@ def fetch_hpo():
         hpo_ids=request.args.get('hpo_ids').strip().split(',')
     hpo_id=hpo_ids[0]
     print('HPO',hpo_id)
-    hpo_db=get_db('hpo')
-    patients_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     hpo_patients=[p['external_id'] for p in lookups.get_hpo_patients(hpo_db,patients_db,hpo_id)]
     print('num patients',len(hpo_patients))
     res=jsonify(result=hpo_patients)
@@ -872,7 +872,7 @@ def private_variant_count():
         external_id=request.form['external_id'].strip()
     else:
         external_id=request.args.get('external_id').strip()
-    db=get_db('patients')
+    db=get_db(app.config['DB_NAME_PATIENTS'])
     p=db.patients.find_one({'external_id':external_id})
     if 'PRIVATE_MUT' not in p: private_variant_count=0
     else: private_variant_count=len(p['PRIVATE_MUT'])
@@ -882,7 +882,7 @@ def private_variant_count():
 
 @app.route('/mim/<mim_id>')
 def mim_page(mim_id):
-    db=get_db('patients')
+    db=get_db(app.config['DB_NAME_PATIENTS'])
     print(str(mim_id))
     patients=[p for p in db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     patient_ids=[p['external_id'] for p in patients]
