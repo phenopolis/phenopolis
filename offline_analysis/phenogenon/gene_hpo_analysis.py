@@ -1,23 +1,5 @@
 #!/bin/env python
 '''
-result = 'digraph {
-6 [style="filled", fixedsize="true", fontsize="15", shape="circle", width="0.75", fillcolor="powderblue", label="Retina", data={p_id1:[{v_id,exac_af,cadd_phred}],p_id2:[{v_id,exac_af,cadd_phred}]}, expect_freq="23/2345", observed_freq="123/2345", id="HP:0000479", color="transparent"];
-7 [style="filled", fixedsize="true", fontsize="15", shape="circle", width="0.75", fillcolor="powderblue", label="Retinal Dystrophy", data={p_id1:[{v_id,exac_af,cadd_phred}],p_id2:[{v_id,exac_af,cadd_phred}]}, expect_freq="23/2345", observed_freq="123/2345", id="HP:0000556", color="transparent"];
-6 -> 7 [color="#000000", lty="solid"];
-6 -> 39 [color="#000000", lty="solid"];
-6 -> 105 [color="#000000", lty="solid"];
-7 -> 112 [color="#000000", lty="solid"];
-7 -> 114 [color="#000000", lty="solid"];
-7 -> 172 [color="#000000", lty="solid"];
-39 -> 172 [color="#000000", lty="solid"];
-39 -> 183 [color="#000000", lty="solid"];
-39 -> 40 [color="#000000", lty="solid"];
-}
-
-width's square propotional to observed/expected sample size. zero observed width = 0.01
-filled color is propotional to IC of the HPO term, ranging from #FFFFFF to #C6DEFF
-equivelent to from (255,255,255) to (198, 222, 255)
-
 Use KING to get independent individuals
 /slms/gee/research/vyplab/UCLex/KING/KING/UCL-exome_unrelated.txt
 
@@ -36,118 +18,140 @@ import time
 import rest
 import fisher
 import copy
-from plinkio import plinkfile
+import errno
+#from plinkio import plinkfile
 
 conn = pymongo.MongoClient(host='phenotips', port=27017)
-hpo_db=conn['hpo']
 db = conn['uclex']
+hpo_db=conn['hpo']
 patient_db=conn['patients']
 
-# vars that don't have proper consequence terms will be thrown here. most of them come from X chrom
-badvars = open('bad_vars.txt','w')
+debug = None
+
 '''
 defs
 '''
-def check_var(var, patient_array):
-    # leave this for the time being!
-    # first use Doug's result to impute the missed vars from available individuals, then use the existing ratios to impute the rest missing data. Note that some vars don't have imputation data
-    # return hpos that are bad for this var
-    missed_nohpo = called_nohpo = missed_hpo = called_hpo = 0
-    chrom,pos,ref,alt = var.split('-')
-    record = tbx.fetch(str(chrom),int(pos)-1,int(pos))
-    missed_patients = []
-    for row in record:
-        row=row.split('\t')
-        # genotype starts from row[9]
-        for ind in range(9,len(tbx_header)):
-            if tbx_header[ind] not in patient_array: continue
-            called = 0 if row[ind][0]==row[2]=='.' else 1
-            if not called:
-                missed_patients.append(tbx_header[ind])
-    print patient_array
-    print var
-    sys.exit()
-    for row in record:
-        row=row.split('\t')
-        # genotype starts from row[9]
-        for ind in range(9,len(tbx_header)):
-            if tbx_header[ind] not in pat_a_array: continue
-            called = 0 if row[ind][0]==row[2]=='.' else 1
-            in_hpo = 1 if tbx_header[ind] in pat_h_array else 0
-            if (not called) and (not in_hpo):
-                missed_nohpo += 1
-            elif called and (not in_hpo):
-                called_nohpo += 1
-            elif (not called) and in_hpo:
-                missed_hpo += 1
-            elif called and in_hpo:
-                called_hpo += 2
-            else:
-                raise 'something is wrong when trying to count miss call and hpo numbers'
-    # do some stats
-    obs = np.array([[missed_nohpo,called_nohpo], [missed_hpo, called_hpo]])
-    print obs
-    if missed_nohpo == missed_hpo == 0: return 1
-    # use chi square without Yates' correction to be conserved
-    p_val = chi2_contingency(obs,correction=False)[1]
-    return p_val
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
-def write_to_data(data,dp,mode):
-    # calculate and populate the p values
-    # calculate pat g for related and unrelated cases
-    related_pat = set([p for h,v in dp.iteritems() for p in v['data'] ])
-    related_pat_g = len(related_pat)
-    unrelated_pat_g = len([p for p in related_pat if p in patients_hpo['unrelated']]) 
-    for h,v in dp.iteritems():
-        related_pat_a = v['related_pat_a']
-        unrelated_pat_a = v['unrelated_pat_a']
-        related_pat_h = v['related_pat_h']
-        unrelated_pat_h = v['unrelated_pat_h']
-        related_pat_gh_set = set([p for p in v['data']])
-        related_pat_gh = len(related_pat_gh_set)
-        unrelated_pat_gh = len([p for p in related_pat_gh_set if p in patients_hpo['unrelated']])
-        related_p_val = fisher.pvalue(related_pat_a-related_pat_h-related_pat_g+related_pat_gh,related_pat_h-related_pat_gh,related_pat_g-related_pat_gh,related_pat_gh)
-        unrelated_p_val = fisher.pvalue(unrelated_pat_a-unrelated_pat_h-unrelated_pat_g+unrelated_pat_gh,unrelated_pat_h-unrelated_pat_gh,unrelated_pat_g-unrelated_pat_gh,unrelated_pat_gh)
-        data[h]['related_'+mode+'_p_val'] = related_p_val.right_tail
-        data[h]['unrelated_'+mode+'_p_val'] = unrelated_p_val.right_tail
-        data[h]['related_'+mode+'_pat_g'] = related_pat_g
-        data[h]['unrelated_'+mode+'_pat_g'] = unrelated_pat_g
-        data[h]['related_'+mode+'_pat_gh'] = related_pat_gh
-        data[h]['unrelated_'+mode+'_pat_gh'] = unrelated_pat_gh
-def populate_fisher_p(data,mode):
+def populate_fisher_p(data,mode,calc_cutoffs):
     # add fisher p value into the data.
+    # also returns qualified patients / variants as in 
+    # { patients: [], variants: []}
+    # only counts unrelated patients and passed variants
     # if mode == het, has to calculate d_p_val for dominant p
-    exac_cutoff = 0.01
-    if mode == 'het': exac_cutoff = 0.001
-
     if not data: return None
-    dp = copy.deepcopy(data)
-    for h,v in dp.iteritems():
-        failed = []
-        for p,var in v['data'].iteritems():
-            count = 0
-            for variant in var['var']:
-                if variant['exac'] <= exac_cutoff and ((not variant['cadd']) or variant['cadd'] >= CADD_cutoff): count += 1
-            if not count: failed.append(p)
-        for p in failed:
-            del v['data'][p]
-    if mode == 'hom_comp':
-        write_to_data(data,dp,'recessive')
-    elif mode == 'het':
-        # dominant_all doesn't eliminate hom_comphet
-        write_to_data(data,dp,'dominant_all')
-        # dominant_single, remove patients who have more than one var on gene
-        for h,v in dp.iteritems():
-            failed = []
-            for p,var in v['data'].iteritems():
-                count = 0
-                for variant in var['var']:
-                    if variant['exac'] <= exac_cutoff and ((not variant['cadd']) or variant['cadd'] >= CADD_cutoff): count += 1
-                if count > 1:
-                    failed.append(p)
-            for p in failed:
-                del v['data'][p]
-        write_to_data(data,dp,'dominant_single')
+    dubious_p = {}
+    dom_single_p = {}
+    dubious_single_p = {}
+    qualified_p = {}
+    qualified_v = []
+    # get qualified patients
+    for k1,v1 in data['patients'].items():
+        count = 0 # controls qualified var count
+        subcount = 0 # controls dubious var count
+        for var in v1['variants']:
+            if ((mode == 'r' and data['variants'][var]['exac_af'] <= calc_cutoffs['exac_rec'] and data['variants'][var]['exac_hom'] <= calc_cutoffs['exac_hom']) or (mode=='d' and data['variants'][var]['exac_af'] <= calc_cutoffs['exac_dom'])) and (not data['variants'][var]['cadd'] or data['variants'][var]['cadd'] >= calc_cutoffs['cadd']): 
+                count += 1
+                if 'filter' in data['variants'][var] and data['variants'][var]['filter'] != 'PASS':
+                    subcount += 1
+                else:
+                    qualified_v.append(var)
+        if (mode == 'r' and count > 1) or (mode == 'd' and count):
+            qualified_p[k1] = {'unrelated':v1['unrelated']}
+            if mode == 'd' and count == 1:
+                dom_single_p[k1] = {'unrelated':v1['unrelated']}
+            if subcount and ((mode == 'd' and count == subcount) or (mode == 'r' and count - subcount < 2)):
+                dubious_p[k1] = {'unrelated':v1['unrelated']}
+                dubious_single_p[k1] = {'unrelated':v1['unrelated']}
+            if subcount and (mode == 'd' and count - subcount <= 1):
+                dubious_single_p[k1] = {'unrelated':v1['unrelated']}
+    # calculate pat_a
+    mt = {'hom_comp':'recessive','het':'dominant'}
+    pat_a = {
+            'unrelated':data['unrelated_pat_a'],
+            'related':data['related_pat_a'],
+            'unrelated_single':data['unrelated_pat_a'],
+            'related_single':data['related_pat_a'],
+            'unrelated_pass':data['unrelated_pat_a'] - len([i for i,j in dubious_p.iteritems() if j['unrelated']]),
+            'related_pass':data['related_pat_a'] - len(dubious_p),
+            'unrelated_pass_single':data['unrelated_pat_a'] - len([i for i,j in dubious_single_p.iteritems() if j['unrelated']]),
+            'related_pass_single':data['related_pat_a'] - len(dubious_single_p)
+            }
+    # pat_g
+    related_pat_g = len(qualified_p)
+    unrelated_pat_g = len([i for i,j in qualified_p.items() if j['unrelated']])
+    unrelated_pass  = set([i for i,j in qualified_p.items() if j['unrelated']]) - set(dubious_p.keys())
+    pat_g = {
+            'related':related_pat_g,
+            'unrelated':unrelated_pat_g,
+            'related_pass':related_pat_g - len(dubious_p),
+            'unrelated_pass':unrelated_pat_g - (pat_a['unrelated'] - pat_a['unrelated_pass']),
+            'unrelated_pass':len(unrelated_pass),
+            'related_single':len(dom_single_p),
+            'unrelated_single':len([i for i,j in dom_single_p.items() if j['unrelated']]),
+            'related_pass_single':len(set(dom_single_p.keys()) - set(dubious_single_p.keys())),
+            'unrelated_pass_single':len(set([i for i,j in dom_single_p.iteritems() if j['unrelated']]) - set([i for i,j in dubious_single_p.items() if j['unrelated']]))
+            }
+    # populate result
+    result = {
+            'patients':list(unrelated_pass),
+            'variants':{},
+            }
+    for p in unrelated_pass:
+        result['variants'].update({v:1 for v in data['patients'][p]['variants'] if v in qualified_v})
+    # calculate
+    for k1,v1 in data['data'].items():
+        if k1 == 'HP:0000001':continue
+        # get pat_h
+        unrelated_pat_h = v1['unrelated_pat_h']
+        related_pat_h = v1['related_pat_h']
+        pat_h = {
+                'unrelated':unrelated_pat_h,
+                'related':related_pat_h,
+                'unrelated_single':unrelated_pat_h,
+                'related_single':related_pat_h,
+                'unrelated_pass':unrelated_pat_h - len(set([i for i in v1['p'][mode] if data['patients'][i]['unrelated']]) & set(dubious_p.keys())),
+                'related_pass':related_pat_h - len(set(v1['p'][mode]) & set(dubious_p.keys())),
+                'unrelated_pass_single':unrelated_pat_h - len(set([i for i in v1['p']['d'] if data['patients'][i]['unrelated']]) & set(dubious_single_p.keys())),
+                'related_pass_single':related_pat_h - len(set(v1['p']['d']) & set(dubious_single_p.keys()))
+                }
+        # get pat_gh
+        pat_gh = {
+                'unrelated':len(set([i for i in v1['p'][mode] if data['patients'][i]['unrelated']]) & set(qualified_p.keys())),
+                'related':len(set(v1['p'][mode]) & set(qualified_p.keys())),
+                'unrelated_pass':len((set([i for i in v1['p'][mode] if data['patients'][i]['unrelated']]) & set(qualified_p.keys())) - set(dubious_p.keys())),
+                'related_pass':len((set(v1['p'][mode]) & set(qualified_p.keys())) - set(dubious_p.keys())),
+                'unrelated_single':len(set([i for i in v1['p']['d'] if data['patients'][i]['unrelated']]) & set(dom_single_p.keys())),
+                'related_single':len(set(v1['p']['d']) & set(dom_single_p.keys())),
+                'unrelated_pass_single':len((set([i for i in v1['p']['d'] if data['patients'][i]['unrelated']]) & set(dom_single_p.keys())) - set(dubious_single_p.keys())),
+                'related_pass_single':len((set(v1['p']['d']) & set(dom_single_p.keys())) - set(dubious_single_p.keys()))
+                }
+        #calculate
+        if mode == 'r':
+            # for key in ['related','unrelated','related_pass','unrelated_pass']:
+            # only use unrelated_pass, rest can be calculated on live using js
+            for key in ['unrelated_pass']:
+                v1['r_'+key+'_p_val'] = fisher.pvalue(pat_a[key]-pat_h[key]-pat_g[key]+pat_gh[key],pat_h[key]-pat_gh[key],pat_g[key]-pat_gh[key],pat_gh[key]).right_tail
+        else:
+            if debug and k1 == debug:
+                tk ='unrelated'
+                print pat_a[tk]
+                print pat_g[tk]
+                print pat_h[tk]
+                print pat_gh[tk]
+            #for key in pat_gh:
+            for key in ['unrelated_pass','unrelated_pass_single']:
+                v1['d_'+key+'_p_val'] = fisher.pvalue(pat_a[key]-pat_h[key]-pat_g[key]+pat_gh[key],pat_h[key]-pat_gh[key],pat_g[key]-pat_gh[key],pat_gh[key]).right_tail
+
+    return result
+
 def get_gene_hpo(gene_id):
     # similar to get_rare_var_p_hpo, but this one has hpo as key 
     #return {'hom_comp':{'HP:0001234':{id:'HP:0001234', name:'hell', data:{p_id1:[{v_id,exac_af,cadd_phred}],p_id2:[{v_id,exac_af,cadd_phred}]}}},
@@ -159,7 +163,7 @@ def get_gene_hpo(gene_id):
     #all_vars = db.genes.find_one({'gene_id':gene_id})['variant_ids']
     # when all_vars too long, cursor will die. convert to list
     all_vars = list(db.variants.find({'genes':gene_id}))
-    results = {'hom_comp':{}, 'het':{}} 
+    results = {'data':{}, 'patients':{}, 'variants':{}} 
     #for v in all_vars:
     for var in all_vars:
         v = var['variant_id']
@@ -197,15 +201,19 @@ def get_gene_hpo(gene_id):
         var['cadd'] = max(var_obj.cadd) if type(var_obj.cadd) is list else var_obj.cadd
         cadd_phred = var['cadd']
 
-        # get exac_af
-        exac_af = 0
+        # get exac_af/hom
+        exac_af = exac_hom = 0
         if var_obj.in_exac:
             # exac_af = var_obj.EXAC['AF'], gives error on multiallelic site, such as 8-43002117-C-A
             if var_obj.ExAC_freq:
                 exac_af = 0. if not var_obj.ExAC_freq['total_ans'] else float(var_obj.ExAC_freq['total_acs'])/var_obj.ExAC_freq['total_ans']
-        # not interested if af is > 0.01
-        if exac_af > 0.01:
+                exac_hom = var_obj.ExAC_freq.get('total_homs',0)
+        # not interested if af is higher than exac_recessive cutoff
+        if exac_af > filter_cutoffs['exac_rec'] or exac_hom > filter_cutoffs['exac_hom']:
             continue
+        '''
+        var_obj.ExAC_freq['total_homs'] encode the number of homs. good for recessive cases. will incorporate
+        '''
         # get relevant info from vcf
         #uclex_af = var_obj.allele_freq # not using it
         
@@ -214,59 +222,24 @@ def get_gene_hpo(gene_id):
         hom_p = var_obj.hom_samples
         for p in hom_p:
             if p not in patients_hpo['related']: continue
-            populate_mode_p(results, ['het','hom_comp'], p, exac_af, v, cadd_phred, var_obj.filter)
+            populate_mode_p(results, 'r', p, exac_af, exac_hom, v, cadd_phred, var_obj.filter)
 
         # dealing with het patients. note to check length of exac_af. longer than one?
         # also added it to 'hom_comp'
         het = var_obj.het_samples
         for p in het:
             if p not in patients_hpo['related']: continue
-            populate_mode_p(results, ['het'], p, exac_af, v, cadd_phred, var_obj.filter)
-    # clean het with cut at exac_af==0.001
-    print 'before clean, rare_het length = %s' % len(results['het'])
-    bad_h = []
-    for key, h in results['het'].iteritems():
-        bad = 1
-        for p, exac in h['data'].iteritems():
-            if min([e['exac'] for e in exac['var']]) <= 0.001:
-                bad = 0
-        if bad:
-            bad_h.append(key)
-    for h in bad_h:
-        del results['het'][h]
-    # add version
-    #for mode in ['hom_comp','het']:
-    #    results[mode]['version'] = version
-    print 'after clean, rare_het length = %s' % len(results['het'])
-    print 'rare_hom_comp length = %s' % len(results['hom_comp'])
-    return {'version':version, 'description': '', 'gene_id':gene_id,'release':release,'hom_comp':results['hom_comp'],'het':results['het']}
+            populate_mode_p(results, 'd', p, exac_af, exac_hom, v, cadd_phred, var_obj.filter)
+    # prepare to return the result
+    results['version'] = version
+    results['description'] = ''
+    results['gene_id'] = gene_id
+    results['release'] = release
+    results['related_pat_a'] = related_pat_a
+    results['unrelated_pat_a'] = unrelated_pat_a
+    return results
 
-
-def get_gradient_colour_raw(this_IC, max_IC, min_IC, max_colour, min_colour):
-   # this is the basic function to get a colour given the range and domain
-   # you can add a wrapper to shorten the parameter's length
-   ratio = (this_IC - min_IC) / (max_IC - min_IC)
-   result = [0,0,0]
-   for i in range(3):
-        result[i] = (max_colour[i] - min_colour[i]) * ratio + min_colour[i]
-   return result
-
-def translate_colour(colour):
-    # from [255,255,255] to #FFFFFF
-    result = '#'
-    for c in colour:
-        temp = hex(int(c))[2:]
-        if len(temp) == 1:
-            result += '0' + temp
-        else:
-            result += hex(int(c))[2:]
-    return result
-
-def IC(freq):
-    # calculate information content
-    return -math.log(freq)
-
-def populate_mode_p(results, modes, p, exac_af, v, cadd_phred, filter):
+def populate_mode_p(results, mode, p, exac_af, exac_hom, v, cadd_phred, filter):
     # get all hpos of the patient. Note that related has all the patients in there
     hpos = patients_hpo['related'][p]['hpo']
     minimum_set = hpo_minimum_set(hpo_db, hpo_ids=hpos)
@@ -275,56 +248,41 @@ def populate_mode_p(results, modes, p, exac_af, v, cadd_phred, filter):
     unrelated = 0
     if p in patients_hpo['unrelated']:
         unrelated = 1
-
-    for mode in modes:
-        # copy if mode = homozygous
-        copy = 2 if len(modes) == 2 else 1
-        for h in hpos:
-            hpo_dict = hpo_db.hpo.find_one({'id':h})
-            this_related_IC = IC(len(hpo_freq['related'][h])/float(related_pat_a))
-            related_colour = get_gradient_colour_raw(this_related_IC, related_max_IC, min_IC, max_colour, min_colour)
-            this_unrelated_IC = IC(len(hpo_freq['unrelated'][h])/float(unrelated_pat_a)) if h in hpo_freq['unrelated'] else 0
-            unrelated_colour = get_gradient_colour_raw(this_unrelated_IC, related_max_IC, min_IC, max_colour, min_colour)
-            if h not in results[mode]:
-                # initialise
-                results[mode][h] = {
-                        'id':h,
-                        'name':hpo_dict['name'][0],
-                        'is_a':hpo_dict.get('is_a',[]),
-                        'related_colour':translate_colour(related_colour),
-                        'unrelated_colour':translate_colour(unrelated_colour),
-                        'unrelated_pat_a':unrelated_pat_a,
-                        'related_pat_a':related_pat_a,
-                        'unrelated_pat_h':len(hpo_freq['unrelated'].get(h,[])),
-                        'related_pat_h':len(hpo_freq['related'][h]),
-                        'data':{}
-                        }
-            
-            # populate data
-            if p in results[mode][h]['data']:
-                results[mode][h]['data'][p]['var'].extend([{'variant_id':v,'exac':exac_af, 'cadd':cadd_phred}]*copy)
-                if len(modes) == 1:
-                    # het mode, and this patient has more than one rare variants
-                    # copy it to hom_comp
-                    results['hom_comp'][h] = results['hom_comp'].get(h,{
-                        'id':h,
-                        'name':hpo_dict['name'][0],
-                        'is_a':hpo_dict.get('is_a',[]),
-                        'related_colour':translate_colour(related_colour),
-                        'unrelated_colour':translate_colour(unrelated_colour),
-                        'unrelated_pat_a':unrelated_pat_a,
-                        'related_pat_a':related_pat_a,
-                        'unrelated_pat_h':len(hpo_freq['unrelated'].get(h,[])),
-                        'related_pat_h':len(hpo_freq['related'][h]),
-                        'data':{}}
-                        )
-
-                    if p in results['hom_comp'][h]['data']:
-                        results['hom_comp'][h]['data'][p]['var'].append({'variant_id':v,'exac':exac_af, 'cadd':cadd_phred, 'filter':filter})
-                    else:
-                        results['hom_comp'][h]['data'][p] = results['het'][h]['data'][p]
-            else:
-                results[mode][h]['data'][p] = {'hpo':hpos_names, 'unrelated':unrelated, 'var':[{'variant_id':v, 'exac':exac_af, 'cadd':cadd_phred, 'filter':filter}]*copy}
+    # add patients
+    if p not in results['patients']:
+        results['patients'][p] = {'hpo':hpos_names, 'unrelated':unrelated, 'variants':[]}
+    # add variants according to homozygosity
+    # hom = 2, het = 1
+    copy = 2 if mode == 'r' else 1
+    results['patients'][p]['variants'].extend([v]*copy)
+    if v not in results['variants']:
+        results['variants'][v] = {
+                'exac_af':exac_af,
+                'filter':filter,
+                'exac_hom':exac_hom,
+                'cadd':cadd_phred
+        }
+    
+    for h in hpos:
+        hpo_dict = hpo_db.hpo.find_one({'id':h})
+        if h not in results['data']:
+            # initialise
+            results['data'][h] = {
+                    'id':h,
+                    'name':hpo_dict['name'][0],
+                    'is_a':hpo_dict.get('is_a',[]),
+                    'unrelated_pat_h':len(hpo_freq['unrelated'].get(h,[])),
+                    'related_pat_h':len(hpo_freq['related'][h]),
+                    'p':{'d':[],'r':[]}
+                    }
+        if p in results['data'][h]['p'][mode]:
+            if mode == 'd' and p not in results['data'][h]['p']['r']:
+                # dominant mode and more than 1 variants, copy it to recessive
+                results['data'][h]['p']['r'].append(p)
+        else:
+            results['data'][h]['p'][mode].append(p)
+        if mode == 'r' and exac_af <= filter_cutoffs['exac_dom'] and p not in results['data'][h]['p']['d']:
+            results['data'][h]['p']['d'].append(p)
 
 def get_chrom_genes(chroms, db):
     # give chrom numbers, get all genes on them
@@ -355,24 +313,27 @@ if __name__ == "__main__":
                       dest="chrom",
                       help="which chrom to process?")
     (options, args) = parser.parse_args()
-    version = 2
+    version = 6
     release = '2016_Aug'
-    CADD_cutoff = 15
-    description = 'version 1:merge all data and stats into one file;version 2:correct a bug when one variant is on multiple genes with messed up consequence annotation'
+    # filter_cutoffs is used to include patients and variants in the result file
+    # calc_cutoffs is used to get patients for phenogenon test
+    filter_cutoffs = {
+        'exac_rec':0.01,
+        'exac_hom':10,
+        'exac_dom':0.001,
+        'cadd':0
+    }
+    calc_cutoffs = {
+        'exac_rec':0.01,
+        'exac_hom':2,
+        'exac_dom':0.0001,
+        'cadd':15
+    }
+
+    description = 'add missing filters\ndo not keep cleaned variant_id\nremove redundant patient/var info'
     genes = get_chrom_genes([options.chrom], db)
     #genes=['TRIM50'];
     #impute_file = '/cluster/project8/vyp/doug/uclex/uclex_phased.bed'
-    # get vcf file
-    vcf_location = '/SAN/vyplab/UCLex/current'
-    vcf_release = 'July2016'
-    vcf_file = os.path.join(vcf_location,'mainset_'+vcf_release+'_chr'+options.chrom+'.vcf.gz')
-    tbx = pysam.TabixFile(vcf_file) 
-    # get tbx header
-    tbx_header = []
-    for h in tbx.header:
-        if h[:2] == '##': continue
-        tbx_header = h.split('\t')
-        break
     patients_hpo_file = 'patients_hpo_snapshot_'+release+'.tsv'
     patients_hpo = parse_patients_hpo(patients_hpo_file)
     hpo_freq_file = 'hpo_freq_'+release+'.json'
@@ -381,12 +342,6 @@ if __name__ == "__main__":
     related_pat_a = len(related_pat)
     unrelated_pat = hpo_freq['unrelated']['HP:0000001']
     unrelated_pat_a = len(unrelated_pat)
-    # set up IC and colour
-    min_IC = 0
-    min_colour = [255, 0, 0]
-    max_colour = [198, 222, 255]
-    related_max_IC = IC(1./related_pat_a)
-    unrelated_max_IC = IC(1./unrelated_pat_a)
     print 'related pat_a: %s, unrelated pat_a: %s' % (related_pat_a, unrelated_pat_a)
     i = 0
     #v = '7-138601865-G-A'
@@ -399,7 +354,9 @@ if __name__ == "__main__":
         if not gene_id.startswith('ENSG'): gene_id = get_gene_by_name(db, gene_id)['gene_id']
         gene_name=db.genes.find_one({'gene_id':gene_id})['gene_name']
         # already done?
-        filename = os.path.join('gene_hpo',release,str(version),gene_id + '.json')
+        filepath = os.path.join('gene_hpo', release, str(version))
+        mkdir_p(filepath)
+        filename = os.path.join(filepath, gene_id + '.json')
         if os.path.isfile(filename) and os.stat(filename).st_size:
             bad = 0 # change it to 1 if want to overwrite anyway.
             try:
@@ -418,11 +375,12 @@ if __name__ == "__main__":
         result = get_gene_hpo(gene_id)
         #print json.dumps(result, indent=4)
         #sys.exit()
-        for mode in ['hom_comp','het']:
+        #for mode in ['r','d']:
             # populate fisher p
-            populate_fisher_p(result[mode],mode)
+            # populate_fisher_p(result,mode,calc_cutoffs)
         outf = open(filename,'w')
         json.dump(result,outf,indent=4)
+
 
             # if you want a static dot file, run the following
             #dot_data = transform(rare_p_hpo[mode], hpo_freq)
