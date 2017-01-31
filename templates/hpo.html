@@ -516,10 +516,10 @@ function fetchPhenoGenon() {
                         var gene_name = document.createElement("div");
                         gene_name.className = "description";
                         gene_name.innerHTML = "<a target=_blank href=/gene/"+lit_genes[i].gene_name+">"+lit_genes[i].gene_name+"</a>";
-                        var unrelated_dominant_single_p_val=document.createTextNode(lit_genes[i]['phenogenon']['het'].unrelated_dominant_single_p_val);
+                        var unrelated_dominant_all_p_val=document.createTextNode(lit_genes[i]['phenogenon']['het'].unrelated_dominant_all_p_val);
                         var unrelated_recessive_p_val=document.createTextNode(lit_genes[i]['phenogenon']['hom_comp'].unrelated_recessive_p_val);
                         cell.appendChild(gene_name);
-                        cell_1.appendChild(unrelated_dominant_single_p_val);
+                        cell_1.appendChild(unrelated_dominant_all_p_val);
                         cell_2.appendChild(unrelated_recessive_p_val);
                         row.appendChild(cell);
                         row.appendChild(cell_1);

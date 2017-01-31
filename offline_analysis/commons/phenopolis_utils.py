@@ -8,6 +8,11 @@ import os
 import errno
 
 '''
+constants
+'''
+VALID_CHROMOSOMES = [str(i) for i in range(1,23)] + ['X','Y']
+
+'''
 parse config file, and make config global. If test, set DB_HOST as 'localhost'
 '''
 def _parse_config():
@@ -40,6 +45,20 @@ def get_mongo_collections():
             'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['db_name']],
             'patient_db': conn['patients'],
     }
+
+'''
+given chromosomes and db, return genes
+'''
+def get_chrom_genes(chroms, db):
+    # give chrom numbers, get all genes on them
+    result = []
+    for chrom in chroms:
+        chrom = str(chrom)
+        if chrom not in VALID_CHROMOSOMES:
+            raise ValueError('Error: %s is not a valid chromosome!' % chrom)
+        genes = [g['gene_id'] for g in db.genes.find({'chrom':chrom})]
+        result.extend(genes)
+    return result
 
 '''
 mkdir -p
