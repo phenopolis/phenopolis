@@ -35,16 +35,24 @@ OFFLINE_CONFIG = _parse_config()
 '''
 get useful mongo collections
 '''
-def get_mongo_collections():
+def get_mongo_collections(test=None):
     conn = pymongo.MongoClient(
-            host = OFFLINE_CONFIG['mongodb']['DB_HOST'],
-            port = int(OFFLINE_CONFIG['mongodb']['DB_PORT']),
-            )
-    return {
+        host = OFFLINE_CONFIG['mongodb']['DB_HOST'],
+        port = int(OFFLINE_CONFIG['mongodb']['DB_PORT']),
+    )
+    if not test:
+        return {
             'hpo_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME_HPO'],
             'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME']],
             'patient_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME_PATIENTS'],
-    }
+        }
+
+    else:
+        return {
+            'hpo_db': conn[test['hpo_db']],
+            'phenopolis_db': conn[test['phenopolis_db']],
+            'patient_db': conn[test['patient_db']],
+        }
 
 '''
 given chromosomes and db, return genes
