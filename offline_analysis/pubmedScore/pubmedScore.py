@@ -14,7 +14,6 @@ import re
 from optparse import OptionParser
 import itertools
 from urllib2 import HTTPError, URLError
-import pysam
 import csv
 import sys
 import re

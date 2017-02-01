@@ -13,7 +13,6 @@ dbs = get_mongo_collections({
 })
 # Load the test data set.
 def load_data():
-    print '!!!!!!!'
     indexes = ['id', 'name']
     import_data('hpo_db', 'hpo', "./tests/data/hpo-hpo.json", indexes)
 
