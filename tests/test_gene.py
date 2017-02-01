@@ -28,11 +28,27 @@ class GenePageTestCase(unittest.TestCase):
     def test_gene_page(self):
         load_data.load_data()
         rv = self.login('demo', 'demo123')
-        rv = self.gene_page('TTLL5')
-        assert 'TTLL5' in rv.data 
-        assert 'Macular dystrophy' in rv.data 
-        assert 'Abnormality of the retina' in rv.data
-        assert 'ENSG00000119685' in rv.data
+        page = self.gene_page('TTLL5')
+        assert page.status_code == 200
+        assert 'TTLL5' in page.data 
+        assert 'ENSG00000119685' in page.data
+        assert 'Macular dystrophy' in page.data 
+        assert 'Abnormality of the macula' in page.data
+        assert 'Autosomal recessive inheritance' in page.data
+        assert 'Mode of inheritance' in page.data
+        assert 'Visual impairment' in page.data
+        assert 'Abnormality of vision' in page.data
+        assert 'Abnormal eye physiology' in page.data
+        assert 'Retinal dystrophy' in page.data
+        assert 'Abnormality of the retina' in page.data
+        assert 'Abnormality of the fundus' in page.data
+        assert 'Abnormality of the posterior segment of the globe' in page.data
+        assert 'Abnormality of the globe' in page.data
+        assert 'Abnormal eye morphology' in page.data
+        assert 'Abnormality of the eye' in page.data
+        assert 'Phenotypic abnormality' in page.data
+        assert 'All' in page.data
+
 
 if __name__ == '__main__':
     unittest.main()

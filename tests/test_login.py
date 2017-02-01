@@ -31,8 +31,10 @@ class LoginTestCase(unittest.TestCase):
         rv = self.login('demo', 'demo123x')
         assert 'Invalid Credentials. Please try again.' in rv.data
         rv = self.login('demo', 'demo123')
+        assert rv.status_code == 200
         assert 'Search Page' and 'HPO Browser' in rv.data
         rv = self.logout()
+        assert rv.status_code == 200
         assert 'Please login' and 'username' and 'password' in rv.data
 
 if __name__ == '__main__':
