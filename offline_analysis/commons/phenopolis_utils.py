@@ -37,13 +37,13 @@ get useful mongo collections
 '''
 def get_mongo_collections():
     conn = pymongo.MongoClient(
-            host = OFFLINE_CONFIG['mongodb']['db_host'],
-            port = int(OFFLINE_CONFIG['mongodb']['db_port']),
+            host = OFFLINE_CONFIG['mongodb']['DB_HOST'],
+            port = int(OFFLINE_CONFIG['mongodb']['DB_PORT']),
             )
     return {
-            'hpo_db': conn['hpo'],
-            'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['db_name']],
-            'patient_db': conn['patients'],
+            'hpo_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME_HPO'],
+            'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME']],
+            'patient_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME_PATIENTS'],
     }
 
 '''

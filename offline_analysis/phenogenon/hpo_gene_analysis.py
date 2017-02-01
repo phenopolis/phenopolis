@@ -6,6 +6,8 @@ from __future__ import print_function, division
 import json
 import os
 import sys
+sys.path.append('../commons')
+from phenopolis_utils import *
 import time
 from gene_hpo_analysis import *
 
@@ -16,8 +18,8 @@ hpo_freq_file = 'hpo_freq_'+release+'.json'
 hpo_freq = json.load(open(hpo_freq_file,'r'))
 result_file = ''
 vp_ratio_cutoffs = {
-        'r': 1,
-        'd': 0.8,
+        'r': float(OFFLINE_CONFIG['filters']['vp_ratio_rec']),
+        'd': float(OFFLINE_CONFIG['filters']['vp_ratio_dom']),
         }
 calc_cutoffs = {
     'exac_rec':0.01,

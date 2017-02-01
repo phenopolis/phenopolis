@@ -10,35 +10,26 @@ from lookups import *
 import pymongo
 import json
 import math
-from scipy.stats import chi2_contingency
+#from scipy.stats import chi2_contingency
 import numpy as np
 import os
 import sys
+sys.path.append('../commons')
+from phenopolis_utils import *
 import time
 import rest
 import fisher
 import copy
-import errno
 #from plinkio import plinkfile
 
-conn = pymongo.MongoClient(host='phenotips', port=27017)
-db = conn['uclex']
-hpo_db=conn['hpo']
-patient_db=conn['patients']
+# get dbs
+dbs = get_mongo_collections()
 
 debug = None
 
 '''
 defs
 '''
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:  # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
 
 def populate_fisher_p(data,mode,calc_cutoffs):
     # add fisher p value into the data.
@@ -162,7 +153,7 @@ def get_gene_hpo(gene_id):
     # get all variants on this gene
     #all_vars = db.genes.find_one({'gene_id':gene_id})['variant_ids']
     # when all_vars too long, cursor will die. convert to list
-    all_vars = list(db.variants.find({'genes':gene_id}))
+    all_vars = list(dbs['phenopolis_db'].variants.find({'genes':gene_id}))
     results = {'data':{}, 'patients':{}, 'variants':{}} 
     #for v in all_vars:
     for var in all_vars:
@@ -191,7 +182,7 @@ def get_gene_hpo(gene_id):
                     break
         if low: continue
         try:
-            var_obj = orm.Variant(variant_id=v,db=db)
+            var_obj = orm.Variant(variant_id=v,db=dbs['phenopolis_db'])
         except:
             print v+'not in vcf'
             continue
@@ -242,8 +233,8 @@ def get_gene_hpo(gene_id):
 def populate_mode_p(results, mode, p, exac_af, exac_hom, v, cadd_phred, filter):
     # get all hpos of the patient. Note that related has all the patients in there
     hpos = patients_hpo['related'][p]['hpo']
-    minimum_set = hpo_minimum_set(hpo_db, hpo_ids=hpos)
-    minimum_set_array = list(hpo_db.hpo.find({'id':{'$in':minimum_set}}))
+    minimum_set = hpo_minimum_set(dbs['hpo_db'], hpo_ids=hpos)
+    minimum_set_array = list(dbs['hpo_db'].hpo.find({'id':{'$in':minimum_set}}))
     hpos_names = [i['name'][0] for i in minimum_set_array]
     unrelated = 0
     if p in patients_hpo['unrelated']:
@@ -264,7 +255,7 @@ def populate_mode_p(results, mode, p, exac_af, exac_hom, v, cadd_phred, filter):
         }
     
     for h in hpos:
-        hpo_dict = hpo_db.hpo.find_one({'id':h})
+        hpo_dict = dbs['hpo_db'].hpo.find_one({'id':h})
         if h not in results['data']:
             # initialise
             results['data'][h] = {
@@ -283,14 +274,6 @@ def populate_mode_p(results, mode, p, exac_af, exac_hom, v, cadd_phred, filter):
             results['data'][h]['p'][mode].append(p)
         if mode == 'r' and exac_af <= filter_cutoffs['exac_dom'] and p not in results['data'][h]['p']['d']:
             results['data'][h]['p']['d'].append(p)
-
-def get_chrom_genes(chroms, db):
-    # give chrom numbers, get all genes on them
-    result = []
-    for chrom in chroms:
-        genes = [g['gene_id'] for g in db.genes.find({'chrom':str(chrom)})]
-        result.extend(genes)
-    return result
 
 def parse_patients_hpo(file):
     inf = open(file,'r')
@@ -331,7 +314,7 @@ if __name__ == "__main__":
     }
 
     description = 'add missing filters\ndo not keep cleaned variant_id\nremove redundant patient/var info'
-    genes = get_chrom_genes([options.chrom], db)
+    genes = get_chrom_genes([options.chrom], dbs['phenopolis_db'])
     #genes=['TRIM50'];
     #impute_file = '/cluster/project8/vyp/doug/uclex/uclex_phased.bed'
     patients_hpo_file = 'patients_hpo_snapshot_'+release+'.tsv'
@@ -351,8 +334,8 @@ if __name__ == "__main__":
     for gene_id in genes:
         i += 1
         
-        if not gene_id.startswith('ENSG'): gene_id = get_gene_by_name(db, gene_id)['gene_id']
-        gene_name=db.genes.find_one({'gene_id':gene_id})['gene_name']
+        if not gene_id.startswith('ENSG'): gene_id = get_gene_by_name(dbs['phenopolis_db'], gene_id)['gene_id']
+        gene_name=dbs['phenopolis_db'].genes.find_one({'gene_id':gene_id})['gene_name']
         # already done?
         filepath = os.path.join('gene_hpo', release, str(version))
         mkdir_p(filepath)
