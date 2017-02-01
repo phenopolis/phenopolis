@@ -11,6 +11,7 @@ before_install:
 env:
   - TEST_SUITE=server
   - TEST_SUITE=offline
+
 install: 
 
 # conda - from http://conda.pydata.org/docs/travis.html#using-conda-with-travis-ci
@@ -34,7 +35,6 @@ install:
         conda info -a;
         conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION scipy==0.18.1;
         source activate test-environment;
-         # end of conda install
         pip install Cython==0.25.2 --install-option="--no-cython-compile"; 
     fi
   - pip install -r requirements_$TEST_SUITE.txt
