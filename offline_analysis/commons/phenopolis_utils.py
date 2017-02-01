@@ -31,20 +31,19 @@ def _parse_config():
     return result
 
 OFFLINE_CONFIG = _parse_config()
-
 '''
 get useful mongo collections
 '''
 def get_mongo_collections(test=None):
     conn = pymongo.MongoClient(
-        host = OFFLINE_CONFIG['mongodb']['DB_HOST'],
-        port = int(OFFLINE_CONFIG['mongodb']['DB_PORT']),
+        host = OFFLINE_CONFIG['mongodb']['db_host'],
+        port = int(OFFLINE_CONFIG['mongodb']['db_port']),
     )
     if not test:
         return {
-            'hpo_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME_HPO'],
-            'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME']],
-            'patient_db': conn[OFFLINE_CONFIG['mongodb']['DB_NAME_PATIENTS'],
+            'hpo_db': conn[OFFLINE_CONFIG['mongodb']['db_name_hpo']],
+            'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['db_name']],
+            'patient_db': conn[OFFLINE_CONFIG['mongodb']['db_name_patients']],
         }
 
     else:
