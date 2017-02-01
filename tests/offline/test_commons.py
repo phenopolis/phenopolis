@@ -1,9 +1,8 @@
 
 import unittest
 import sys
-sys.path.append('offline_analysis/commons')
-sys.path.append('tests')
 import load_data
+sys.path.append('offline_analysis/commons')
 from phenopolis_utils import *
 
 class utilsTestCase(unittest.TestCase):
@@ -13,7 +12,10 @@ class utilsTestCase(unittest.TestCase):
             'phenopolis_db':'test_uclex',
             'patient_db':'test_patients',
         }
+        load_data.load_data()
 
+    def tearDown(self):
+        pass
     def test_mongodb(self):
         # hpo
         db = get_mongo_collections(self.db_config)

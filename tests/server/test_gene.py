@@ -2,7 +2,6 @@
 import unittest
 import runserver
 import sys
-sys.path.append('tests')
 import load_data
 
 class GenePageTestCase(unittest.TestCase):
