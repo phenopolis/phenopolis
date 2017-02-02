@@ -27,12 +27,17 @@ class LoginTestCase(unittest.TestCase):
 
     def test_login_logout(self):
         rv = self.login('demox', 'demo123')
+        assert rv.status_code == 200
         assert 'Invalid Credentials. Please try again.' in rv.data
+        
         rv = self.login('demo', 'demo123x')
+        assert rv.status_code == 200
         assert 'Invalid Credentials. Please try again.' in rv.data
+        
         rv = self.login('demo', 'demo123')
         assert rv.status_code == 200
         assert 'Search Page' and 'HPO Browser' in rv.data
+        
         rv = self.logout()
         assert rv.status_code == 200
         assert 'Please login' and 'username' and 'password' in rv.data
