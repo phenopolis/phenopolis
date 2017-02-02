@@ -60,19 +60,6 @@ def restart_line():
     sys.stdout.flush()
 
 '''
-to check if an iterable is empty
-'''
-def peek(iterable):
-    try:
-        first = next(iterable)
-    except RuntimeError:
-        return None
-    except StopIteration:
-        return None
-    return itertools.chain([first], iterable)
-
-
-'''
 find the freaking PID, Title or Abstract no matter what!
 '''
 def find_item(obj, key):
