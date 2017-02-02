@@ -95,7 +95,6 @@ def individual_page(individual):
     else:
         update_status=0
     # get known and retnet genes
-    #known_genes = open('gene_list/ret_known_genes.txt', 'r').readline().strip().split()
     known_genes=[x['gene_name'] for x in db.retnet.find()]
     RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},projection={'_id':False})])
     # get combinatorics of features to draw venn diagram

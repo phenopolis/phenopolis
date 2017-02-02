@@ -8,19 +8,20 @@ import myvariant
 from vcf import vcf_query
 import hashlib
 from bson.json_util import dumps
+
 '''
 defs
 '''
 def hide_hpo_for_demo(data):
-    if data:
-        for mode in ['hom_comp','het']:
-            for k1,v1 in data[mode].iteritems():
-                # hide hpo
-                for k2,v2 in v1['data'].iteritems():
-                    v2['hpo'] = ['hidden']
-                # hide p_id
-                for k2 in v1['data'].keys():
-                    v1['data']['hidden_'+hashlib.sha224(k2).hexdigest()[:6]] = v1['data'].pop(k2)
+    if not data: return
+    for mode in ['hom_comp','het']:
+        for k1,v1 in data[mode].iteritems():
+            # hide hpo
+            for k2,v2 in v1['data'].iteritems():
+                v2['hpo'] = ['hidden']
+            # hide p_id
+            for k2 in v1['data'].keys():
+                v1['data']['hidden_'+hashlib.sha224(k2).hexdigest()[:6]] = v1['data'].pop(k2)
 '''
 routes
 '''
@@ -146,8 +147,7 @@ def sequence():
     server = "http://%s.rest.ensembl.org" % build
     ext = '''/sequence/region/human/%(chrom)s:%(start)s..%(end)s:%(strand)s?expand_5prime=%(margins)s;expand_3prime=%(margins)s;''' % locals()
     r = requests.get(server+ext, headers={'Content-Type':'application/json' })
-    if not r.ok:
-        return r.raise_for_status()
+    if not r.ok: return r.raise_for_status()
     decoded = r.json()
     # run primer3 to get primers suggestion
     # useful keys:
@@ -204,7 +204,6 @@ def sequence():
         right_tm=primer['PRIMER_RIGHT_0_TM']
         right_gc=primer['PRIMER_RIGHT_0_GC_PERCENT']
         product_length=primer['PRIMER_PAIR_0_PRODUCT_SIZE']
-    
     # construct object
     result = {'seq': seq,
             'var_id': var_id,
@@ -229,10 +228,7 @@ def sequence():
             'primer_size_max': primer_size_max,
             'PCR_size_range': PCR_size_range,
             }
-
-    return render_template('primer3_sequence.html',
-                            result = result,
-                            )
+    return render_template('primer3_sequence.html', result = result,)
     
 
 # test
@@ -241,7 +237,7 @@ def test():
     '''
     random test
     '''
-    retnet_f = 'retnet.json'
+    retnet_f=app.config['RETNET_JSON']
     RETNET = json.load(open(retnet_f, 'r'))
     relations = []
     genes = []
@@ -251,12 +247,7 @@ def test():
         for o in v['omim']:
             omims.append(o)
             relations.extend([(g,o)])
-
-    return render_template('test.html',
-                           relations = json.dumps(relations),
-                           genes = json.dumps(list(set(genes))),
-                           omims = json.dumps(list(set(omims)))
-                           )
+    return render_template('test.html', relations = json.dumps(relations), genes = json.dumps(list(set(genes))), omims = json.dumps(list(set(omims))))
 
 
 
