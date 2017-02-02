@@ -18,7 +18,7 @@ def homepage():
     #t = cache.get(cache_key)
     #if t: return t
     db=get_db()
-    patients_db=get_db('patients')
+    patients_db=get_db(app.config['DB_NAME_PATIENTS']) 
     total_variants=db.variants.count()
     print('total_variants',total_variants,)
     total_patients=patients_db.patients.count()

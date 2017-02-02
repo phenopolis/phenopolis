@@ -15,8 +15,8 @@ from load_individual import load_patient
 @requires_auth
 def individual_json(individual):
     db=get_db()
-    hpo_db=get_db('hpo')
-    patient_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
     #if not patient: return jsonify(result=None)
     patient = patient_db.patients.find_one({'external_id':individual},{'_id':False})
     patient['features']=[f for f in patient['features'] if f['observed']=='yes']
@@ -36,8 +36,8 @@ def individual_page(individual):
     p=conn.get_patient(eid=individual,auth=auth)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
-    hpo_db=get_db('hpo')
-    patient_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
     patient = db.patients.find_one({'external_id':individual})
     patient2 = patient_db.patients.find_one({'external_id':individual})
     if patient2 is None or 'report_id' not in patient2 or patient is None:
@@ -199,7 +199,7 @@ def individual_update(individual):
     p=conn.get_patient(eid=individual,auth=auth)
     print 'UPDATE'
     print p
-    print get_db('patients').patients.update({'external_id':individual},{'$set':p},w=0)
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p},w=0)
     if request.referrer:
         referrer=request.referrer
         u = urlparse(referrer)
