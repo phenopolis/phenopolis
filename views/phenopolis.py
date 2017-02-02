@@ -229,8 +229,8 @@ def individual_page(individual):
     p=conn.get_patient(eid=individual,auth=auth)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
-    hpo_db=get_db('hpo')
-    patient_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
     patient = db.patients.find_one({'external_id':individual})
     patient2 = patient_db.patients.find_one({'external_id':individual})
     if patient2 is None:
@@ -369,7 +369,7 @@ def individual_update(individual):
     p=conn.get_patient(eid=individual,auth=auth)
     print 'UPDATE'
     print p
-    print get_db('patients').patients.update({'external_id':individual},{'$set':p},w=0)
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p},w=0)
     if request.referrer:
         referrer=request.referrer
         u = urlparse(referrer)
@@ -382,7 +382,7 @@ def individual_update(individual):
 @app.route('/individuals')
 @requires_auth
 def individuals_page(page=None):
-    hpo_db=get_db('hpo')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
     def f(p):
         print p['external_id']
         p['features']=[f for f in p.get('features',[]) if f['observed']=='yes']
@@ -408,8 +408,8 @@ def individuals_page(page=None):
     patients=conn.get_patient(auth=auth).get('patientSummaries',[])
     eids=[p['eid'] for p in patients]
     print(eids)
-    patients=get_db('patients').patients.find({'external_id':{'$in':eids}})
-    #patients=get_db('patients').patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
+    patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
+    #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
     individuals=[f(p) for p in patients if 'external_id' in p]
     # family_history":{"consanguinity":true}
     return render_template('individuals_page.html',individuals=individuals)
@@ -433,10 +433,9 @@ def research_pubmed():
 
 @app.route('/hpo/<hpo_id>')
 def hpo_page(hpo_id):
-    patients_db=get_db('patients')
     db=get_db()
-    hpo_db=get_db('hpo')
-    patients_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     #patients=[p for p in patients_db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     print(hpo_id)
     if not hpo_id.startswith('HP:'):
@@ -492,8 +491,8 @@ def fetch_hpo():
         hpo_ids=request.args.get('hpo_ids').strip().split(',')
     hpo_id=hpo_ids[0]
     print('HPO',hpo_id)
-    hpo_db=get_db('hpo')
-    patients_db=get_db('patients')
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     hpo_patients=[p['external_id'] for p in lookups.get_hpo_patients(hpo_db,patients_db,hpo_id)]
     print('num patients',len(hpo_patients))
     res=jsonify(result=hpo_patients)
@@ -587,7 +586,7 @@ def private_variant_count():
         external_id=request.form['external_id'].strip()
     else:
         external_id=request.args.get('external_id').strip()
-    db=get_db('patients')
+    db=get_db(app.config['DB_NAME_PATIENTS'])
     p=db.patients.find_one({'external_id':external_id})
     if 'PRIVATE_MUT' not in p: private_variant_count=0
     else: private_variant_count=len(p['PRIVATE_MUT'])
@@ -597,7 +596,7 @@ def private_variant_count():
 
 @app.route('/mim/<mim_id>')
 def mim_page(mim_id):
-    db=get_db('patients')
+    db=get_db(app.config['DB_NAME_PATIENTS'])
     print(str(mim_id))
     patients=[p for p in db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     patient_ids=[p['external_id'] for p in patients]
@@ -632,7 +631,7 @@ def gene_page(gene_id):
     if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
     gene_name=db.genes.find_one({'gene_id':gene_id})['gene_name']
     print(gene_name)
-    hpo_string=lookups.get_gene_hpo(get_db('hpo'),gene_name)
+    hpo_string=lookups.get_gene_hpo(get_db(app.config['DB_NAME_HPO']),gene_name)
     #if gene_id in app.config['GENES_TO_CACHE']:
         #return open(os.path.join(app.config['GENE_CACHE_DIR'], '{}.html'.format(gene_id))).read()
     #else:
