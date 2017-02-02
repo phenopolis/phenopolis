@@ -1,6 +1,7 @@
 
 import unittest
 import runserver
+import sys
 import load_data
 
 class GenePageTestCase(unittest.TestCase):
