@@ -75,7 +75,7 @@ def phenogenon_json(hpo_id):
 
 @app.route('/hpo/<hpo_id>')
 @requires_auth
-@cache.cached(timeout=3600)
+@cache.cached(timeout=24*3600)
 def hpo_page(hpo_id):
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])

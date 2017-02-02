@@ -8,6 +8,10 @@ git:
 before_install:
   - git submodule update --init --remote --recursive
   
+env:
+  - TEST_SUITE=server
+  - TEST_SUITE=offline
+
 install: 
 
 # conda - from http://conda.pydata.org/docs/travis.html#using-conda-with-travis-ci
@@ -20,25 +24,25 @@ install:
     else
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION scipy==0.18.1
-  - source activate test-environment
-  
-# end of conda install
-  - pip install Cython==0.25.2 --install-option="--no-cython-compile" 
-  - pip install -r requirements.txt
-
-  - cd varnorm
-  - python setup.py install
-  - cd ..
-
+  # server test relevant
+  - if [[ "$TEST_SUITE" == "server" ]]; then
+        bash miniconda.sh -b -p $HOME/miniconda;
+        export PATH="$HOME/miniconda/bin:$PATH";
+        hash -r;
+        conda config --set always_yes yes --set changeps1 no;
+        conda update -q conda;
+        Useful for debugging any issues with conda;
+        conda info -a;
+        conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION scipy==0.18.1;
+        source activate test-environment;
+        pip install Cython==0.25.2 --install-option="--no-cython-compile"; 
+    fi
+  - pip install -r requirements_$TEST_SUITE.txt
+  - if [[ "$TEST_SUITE" == "server" ]]; then
+        cd varnorm;
+        python setup.py install;
+        cd ..;
+    fi
   - pip install coveralls
 
 services:
@@ -51,7 +55,7 @@ script:
   - ln -s $STATIC_DIR_PATH $VIEWS_DIR_PATH/static
   - ln -s $TEMPLATE_DIR_PATH $VIEWS_DIR_PATH/templates  
 # command to run coveralls (test coverage) and run tests 
-  - coverage run --omit */site-packages/* -m unittest discover
+  - coverage run --omit */site-packages/* -m unittest discover -s tests/$TEST_SUITE
   
 after_success:
   coveralls
