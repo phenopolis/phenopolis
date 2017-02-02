@@ -1,7 +1,7 @@
 
 import unittest
 import sys
-sys.path.append('pre_analysis/pubmedScore')
+sys.path.append('offline_analysis/pubmedScore')
 import pubmedScore
 import time
 

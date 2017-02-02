@@ -1,6 +1,4 @@
 global LOCAL
-LOCAL=True
-#NO_PHENOTIPS_INSTALLATION: LOCAL=True
 
 #flask import
 from flask import Flask
@@ -83,10 +81,13 @@ import base64
 import orm
 from lookups import *
 
-
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
 
+if sys.argv[1]=='SERVER':
+    LOCAL=False
+else:
+    LOCAL=True
 
 if LOCAL:
     print 'LOCAL'
@@ -303,6 +304,7 @@ def connect_db(dbname=None):
         from neo4j.v1 import GraphDatabase, basic_auth
         neo4j=GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
         return neo4j.session()
+    print(app.config['DB_HOST'], app.config['DB_PORT'])
     client = pymongo.MongoClient(host=app.config['DB_HOST'], port=app.config['DB_PORT'])
     print(client)
     if not dbname: dbname=app.config['DB_NAME']
@@ -1624,7 +1626,7 @@ import views.uclex_irdc
 import views.variant
 import views.individual
 import views.individuals
-import views.pubmedbatch
+#import views.pubmedbatch
 import views.igv
 import views.hpo
 import views.home

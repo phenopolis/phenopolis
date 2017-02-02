@@ -14,7 +14,6 @@ import re
 from optparse import OptionParser
 import itertools
 from urllib2 import HTTPError, URLError
-import pysam
 import csv
 import sys
 import re
@@ -59,19 +58,6 @@ def restart_line():
     sys.stdout.flush()
     sys.stdout.write('\r')
     sys.stdout.flush()
-
-'''
-to check if an iterable is empty
-'''
-def peek(iterable):
-    try:
-        first = next(iterable)
-    except RuntimeError:
-        return None
-    except StopIteration:
-        return None
-    return itertools.chain([first], iterable)
-
 
 '''
 find the freaking PID, Title or Abstract no matter what!
