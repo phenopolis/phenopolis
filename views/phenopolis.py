@@ -272,8 +272,8 @@ def individual_page(individual):
     # is this still updating?
     update_status = pubmedbatch.get('status', 0);
     # get known and retnet genes
-    known_genes = open('ret_known_genes.txt', 'r').readline().strip().split()
-    RETNET  = json.load(open('retnet.json', 'r'))
+    known_genes = open(app.config['RETNET_KNOWN_GENES'], 'r').readline().strip().split()
+    RETNET  = json.load(open(app.config['RETNET_JSON'], 'r'))
     # sort the table, and add known / retnet gene annotation
     #for var_type in ['rare_homozygous', 'compound_hets', 'rare_variants']:
     for var_type in []:
@@ -762,11 +762,6 @@ def contact_page():
 @app.route('/faq')
 def faq_page():
     return render_template('faq.html')
-
-@app.route('/samples')
-def samples_page():
-    samples=pandas.read_csv('HPO/hpo.txt')
-    return render_template('samples.html',samples=samples.to_html(escape=False))
 
 
 @app.route('/text')
