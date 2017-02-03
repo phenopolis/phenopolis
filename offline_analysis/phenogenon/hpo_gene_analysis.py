@@ -60,13 +60,13 @@ for file in os.listdir(path_to_files):
                     m = 'recessive' if mode == 'r' else 'dominant'
                     result[hpo]['data']['unrelated'][m].append({
                         'gene_id':data['gene_id'],
-                        'pass_p_val':value[mode+'_unrelated_pass_p_val'],
+                        'p_val':value[mode+'_unrelated_pass_p_val'],
                     })
 
 # sort based on p value
 for hpo, value in result.items():
     for mode in ['dominant','recessive']:
-        value['data']['unrelated'][mode] = sorted(value['data']['unrelated'][mode], key=lambda k: k['pass_p_val'])
+        value['data']['unrelated'][mode] = sorted(value['data']['unrelated'][mode], key=lambda k: k['p_val'])
 
 # write to file, each hpo stands for a file
 for hpo, value in result.items():
