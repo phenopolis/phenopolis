@@ -84,7 +84,7 @@ from lookups import *
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
 
-if sys.argv[1]=='SERVER':
+if len(sys.argv)>1 and sys.argv[1]=='SERVER':
     LOCAL=False
 else:
     LOCAL=True

@@ -3,6 +3,7 @@ import unittest
 import runserver
 import sys
 import load_data
+import helper
 
 class GenePageTestCase(unittest.TestCase):
 
@@ -12,23 +13,16 @@ class GenePageTestCase(unittest.TestCase):
         runserver.app.config['DB_NAME_HPO'] = 'test_hpo'
         runserver.app.config['DB_NAME_PATIENTS'] = 'test_patients'
         self.app = runserver.app.test_client()
+        helper.login(self.app)
+        load_data.load_data()
 
     def tearDown(self):
-        pass
+        self.app.get('/logout', follow_redirects=True)
     
-    # TODO LMTW - Make this a common helper function 
-    def login(self, username, password):
-        return self.app.post('/login', data=dict(
-            username=username,
-            password=password
-        ), follow_redirects=True)
-
     def gene_page(self, geneName):
         return self.app.get('/gene/'+geneName, follow_redirects=True)
 
     def test_gene_page(self):
-        load_data.load_data()
-        rv = self.login('demo', 'demo123')
         page = self.gene_page('TTLL5')
         assert page.status_code == 200
         assert 'TTLL5' in page.data 
