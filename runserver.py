@@ -4,7 +4,7 @@ from views import *
 # Load default config and override config from an environment variable
 global LOCAL
 
-if sys.argv[1]=='SERVER':
+if len(sys.argv)>1 and sys.argv[1]=='SERVER':
     LOCAL=False
     app.config.from_pyfile('../phenopolis.cfg')
 else:
