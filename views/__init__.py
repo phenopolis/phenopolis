@@ -42,7 +42,7 @@ import itertools
 import json
 import os
 import pymongo
-import pysam
+#import pysam
 import gzip
 import logging
 import lookups
@@ -73,6 +73,7 @@ from plotly.graph_objs import Scatter, Layout
 #import pyRserve 
 import numpy
 import subprocess
+import datetime
 
 from load_individual import load_patient 
 from Crypto.Cipher import DES
@@ -200,6 +201,11 @@ def requires_auth(f):
                  return redirect('https://uclex.cs.ucl.ac.uk/login')
     return decorated
 
+
+@app.before_request
+def make_session_timeout():
+    session.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(hours=2)
 
 # 
 @app.route('/login', methods=['GET','POST'])
