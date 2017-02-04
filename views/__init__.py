@@ -42,7 +42,7 @@ import itertools
 import json
 import os
 import pymongo
-#import pysam
+import pysam
 import gzip
 import logging
 import lookups
