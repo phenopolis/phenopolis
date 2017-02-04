@@ -73,6 +73,7 @@ from plotly.graph_objs import Scatter, Layout
 #import pyRserve 
 import numpy
 import subprocess
+import datetime
 
 from load_individual import load_patient 
 from Crypto.Cipher import DES
@@ -147,7 +148,6 @@ def check_auth(username, password):
         password=md5.new(password).hexdigest()
         session['user'] = username
         session['password'] = password
-        print(session)
         return True
     else: return False
     # can also check that user name and hash of password exist in database
@@ -177,7 +177,6 @@ def requires_auth(f):
     def decorated(*args, **kwargs):
         if session:
           if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
-             print 'SESSION', session
              return f(*args, **kwargs)
           else:
              print 'login'
@@ -201,13 +200,17 @@ def requires_auth(f):
     return decorated
 
 
+@app.before_request
+def make_session_timeout():
+    session.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(hours=2)
+
 # 
 @app.route('/login', methods=['GET','POST'])
 def login():
     print request.method
     error = None
     print 'login', request.method
-    print request.form
     if request.method == 'POST':
        username=request.form['username']
        password=request.form['password']
@@ -227,7 +230,6 @@ def login2():
     print request.method
     error = None
     print 'login', request.method
-    print request.form
     if request.method == 'POST':
        username=request.form['username']
        password=request.form['password']
@@ -245,11 +247,9 @@ def login2():
 @app.route('/logout')
 def logout():
     print('DELETE SESSION')
-    print(session)
     session.pop('user',None)
     session.pop('password',None)
     session.pop('password2',None)
-    print(session)
     if LOCAL:
         return redirect('/login')
     else:
@@ -623,7 +623,6 @@ def awesome():
 
 @app.route('/patient/<patient_str>')
 def get_patient(patient_str):
-    print(session)
     return patient_str
 
 # AJAX
