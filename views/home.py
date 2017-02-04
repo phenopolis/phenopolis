@@ -95,7 +95,6 @@ def homepage():
         #image=image.decode('utf8'))
         image="")
     #cache.set(cache_key, t)
-    print(session)
     return t
 
 
