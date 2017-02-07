@@ -97,7 +97,6 @@ def get_candidate_genes(db, genes=None, fields=None):
     SOLVE_DICT = {
             'solved':1,
             'unsolved':0,
-            'unknown':-1
         }
 
     fields = fields or ['hpo','solve','candidate_genes','sex']
@@ -110,7 +109,7 @@ def get_candidate_genes(db, genes=None, fields=None):
             if 'hpo' in fields:
                 temp['hpo'] = [f for f in p['features'] if f['observed'] == 'yes']
             if 'solve' in fields:
-                temp['solve'] = SOLVE_DICT[p.get('solved',{'status']]
+                temp['solve'] = SOLVE_DICT[p['solved']['status']]
             if 'sex' in fields:
                 temp['sex'] = SEX_DICT[p['sex']]
 
