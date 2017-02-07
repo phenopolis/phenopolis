@@ -81,3 +81,39 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+'''
+get candidate genes and patients' hpos, solve, candidate genes, sex
+'''
+def get_candidate_genes(db, genes=None, fields=None):
+    # set up some defaults. hpos = observed features.
+    # solve would be 0 for unsolved and 1 for solved
+    # sex 0 unknown, 1 male, 2 female
+    SEX_DICT = {
+            'F': 2,
+            'M': 1,
+            'U': 0,
+        }
+    SOLVE_DICT = {
+            'solved':1,
+            'unsolved':0,
+            'unknown':-1
+        }
+
+    fields = fields or ['hpo','solve','candidate_genes','sex']
+    all_valid_p = [p for p in db.patients.find({}) if p.get('genes',[])]
+    result = {}
+    for p in all_valid_p:
+        for g in p['genes']:
+            # deal with hpo and solve and sex
+            temp  = {f:p.get(f,None) for f in fields}
+            if 'hpo' in fields:
+                temp['hpo'] = [f for f in p['features'] if f['observed'] == 'yes']
+            if 'solve' in fields:
+                temp['solve'] = SOLVE_DICT[p.get('solved',{'status']]
+            if 'sex' in fields:
+                temp['sex'] = SEX_DICT[p['sex']]
+
+            result[g['gene']] = result.get(g['gene'],[])
+            result[g['gene']].append(temp)
+    return result
