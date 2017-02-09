@@ -80,7 +80,12 @@ def homepage():
     #image=urllib.quote(base64.b64encode(imgdata.buf))
     #image=imgdata.buf
     #image = '<svg' + image.split('<svg')[1]
-    version_number = subprocess.check_output(['git', 'describe'])
+
+    try:
+        version_number = subprocess.check_output(['git', 'describe', '--exact-match'])
+    except:
+        version_number = None
+
     t = render_template('homepage.html',
         title='home',
         total_patients=total_patients,
