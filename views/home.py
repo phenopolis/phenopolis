@@ -85,6 +85,8 @@ def homepage():
         version_number = subprocess.check_output(['git', 'describe', '--exact-match'])
     except:
         version_number = None
+    print('Version number is:-')
+    print(version_number)
 
     t = render_template('homepage.html',
         title='home',
