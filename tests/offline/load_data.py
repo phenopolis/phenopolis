@@ -10,6 +10,7 @@ dbs = get_mongo_collections({
     'hpo_db':'test_hpo',
     'phenopolis_db':'test_uclex',
     'patient_db':'test_patients',
+    'pubmedbatch_db':'test_pubmedbatch',
 })
 # Load the test data set.
 def load_data():
