@@ -4,7 +4,9 @@ import requests
 import re
 from utils import *
 import itertools
-import pysam
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import pysam
 import csv
 #hpo lookup
 import orm
@@ -29,7 +31,7 @@ def homepage():
     female_patients=patients_db.patients.find( {'sex':'F'}).count()
     print('female_patients',female_patients,)
     unknown_patients=patients_db.patients.find( {'sex':'U'}).count()
-    if LOCAL:
+    if config.LOCAL:
         hpo_json={}
     else:
         hpo_file='uclex_stats/overall_hpo_2016_Aug_2.json'

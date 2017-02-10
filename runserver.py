@@ -1,16 +1,12 @@
 import sys
 from views import *
+from config import config
 
 # Load default config and override config from an environment variable
-global LOCAL
-
-if len(sys.argv)>1 and sys.argv[1]=='SERVER':
-    LOCAL=False
-    app.config.from_pyfile('../phenopolis.cfg')
-else:
-    LOCAL=True
+if config.LOCAL:
     app.config.from_pyfile('../local.cfg')
-
+else:
+    app.config.from_pyfile('../phenopolis.cfg')
 
 
 if __name__ == "__main__":
