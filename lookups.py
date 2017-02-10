@@ -1,7 +1,9 @@
 import re
 from utils import *
 import itertools
-import pysam
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import pysam
 import csv
 #hpo lookup
 import random
