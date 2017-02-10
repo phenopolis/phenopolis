@@ -8,6 +8,7 @@ import pysam
 import csv
 #hpo lookup
 import orm
+import subprocess
 
 
 
@@ -79,6 +80,14 @@ def homepage():
     #image=urllib.quote(base64.b64encode(imgdata.buf))
     #image=imgdata.buf
     #image = '<svg' + image.split('<svg')[1]
+
+    try:
+        version_number = subprocess.check_output(['git', 'describe', '--exact-match'])
+    except:
+        version_number = None
+    print('Version number is:-')
+    print(version_number)
+
     t = render_template('homepage.html',
         title='home',
         total_patients=total_patients,
@@ -93,7 +102,8 @@ def homepage():
         pass_exac_variants=pass_exac_variants,
         pass_nonexac_variants=pass_nonexac_variants,
         #image=image.decode('utf8'))
-        image="")
+        image="",
+        version_number=version_number)
     #cache.set(cache_key, t)
     return t
 

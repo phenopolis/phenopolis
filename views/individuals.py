@@ -42,10 +42,11 @@ def individuals_page():
     conn=PhenotipsClient()
     auth='%s:%s' % (session['user'],session['password2'],)
     all_patients=conn.get_patient(auth=auth).get('patientSummaries',[])
-    total=len(all_patients)
+    all_eids=[p['eid'] for p in all_patients if p['eid']]
+    total=len(all_eids)
     print('TOTAL NUMBER OF PATIENTS',total)
     patients=conn.get_patient(auth=auth,start=page*number,number=number).get('patientSummaries',[])
-    eids=[p['eid'] for p in patients]
+    eids=[p['eid'] for p in patients if p['eid']]
     print(eids)
     patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
     #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
