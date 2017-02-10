@@ -8,7 +8,8 @@ import json
 from Bio import Entrez
 import pymongo
 import sys
-sys.path.append('../commons')
+THIS_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(THIS_FILE_PATH,'..','commons'))
 from phenopolis_utils import *
 from time import gmtime, strftime
 import time
