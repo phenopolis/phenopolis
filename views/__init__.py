@@ -42,7 +42,9 @@ import itertools
 import json
 import os
 import pymongo
-import pysam
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import pysam
 import gzip
 import logging
 import lookups

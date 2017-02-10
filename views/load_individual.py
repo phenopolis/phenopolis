@@ -18,7 +18,9 @@ import sys
 import re
 import itertools
 from urllib2 import HTTPError, URLError
-import pysam
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import pysam
 import csv
 from collections import defaultdict, Counter
 #import rest as annotation
