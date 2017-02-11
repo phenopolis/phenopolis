@@ -82,17 +82,8 @@ mongo patients --eval "db.patients.createIndex({'solved' : 1})"
 mongo patients --eval "db.patients.createIndex({'clinicalStatus.clinicalStatus' : 1})"
 mongo patients --eval "db.patients.createIndex({'specificity.score' : 1})"
 
-
 # Run server
 cd phenopolis 
-
-# create necessary symlinks
-VIEWS_DIR_PATH="$(readlink -f views)"
-TEMPLATE_DIR_PATH="$(readlink -f templates)"
-STATIC_DIR_PATH="$(readlink -f static)"
-ln -s $STATIC_DIR_PATH $VIEWS_DIR_PATH/static
-ln -s $TEMPLATE_DIR_PATH $VIEWS_DIR_PATH/templates
-
 python runserver.py
 
 exec $SHELL
