@@ -19,6 +19,7 @@ import vcf
 def phenogenon(hpo_id,lit_genes,omim_genes,recessive_genes,dominant_genes):
     cache_db=get_db('cache')
     temp=cache_db.phenogenon_cache.find_one({'hpo_id':hpo_id})
+    print(len(temp))
     if temp:
         lit_genes.extend(temp['lit_genes'])
         omim_genes.extend(temp['omim_genes'])
