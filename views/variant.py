@@ -3,12 +3,14 @@ from views import *
 from lookups import *
 import rest as annotation
 import requests
-import primer3
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import pysam
+    import primer3
 import myvariant
 import re
 from utils import *
 import itertools
-import pysam
 import csv
 #hpo lookup
 import phizz
