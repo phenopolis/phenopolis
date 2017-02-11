@@ -118,6 +118,14 @@ sess.init_app(app)
 
 print app.root_path
 
+# Minifys the HTML when app.config['HTML_COMPRESS'] is True; otherwise prettifies the HTML
+if app.config['HTML_COMPRESS']:
+    from minify_output import uglify
+    render_template = uglify(render_template)
+else:
+    from minify_output import prettify
+    render_template = prettify(render_template)
+
 def check_auth(username, password):
     """
     This function is called to check if a username / password combination is valid.
