@@ -6,7 +6,7 @@ def prettify(route_function):
     @functools.wraps(route_function)
     def wrapped(*args, **kwargs):
         yielded_html = route_function(*args, **kwargs)
-        soup = bs4.BeautifulSoup(yielded_html, 'html.parser')
+        soup = bs4.BeautifulSoup(yielded_html, 'lxml')
         return soup.prettify()
 
     return wrapped
