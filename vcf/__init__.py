@@ -1,5 +1,7 @@
 
-import pysam
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import pysam
 
 # VCF query
 def vcf_query(chrom=None, pos=None, ref=None, alt=None, variant_str=None, individual=None, verbose=False, limit=100, release='mainset_July2016'):
