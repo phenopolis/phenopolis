@@ -4,7 +4,9 @@ from lookups import *
 from orm import *
 import rest as annotation
 import requests
-import primer3
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import primer3
 import myvariant
 from vcf import vcf_query
 import hashlib

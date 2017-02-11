@@ -1,4 +1,3 @@
-global LOCAL
 
 #flask import
 from flask import Flask
@@ -42,7 +41,9 @@ import itertools
 import json
 import os
 import pymongo
-import pysam
+from config import config
+if config.IMPORT_PYSAM_PRIMER3:
+    import pysam
 import gzip
 import logging
 import lookups
@@ -81,21 +82,20 @@ import base64
 
 import orm
 from lookups import *
+from config import config
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
 
-if len(sys.argv)>1 and sys.argv[1]=='SERVER':
-    LOCAL=False
-else:
-    LOCAL=True
-
-if LOCAL:
+# Load default config and override config from an environment variable
+if config.LOCAL:
     print 'LOCAL'
     app = Flask(__name__,static_url_path='/static')
+    app.config.from_pyfile('../local.cfg')
 else:
     print 'SERVER'
     app = Flask(__name__)
+    app.config.from_pyfile('../phenopolis.cfg')
 
 ADMINISTRATORS = ( 'n.pontikos@ucl.ac.uk',)
 mail_on_500(app, ADMINISTRATORS)
@@ -109,13 +109,6 @@ cache = Cache(app,config={'CACHE_TYPE': 'simple'})
 
 REGION_LIMIT = 1E5
 EXON_PADDING = 50
-# Load default config and override config from an environment variable
-if LOCAL:
-    print 'LOCAL'
-    app.config.from_pyfile('../local.cfg')
-else:
-    print 'SERVER'
-    app.config.from_pyfile('../phenopolis.cfg')
 
 # Check Configuration section for more details
 SESSION_TYPE = 'mongodb'
@@ -131,7 +124,7 @@ def check_auth(username, password):
     Will try to connect to phenotips instance.
     """
     print username
-    if LOCAL:
+    if config.LOCAL:
         print 'LOCAL'
         if username=='demo' and password=='demo123':
             session['password2'] = password
@@ -180,7 +173,7 @@ def requires_auth(f):
              return f(*args, **kwargs)
           else:
              print 'login'
-             if LOCAL:
+             if config.LOCAL:
                  return redirect('login')
              else:
                  return redirect('https://uclex.cs.ucl.ac.uk/login')
@@ -193,7 +186,7 @@ def requires_auth(f):
           if check_auth(username,password):
              return f(*args, **kwargs)
           else:
-             if LOCAL:
+             if config.LOCAL:
                  return render_template('login.html', error='Invalid Credentials. Please try again.')
              else:
                  return redirect('https://uclex.cs.ucl.ac.uk/login')
@@ -218,7 +211,7 @@ def login():
           error = 'Invalid Credentials. Please try again.'
        else:
            print 'LOGIN SUCCESS'
-           if LOCAL:
+           if config.LOCAL:
                return redirect('/')
            else:
                return redirect('https://uclex.cs.ucl.ac.uk/')
@@ -236,7 +229,7 @@ def login2():
        if not check_auth(username,password):
           error = 'Invalid Credentials. Please try again.'
        else:
-           if LOCAL:
+           if config.LOCAL:
                return redirect('/')
            else:
                return redirect('https://uclex.cs.ucl.ac.uk')
@@ -250,7 +243,7 @@ def logout():
     session.pop('user',None)
     session.pop('password',None)
     session.pop('password2',None)
-    if LOCAL:
+    if config.LOCAL:
         return redirect('/login')
     else:
         return redirect('https://uclex.cs.ucl.ac.uk/login')
