@@ -90,11 +90,11 @@ logging.getLogger().setLevel(logging.INFO)
 # Load default config and override config from an environment variable
 if config.LOCAL:
     print 'LOCAL'
-    app = Flask(__name__,static_url_path='/static')
+    app = Flask(__name__,static_url_path='/static', static_folder='../static', template_folder='../templates')
     app.config.from_pyfile('../local.cfg')
 else:
     print 'SERVER'
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../templates')
     app.config.from_pyfile('../phenopolis.cfg')
 
 ADMINISTRATORS = ( 'n.pontikos@ucl.ac.uk',)
