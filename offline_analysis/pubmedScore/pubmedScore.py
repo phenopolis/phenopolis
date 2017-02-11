@@ -56,7 +56,7 @@ def restart_line():
     sys.stdout.flush()
 
 '''
-find the freaking PID, Title or Abstract no matter what!
+find the PID, Title or Abstract no matter what!
 '''
 def find_item(obj, key):
     if key in obj:
@@ -130,7 +130,7 @@ def pubmed_query(gene,keywords,lag=0,email='me@example.com'):
     # now done the search. let's get results
     count = int(search_results["Count"])
     print count
-    results = {'results':[], 'total_score':0}
+    results = {'results':[], 'score':0}
     # get search content
     if count:
         attempt = 1
@@ -190,7 +190,7 @@ def pubmed_query(gene,keywords,lag=0,email='me@example.com'):
                         'abstract': abstract,
                         'score': score
                     })
-                    results['total_score'] = results['total_score'] + score
+                    results['score'] = results['score'] + score
         results['results'] = sorted(results['results'], key=lambda k: k['score'], reverse=True)
     return results
 '''
@@ -204,24 +204,25 @@ def pubmed(gene_name, keywords, now, test=False):
     term = '_'.join([gene_name.upper(), '-'.join(keywords).lower()])
     # check if the pubmed result already in the database, and if it is outdated
     saved = dbs['pubmedbatch'].cache.find_one({'key': term})
-    lag = 0 if test else now - saved['date'] # use it as a flag of how to search. 0 = search; now-saved['date'] = update; 
+
+    lag = 0
+    this_life = 1 if test else life
     if saved:
         lag = now - saved['date']
         # has record. let's see if it is out of date
-        if lag  <= life:
+        if lag  <= this_life:
             # up to date
             #print 'already in the database, and up to date'
-            return None
+            return saved
     #print 'number of results', len([r for r in results['results']])
     # update the database, and maybe results
     # update database now
     results = pubmed_query(gene_name,keywords,lag,email)
     if saved:
         results['results'].extend(saved['data'])
-    if test:
-        return results
-    else:
-        dbs['pubmedbatch'].cache.update({'key': term}, {'$set': {'score':results['total_score'],'data':results['results'],'date':now}},upsert=True)
+    if not test:
+        dbs['pubmedbatch'].cache.update({'key': term}, {'$set': {'score':results['score'],'data':results['results'],'date':now}},upsert=True)
+    return results
 
 
 if __name__ == '__main__':
@@ -248,12 +249,12 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     keywords=[i.strip() for i in options.keywords.split(',')]
     if options.gene:
-        pubmed(options.gene,keywords,now)
+        pubmed(options.gene,dbs,keywords,now)
     elif options.patient:
         print options.patient
         patient=dbs['uclex'].patients.find_one({'external_id':options.patient})
         for v in patient['rare_variants']+patient['homozygous_variants']+patient['compound_hets']:
-            pubmed(v['canonical_gene_name_upper'],keywords,now)
+            pubmed(v['canonical_gene_name_upper'],dbs,keywords,now)
             keywords.sort()
             term = ','.join(keywords).lower()
             print(term)
@@ -264,7 +265,7 @@ if __name__ == '__main__':
             p = p.rstrip()
             print p
             for v in dbs['uclex'].patients.find_one({'external_id':p})['compound_hets']:
-                pubmed(v['canonical_gene_name_upper'],keywords,now)
+                pubmed(v['canonical_gene_name_upper'],dbs,keywords,now)
                 keywords.sort()
                 term = '-'.join(keywords).lower()
                 dbs['uclex'].patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
