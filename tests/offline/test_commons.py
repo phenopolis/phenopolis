@@ -11,6 +11,7 @@ class utilsTestCase(unittest.TestCase):
             'hpo_db':'test_hpo',
             'phenopolis_db':'test_uclex',
             'patient_db':'test_patients',
+            'pubmedbatch_db':'test_pubmedbatch',
         }
         load_data.load_data()
         self.db = get_mongo_collections(self.db_config)

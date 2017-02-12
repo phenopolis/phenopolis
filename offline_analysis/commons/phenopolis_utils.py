@@ -44,6 +44,7 @@ def get_mongo_collections(test=None):
             'hpo_db': conn[OFFLINE_CONFIG['mongodb']['db_name_hpo']],
             'phenopolis_db': conn[OFFLINE_CONFIG['mongodb']['db_name']],
             'patient_db': conn[OFFLINE_CONFIG['mongodb']['db_name_patients']],
+            'pubmedbatch': conn[OFFLINE_CONFIG['mongodb']['db_name_pubmedbatch']],
         }
 
     else:
@@ -51,6 +52,7 @@ def get_mongo_collections(test=None):
             'hpo_db': conn[test['hpo_db']],
             'phenopolis_db': conn[test['phenopolis_db']],
             'patient_db': conn[test['patient_db']],
+            'pubmedbatch': conn[test['pubmedbatch_db']],
         }
 
 '''
