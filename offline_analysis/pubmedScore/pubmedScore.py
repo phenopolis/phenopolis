@@ -8,6 +8,9 @@ import json
 from Bio import Entrez
 import pymongo
 import sys
+THIS_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(THIS_FILE_PATH,'..','commons'))
+from phenopolis_utils import *
 from time import gmtime, strftime
 import time
 import re
@@ -19,21 +22,14 @@ import sys
 import re
 from collections import defaultdict, Counter
 
+# get dbs
+dbs = get_mongo_collections()
 # username used to connect to pubmed
-email = 'me@example.com'
+email = OFFLINE_CONFIG['pubmedScore']['email']
 
 # Some constant
-today = strftime("%Y-%m-%d", gmtime())
-life = 3600 * 24 * 30 #3600 * 24 * 30 for a month, 1 for fresh insert
+life = int(OFFLINE_CONFIG['pubmedScore']['lifetime']) #3600 * 24 * 30 for a month, 1 for fresh insert
 now = time.mktime(time.localtime()) #get time in seconds
-#life = now - 1470220103 + 600
-HEADER = ['HUGO', 'HPO', 'consequence', 'ref(pubmedID)', 'description', 'OMIM', 'allele_freq', 'ExAC_freq', 'variant_id', 'p_change']
-# get db
-client = pymongo.MongoClient()
-db_pubmed = client['pubmedbatch']
-hpo_db = client['hpo']
-db = client['uclex']
-patient_db = client['patients']
 
 ###############################
 # parse options
@@ -60,7 +56,7 @@ def restart_line():
     sys.stdout.flush()
 
 '''
-find the freaking PID, Title or Abstract no matter what!
+find the PID, Title or Abstract no matter what!
 '''
 def find_item(obj, key):
     if key in obj:
@@ -134,7 +130,7 @@ def pubmed_query(gene,keywords,lag=0,email='me@example.com'):
     # now done the search. let's get results
     count = int(search_results["Count"])
     print count
-    results = {'results':[], 'total_score':0}
+    results = {'results':[], 'score':0}
     # get search content
     if count:
         attempt = 1
@@ -194,7 +190,7 @@ def pubmed_query(gene,keywords,lag=0,email='me@example.com'):
                         'abstract': abstract,
                         'score': score
                     })
-                    results['total_score'] = results['total_score'] + score
+                    results['score'] = results['score'] + score
         results['results'] = sorted(results['results'], key=lambda k: k['score'], reverse=True)
     return results
 '''
@@ -207,27 +203,26 @@ def pubmed(gene_name, keywords, now, test=False):
     # constructing searching term and cache database key
     term = '_'.join([gene_name.upper(), '-'.join(keywords).lower()])
     # check if the pubmed result already in the database, and if it is outdated
-    lag = 0 # use it as a flag of how to search. 0 = search; now-saved['date'] = update; 
-    saved = db_pubmed.cache.find_one({'key': term})
-    print(term)
-    print(saved)
+    saved = dbs['pubmedbatch'].cache.find_one({'key': term})
+
+    lag = 0
+    this_life = 1 if test else life
     if saved:
         lag = now - saved['date']
         # has record. let's see if it is out of date
-        if lag  <= life:
+        if lag  <= this_life:
             # up to date
             #print 'already in the database, and up to date'
-            return None
+            return saved
     #print 'number of results', len([r for r in results['results']])
     # update the database, and maybe results
     # update database now
     results = pubmed_query(gene_name,keywords,lag,email)
     if saved:
         results['results'].extend(saved['data'])
-    if test:
-        return results
-    else:
-        db_pubmed.cache.update({'key': term}, {'$set': {'score':results['total_score'],'data':results['results'],'date':now}},upsert=True)
+    if not test:
+        dbs['pubmedbatch'].cache.update({'key': term}, {'$set': {'score':results['score'],'data':results['results'],'date':now}},upsert=True)
+    return results
 
 
 if __name__ == '__main__':
@@ -254,23 +249,23 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     keywords=[i.strip() for i in options.keywords.split(',')]
     if options.gene:
-        pubmed(options.gene,keywords,now)
+        pubmed(options.gene,dbs,keywords,now)
     elif options.patient:
         print options.patient
-        patient=db.patients.find_one({'external_id':options.patient})
+        patient=dbs['uclex'].patients.find_one({'external_id':options.patient})
         for v in patient['rare_variants']+patient['homozygous_variants']+patient['compound_hets']:
-            pubmed(v['canonical_gene_name_upper'],keywords,now)
+            pubmed(v['canonical_gene_name_upper'],dbs,keywords,now)
             keywords.sort()
             term = ','.join(keywords).lower()
             print(term)
-            db.patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
+            dbs['uclex'].patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
     else:
         patients = open(options.input, 'r')
         for p in patients:
             p = p.rstrip()
             print p
-            for v in db.patients.find_one({'external_id':p})['compound_hets']:
-                pubmed(v['canonical_gene_name_upper'],keywords,now)
+            for v in dbs['uclex'].patients.find_one({'external_id':p})['compound_hets']:
+                pubmed(v['canonical_gene_name_upper'],dbs,keywords,now)
                 keywords.sort()
                 term = '-'.join(keywords).lower()
-                db.patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
+                dbs['uclex'].patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
