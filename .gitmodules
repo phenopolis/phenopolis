@@ -2,3 +2,6 @@
 	path = varnorm
 	url = https://github.com/weiyi-bitw/varnorm.git
 	branch = master
+[submodule "BioTools"]
+	path = BioTools
+	url = https://github.com/logust79/BioTools.git
