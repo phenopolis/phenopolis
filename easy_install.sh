@@ -10,11 +10,6 @@ cd ../..
 pip install Cython==0.25.2 --install-option="--no-cython-compile" --user 
 pip install -r phenopolis/requirements_server.txt --user
 
-# For local install without Phenotips this will:
-# 1) approve all logins as Phenotips is not running
-# 2) let Flask serve static files instead of webserver
-sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py
-
 # Make sure mongodb is running
 DBPATH=db
 mkdir -p $DBPATH
