@@ -195,6 +195,7 @@ def individual_page(individual):
 
 
 @app.route('/individual_update/<individual>')
+@requires_auth
 def individual_update(individual):
     conn=PhenotipsClient()
     auth='%s:%s' % (session['user'],session['password2'],)
