@@ -32,7 +32,6 @@ from scipy.stats import chisquare
 import math 
 from Bio import Entrez
 from phenotips_python_client import PhenotipsClient
-from phenotips_python_client import browser
 from bson.json_util import loads
 from mongodb import *
 # fizz: hpo lookup
