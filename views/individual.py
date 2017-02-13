@@ -207,7 +207,9 @@ def individual_update(individual):
         u = urlparse(referrer)
         referrer='%s://%s' % (u.scheme,u.hostname,)
         if u.port: referrer='%s:%s' % (referrer,u.port,)
-    return redirect(referrer+'/individual/'+individual)
+        return redirect(referrer+'/individual/'+individual)
+    else:
+        return 'done'
 
 @app.route('/load_individual/<individual>')
 @requires_auth
