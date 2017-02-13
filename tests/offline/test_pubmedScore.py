@@ -28,14 +28,14 @@ class pubmedScoreTestCase(unittest.TestCase):
     def test_score(self):
         # case might change
         case = pubmedScore.pubmed_query('wahahahaha0>o', self.keywords)
-        self.assertEqual(case['total_score'],0)
+        self.assertEqual(case['score'],0)
         case = pubmedScore.pubmed_query('ARL2BP', self.keywords)
         c = [i for i in case['results'] if i['id'] == '23849777']
         self.assertTrue(c)
 
     def test_pubmed(self):
         case = pubmedScore.pubmed('wahahahaha0>o', self.keywords, self.now, test=True)
-        self.assertEqual(case['total_score'],0)
+        self.assertEqual(case['score'],0)
         case = pubmedScore.pubmed('TTLL5', self.keywords, self.now, test=True)
         c = [i for i in case['results'] if i['id'] == '27162334']
         self.assertTrue(c)
