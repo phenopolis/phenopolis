@@ -144,6 +144,7 @@ def get_candidate_genes(db, genes=None, fields=None):
         if 'sex' in fields:
             temp['sex'] = SEX_DICT[p['sex']]
         for g in p['genes']:
+            if not g['gene']: continue
             if g['gene'] == 'Somatic NLRP3':
                 g['gene'] = 'NLRP3'
             if g['gene'] == 'GPR98':
