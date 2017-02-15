@@ -34,7 +34,7 @@ class utilsTestCase(unittest.TestCase):
         result = get_candidate_genes(self.db['patient_db'],fields=['hpo'])
         # HP:0000548 in at least one of the returned TTLL5 result
         case = result['ENSG00000156171']
-        self.assertEqual(case['symbol'],'TTLL5')
+        self.assertEqual(case['symbol'],'DRAM2')
 
 if __name__ == '__main__':
     unittest.main()
