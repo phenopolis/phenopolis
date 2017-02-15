@@ -75,6 +75,44 @@ def phenogenon_json(hpo_id):
                     'recessive_genes':recessive_genes,
                     'dominant_genes':dominant_genes} )
 
+
+@app.route('/phenogenon_recessive_csv/<hpo_id>')
+@requires_auth
+def phenogenon_recessive_csv(hpo_id):
+    lit_genes=[]
+    omim_genes=[]
+    recessive_genes=[]
+    dominant_genes=[]
+    phenogenon(hpo_id, lit_genes, omim_genes, recessive_genes, dominant_genes)
+    print(len(lit_genes))
+    print(len(omim_genes))
+    print(len(recessive_genes))
+    print(len(dominant_genes))
+    text=','.join([k for k in recessive_genes[0].keys()])+'\n'
+    for g in recessive_genes:
+        text+=','.join([str(g[k]) for k in recessive_genes[0].keys()])+'\n'
+    return text
+
+
+@app.route('/phenogenon_dominant_csv/<hpo_id>')
+@requires_auth
+def phenogenon_dominant_csv(hpo_id):
+    lit_genes=[]
+    omim_genes=[]
+    recessive_genes=[]
+    dominant_genes=[]
+    phenogenon(hpo_id, lit_genes, omim_genes, recessive_genes, dominant_genes)
+    print(len(lit_genes))
+    print(len(omim_genes))
+    print(len(recessive_genes))
+    print(len(dominant_genes))
+    text=','.join([k for k in dominant_genes[0].keys()])+'\n'
+    for g in dominant_genes:
+        text+=','.join([str(g[k]) for k in dominant_genes[0].keys()])+'\n'
+    return text
+
+
+
 @app.route('/hpo/<hpo_id>')
 @requires_auth
 @cache.cached(timeout=24*3600)

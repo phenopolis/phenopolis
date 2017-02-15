@@ -32,7 +32,6 @@ from scipy.stats import chisquare
 import math 
 from Bio import Entrez
 from phenotips_python_client import PhenotipsClient
-from phenotips_python_client import browser
 from bson.json_util import loads
 from mongodb import *
 # fizz: hpo lookup
@@ -90,11 +89,11 @@ logging.getLogger().setLevel(logging.INFO)
 # Load default config and override config from an environment variable
 if config.LOCAL:
     print 'LOCAL'
-    app = Flask(__name__,static_url_path='/static')
+    app = Flask(__name__,static_url_path='/static', static_folder='../static', template_folder='../templates')
     app.config.from_pyfile('../local.cfg')
 else:
     print 'SERVER'
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../templates')
     app.config.from_pyfile('../phenopolis.cfg')
 
 ADMINISTRATORS = ( 'n.pontikos@ucl.ac.uk',)
@@ -117,6 +116,14 @@ sess=Session()
 sess.init_app(app)
 
 print app.root_path
+
+# Minifys the HTML when app.config['HTML_COMPRESS'] is True; otherwise prettifies the HTML
+if app.config['HTML_COMPRESS']:
+    from minify_output import uglify
+    render_template = uglify(render_template)
+else:
+    from minify_output import prettify
+    render_template = prettify(render_template)
 
 def check_auth(username, password):
     """

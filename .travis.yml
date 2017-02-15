@@ -52,13 +52,8 @@ services:
   - sqlite3
   
 script:
-  - VIEWS_DIR_PATH="$(readlink -f views)"
-  - TEMPLATE_DIR_PATH="$(readlink -f templates)"
-  - STATIC_DIR_PATH="$(readlink -f static)"
-  - ln -s $STATIC_DIR_PATH $VIEWS_DIR_PATH/static
-  - ln -s $TEMPLATE_DIR_PATH $VIEWS_DIR_PATH/templates  
 # command to run coveralls (test coverage) and run tests 
-  - coverage run --omit */site-packages/* -m unittest discover -s tests/$TEST_SUITE
+  - coverage run --omit=*/site-packages/*,*/tests/* -m unittest discover -s tests/$TEST_SUITE
   
 after_success:
   coveralls
