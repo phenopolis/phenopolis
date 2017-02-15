@@ -42,6 +42,8 @@ install:
         cd varnorm;
         python setup.py install;
         cd ..;
+    else
+        mkdir -p offline_analysis/db;
     fi
   - pip install coveralls
 
