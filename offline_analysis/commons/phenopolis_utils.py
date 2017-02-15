@@ -6,6 +6,11 @@ import pymongo
 import ConfigParser
 import os
 import errno
+import sys
+sys.path.append('../../BioTools')
+from Genes import *
+import sqlite3
+import re
 
 '''
 constants
@@ -100,21 +105,52 @@ def get_candidate_genes(db, genes=None, fields=None):
             'solved':1,
             'unsolved':0,
         }
+    
+    # make a G for translation
+    biotools_db = sqlite3.connect(OFFLINE_CONFIG['biotools']['db_file'])
+    G = Genes(biotools_db)
+    # fields of interests
+    fields = fields or ['hpo','solve','genes','sex']
 
-    fields = fields or ['hpo','solve','candidate_genes','sex']
     all_valid_p = [p for p in db.patients.find({}) if p.get('genes',[])]
     result = {}
-    for p in all_valid_p:
-        for g in p['genes']:
-            # deal with hpo and solve and sex
-            temp  = {f:p.get(f,None) for f in fields}
-            if 'hpo' in fields:
-                temp['hpo'] = [f for f in p['features'] if f['observed'] == 'yes']
-            if 'solve' in fields:
-                temp['solve'] = SOLVE_DICT[p['solved']['status']]
-            if 'sex' in fields:
-                temp['sex'] = SEX_DICT[p['sex']]
+    gene_names = []
+    for k1 in all_valid_p:
+        for k2 in k1['genes']:
+            # there's one patient that has Somatic NLRP3 as gene.
+            # and there's one patient has GPR98. should be ADGRV1
+            if k2['gene'] == 'Somatic NLRP3':
+                gene_names.append('NLRP3')
+                continue
+            if k2['gene'] == 'GPR98':
+                gene_names.append('ADGRV1')
+                continue
+            # illegal char?
+            k2['gene'] = k2['gene'].strip()
+            if re.search(r'[^a-zA-Z0-9-]', k2['gene']):
+                raise ValueError('Error: Illegal gene name "%s"' % k2['gene'])
+            gene_names.append(k2['gene'])
 
-            result[g['gene']] = result.get(g['gene'],[])
-            result[g['gene']].append(temp)
+    gene_dict = G.symbols_to_ensemblIds(gene_names)
+    G.ids = gene_dict.values()
+    for p in all_valid_p:
+        # deal with hpo and solve and sex
+        temp  = {f:p.get(f,None) for f in fields}
+        if 'hpo' in fields:
+            temp['hpo'] = [f for f in p['features'] if f['observed'] == 'yes']
+        if 'solve' in fields:
+            temp['solve'] = SOLVE_DICT[p['solved']['status']]
+        if 'sex' in fields:
+            temp['sex'] = SEX_DICT[p['sex']]
+        for g in p['genes']:
+            if g['gene'] == 'Somatic NLRP3':
+                g['gene'] = 'NLRP3'
+            if g['gene'] == 'GPR98':
+                g['gene'] = 'ADGRV1'
+            gene_id = gene_dict[g['gene']]
+            result[gene_id] = result.get(gene_id,{
+                'name':G.symbol[gene_id],
+                'data':[],
+                })
+            result[gene_id]['data'].append(temp)
     return result
