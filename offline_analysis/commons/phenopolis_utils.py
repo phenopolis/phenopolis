@@ -151,7 +151,7 @@ def get_candidate_genes(db, genes=None, fields=None):
                 g['gene'] = 'ADGRV1'
             gene_id = gene_dict[g['gene']]
             result[gene_id] = result.get(gene_id,{
-                'name':G.symbol[gene_id],
+                'symbol':G.symbol[gene_id],
                 'data':[],
                 })
             result[gene_id]['data'].append(temp)

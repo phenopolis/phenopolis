@@ -33,8 +33,8 @@ class utilsTestCase(unittest.TestCase):
     def test_get_candidate_genes(self):
         result = get_candidate_genes(self.db['patient_db'],fields=['hpo'])
         # HP:0000548 in at least one of the returned TTLL5 result
-        case = [i2 for i1 in result['ENSG00000156171']['data'] for i2 in i1['hpo'] if i2['observed'] == 'yes' and i2['id'] == 'HP:0000548']
-        self.assertTrue(case)
+        case = result['ENSG00000156171']
+        self.assertEqual(case['symbol'],'TTLL5')
 
 if __name__ == '__main__':
     unittest.main()
