@@ -7,7 +7,8 @@ import ConfigParser
 import os
 import errno
 import sys
-sys.path.append('../../BioTools')
+path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(path,'..','..','BioTools'))
 from Genes import *
 import sqlite3
 import re
