@@ -47,6 +47,7 @@ install:
 
 services:
   - mongodb
+  - sqlite3
   
 script:
   - VIEWS_DIR_PATH="$(readlink -f views)"
