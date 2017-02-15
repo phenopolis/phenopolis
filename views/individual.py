@@ -195,19 +195,24 @@ def individual_page(individual):
 
 
 @app.route('/individual_update/<individual>')
+@requires_auth
 def individual_update(individual):
     conn=PhenotipsClient()
     auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=individual,auth=auth)
+    p=conn.get_patient(eid=individual,auth=auth,cache=False)
     print 'UPDATE'
     print p
-    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p},w=0)
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p})
+    print 'DB'
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':individual})
     if request.referrer:
         referrer=request.referrer
         u = urlparse(referrer)
         referrer='%s://%s' % (u.scheme,u.hostname,)
         if u.port: referrer='%s:%s' % (referrer,u.port,)
-    return redirect(referrer+'/individual/'+individual)
+        return redirect(referrer+'/individual/'+individual)
+    else:
+        return 'done'
 
 @app.route('/load_individual/<individual>')
 @requires_auth

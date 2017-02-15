@@ -45,11 +45,8 @@ Phenopolis can be developed under Windows but requires some additional steps and
  * pip install scipy-0.18.1-cp27-cp27m-win32.whl –user
  * pip install biopython-1.68-cp27-cp27m-win32.whl –user
 * Execute [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) 
-* pysam - disable the pysam install and imports. This package won't install on Windows.
-* primer3 (package name primer3-py) - disable the primer3 install and imports. This package won't install on Windows.
-* The following line in easy_install.sh fails 
-```sed -i '' 's/#NO_PHENOTIPS_INSTALLATION: //' phenopolis/views/__init__.py```
-instead, ensure that ```LOCAL=True``` is set in [views/\_\_init__.py](https://github.com/pontikos/phenopolis/blob/master/views/__init__.py) 
+* pysam and primer3 - disable the install, these packages won't install on Windows.
+* In [config.py](https://github.com/pontikos/phenopolis/blob/master/config/config.py) set ```IMPORT_PYSAM_PRIMER3 = False```
 * Rerun [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) (you may disable the commands ```git clone```, ```wget```, ```mongoimport``` and ```mongo```).
 
 To debug in Visual Studio, first turn off the Flask debug by setting ```app.run(..,..,..,debug=False)``` in ```runserver.py```.
