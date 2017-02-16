@@ -10,6 +10,7 @@ import phenotips_python_client
 
 import runserver
 from phenotips_python_client import PhenotipsClient
+from phenotips_python_client import PhenotipsClientNew
 import httpie
 from binascii import b2a_base64, a2b_base64
 import requests
@@ -33,15 +34,10 @@ class PhenotipsLoginTestCase(unittest.TestCase):
 
         print('doing session')
         url = 'http://localhost:8080/rest/patients/P0000001/permissions'
-        #s = requests.Session()
-        #s.auth('Admin','admin')
-        ##r1 = s.get('http://localhost:8080/rest/patients/P0000001/permissions', 'Admin:admin')
-        #r2 = s.get('http://localhost:8080/rest/patients/P0000001/permissions')
-
+        
         s = requests.Session()
         s.auth = requests.auth.HTTPDigestAuth('Admin', 'admin')
         r2 = s.get('http://localhost:8080/rest/patients/P0000001/permissions')
-
 
 
         encoded_auth=b2a_base64('Admin:admin').strip()
@@ -62,22 +58,27 @@ class PhenotipsLoginTestCase(unittest.TestCase):
         status_code = r.status_code 
 
 
-        #self.app.session['phenotips']=s
-        #s2 = self.app.session['phenotips']
-        #app = Flask(__name__)
-        #with current_app.test_request_context():
-        #    session['phenotips']=s #RuntimeError: working outside of request context
-        #    s2 = session['phenotips']
-        #    r = s2.get(new_url, headers=small_headers)
-        #    status_code = r.status_code 
-
-        #with self.app.test_client() as c:
         with self.app.session_transaction() as sess:
-            sess['a_key'] = 'a value' 
             sess['phenotips'] = s 
             s2 = sess['phenotips']
             r = s2.get(new_url, headers=small_headers)
             status_code = r.status_code 
+            assert(r.status_code == 200) 
+
+        conn = PhenotipsClientNew()
+        phenotips_session = conn.get_session('Admin', 'admin')
+        with self.app.session_transaction() as sess:
+            sess['phenotips'] = phenotips_session 
+            s2 = sess['phenotips']
+            r = s2.get(new_url, headers=small_headers)
+            status_code = r.status_code 
+            assert(r.status_code == 200) 
+
+            conn.clear_cache()
+            all_patients=conn.get_patient(sess['phenotips']).get('patientSummaries',[]) # TODO LMTW throw error if can't log in. ??
+            all_eids=[p['eid'] for p in all_patients if p['eid']]
+            total=len(all_eids)
+            print('TOTAL NUMBER OF PATIENTS',total)
 
         temp =''
 
