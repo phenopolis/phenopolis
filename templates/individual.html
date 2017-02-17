@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h1> 
-    Individual: <a href='https://phenotips.cs.ucl.ac.uk/bin/{{patient.report_id}}' target='_blank'>{{external_id}}</a> <span class='sex'>[{{ patient.sex }}]</span> 
+<h1 id="individual_header"> 
+    Individual: <a href='https://phenotips.cs.ucl.ac.uk/bin/{{patient.report_id}}' target='_blank'>{{external_id}}</a> <span class='sex' id="sex">[{{ patient.sex }}]</span> 
 </h1>
 
 <!-- jQuery UI for range slider -->
@@ -276,14 +276,14 @@
 <div class="tabs">
 
 <ul class="nav nav-tabs" role="tablist">
-    <li class="active"><a href="#individual-tab_hpo_omim" role="tab" data-toggle="tab" id="individuals_loaded">OMIM genes</a></li> 
-    <li><a href="#individual-tab_hom_variants" role="tab" data-toggle="tab" id="hom-loaded">Rare Hom ({{patient.homozygous_variants|length}})</a></li>
-    <li><a href="#individual-tab_comp_variants" role="tab" data-toggle="tab" id="comp-hets_loaded">Rare Comp Hets ({{patient.compound_hets|length}})</a></li>
-    <li><a href="#individual-tab_rare_variants" role="tab" data-toggle="tab" id="variants_loaded">Rare Var ({{patient.rare_variants|length}})</a></li>
+    <li class="active"><a id="individual-tab_hpo_omim_tab" href="#individual-tab_hpo_omim" role="tab" data-toggle="tab" id="individuals_loaded">OMIM genes</a></li> 
+    <li><a id="individual-tab_hom_variants_tab" href="#individual-tab_hom_variants" role="tab" data-toggle="tab" id="hom-loaded">Rare Hom ({{patient.homozygous_variants|length}})</a></li>
+    <li><a id="individual-tab_comp_variants_tab" href="#individual-tab_comp_variants" role="tab" data-toggle="tab" id="comp-hets_loaded">Rare Comp Hets ({{patient.compound_hets|length}})</a></li>
+    <li><a id="individual-tab_rare_variants_tab" href="#individual-tab_rare_variants" role="tab" data-toggle="tab" id="variants_loaded">Rare Var ({{patient.rare_variants|length}})</a></li>
     {% if session['user']!='demo' %}
     <li><a href="#individual-tab_downloads" role="tab" data-toggle="tab" id="csv">Download files</a></li>
     {% endif %}
-    <li><a href="#individual-tab_Exomiser" role="tab" data-toggle="tab" id="exomiser">Exomiser</a></li>
+    <li><a id="individual-tab_Exomiser_tab" href="#individual-tab_Exomiser" role="tab" data-toggle="tab" id="exomiser">Exomiser</a></li>
 </ul>
 
 <div class="tab-content">
@@ -331,9 +331,77 @@
 <script type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
 <script type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
 <script type="text/javascript" src="/static/js/individual_pubmed.js"></script>
-<script type="text/javascript" src="/static/js/intro.js"></script>
+<script type="text/javascript" src="/static/js/intro.min.js"></script>
 <script type="text/javascript" src="/static/js/venn.js"></script>
 <script type="text/javascript" src="/static/js/main.js"></script>
+
+<script type="text/javascript">
+  function startIntro(){
+    var gender;
+    // set gender to male or female depending on patient sex variable 
+    if ('{{ patient.sex }}' === 'M') { gender = 'Male' } else { gender = 'Female' }
+
+    var intro = introJs();
+    intro.setOptions({
+      steps: [
+        {
+          element: '#individual_header',
+          intro: "This is a tutorial for this patient."
+        },
+        {
+          element: '#sex',
+          intro: "This patient is a " + gender + '.'
+        },
+        {
+          element: '#individual-tab_hpo_omim_tab',
+          intro: "Below is OMIM data for this patient."
+        },
+        {
+          element: '#individual-tab_hom_variants_tab',
+          intro: "This patient is a " + gender + '.'
+        },
+        {
+          element: '#hom-variants-2',
+          intro: "This patient is a " + gender + '.'
+        },
+        {
+          element: '#individual-tab_comp_variants_tab',
+          intro: "This patient is a "
+        },
+        {
+          element: '#individual-tab_rare_variants_tab',
+          intro: "This patient is a " + gender + '.'
+        },
+        {
+          element: '#individual-tab_Exomiser_tab',
+          intro: "This patient is a " + gender + '.'
+        }
+      ]
+    });
+
+    intro.onafterchange(function(targetElement) {
+      if (targetElement == $('#individual-tab_hpo_omim_tab')[0]) {
+        $('#individual-tab_hpo_omim_tab').click();
+      } else if (targetElement == $('#individual-tab_hom_variants_tab')[0]) {
+        $('#individual-tab_hom_variants_tab').click();
+      } else if (targetElement == $('#individual-tab_comp_variants_tab')[0]) {
+        $('#individual-tab_comp_variants_tab').click();
+      } else if (targetElement == $('#individual-tab_rare_variants_tab')[0]) {
+        $('#individual-tab_rare_variants_tab').click();
+      } else if (targetElement == $('#individual-tab_Exomiser_tab')[0]) {
+        $('#individual-tab_Exomiser_tab').click();
+      }
+    });
+
+    intro.onbeforechange(function(targetElement) {
+      if (targetElement == $('#hom-variants-2')[0]) {
+        $('#individual-tab_hom_variants_tab').click();
+      }
+    });
+    intro.start();
+  }
+</script>
+
 <script type=text/javascript>
 // load pubmed
 $('.pubmed-gene-cell').each(function(){
