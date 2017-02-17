@@ -339,7 +339,6 @@ $('.pubmed-gene-cell').each(function(){
     var handler = onVisibilityChange($(this), function() {
         /* send key, get data */
         $.get('/pubmedbatch-cache/'+theCell.attr('pubmedkey'), function(data){
-            data = $.parseJSON(data);
             if (!data){ 
                 theCell.html('Will be available later');
             }
@@ -622,7 +621,7 @@ $('.re-search').on('click', function(e){
         function(data){
             $('span.updating').hide();
             if (data != '0'){
-                alert('something is wrong when updating!')
+                alert('something went wrong while updating!')
             }else{
                location.reload();
             }

@@ -223,5 +223,22 @@ def load_individual(individual):
     return 'Loading %s...' % individual
 
 
+'''
+progress bar query
+'''
+@app.route('/pubmedbatch_progress_bar/<id>')
+def pubmedbatch_progress(id):
+    user = session.get('user') or app.config['DEFAULT_USER']
+    progress_id = user + id
+    return jsonify(PROGRESS_BAR[progress_id])
+
+'''
+get pubmedbatch cache results based on pubmedkey
+'''
+@app.route('/pubmedbatch-cache/<pubmedkey>')
+def pubmedbatch_getcache(pubmedkey):
+    db = get_db('pubmedbatch') 
+    result = db.cache.find_one({'key':pubmedkey},{'_id':False})
+    return jsonify(result)
 
 
