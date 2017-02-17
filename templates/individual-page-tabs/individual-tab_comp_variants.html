@@ -18,7 +18,7 @@
             <thead>
                 <tr>
                     {% for h in table_headers %}
-                    <th>{{ h }}</th>
+                    <th id="comp-hets-{{loop.index}}">{{ h }}</th>
                     {% endfor %}
                 </tr>
             </thead>

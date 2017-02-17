@@ -18,8 +18,8 @@
             <table id="hom-variants" class="table-sorter">
             <thead>
                 <tr>
-                    {% for h in  table_headers %}
-                    <th>{{ h }}</th>
+                    {% for h in table_headers %}
+                    <th id="hom-variants-{{loop.index}}">{{ h }}</th>
                     {% endfor %}
                 </tr>
             </thead>
