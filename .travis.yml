@@ -42,11 +42,14 @@ install:
         cd varnorm;
         python setup.py install;
         cd ..;
+    else
+        mkdir -p offline_analysis/db;
     fi
   - pip install coveralls
 
 services:
   - mongodb
+  - sqlite3
   
 script:
 # command to run coveralls (test coverage) and run tests 
