@@ -88,8 +88,8 @@
             <div class="collapse navbar-collapse" id="collapsedmenu">
                 <ul class="nav navbar-nav navbar-right">
                     <span style="display: none;">{{request.endpoint}}</span>
-                    {% if request.endpoint == "individual" %}
-                    <li><a>Tutorial</a></li>
+                    {% if request.endpoint == "individual_page" %}
+                    <li><a href="javascript:void(0);" onclick="javascript:startIntro();">Tutorial</a></li>
                     {% endif %}
                     <li><a href="/">Home</a></li>
                     <li><a href="/individuals?number=50">My Patients</a></li>

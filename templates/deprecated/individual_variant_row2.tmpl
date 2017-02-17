@@ -1,0 +1,150 @@
+
+
+<!-- filter cell -->
+{% if v.filter == 3 %}
+<tr class='table-gene error' 
+{% elif v.filter == "FAIL" %}
+<tr class='table-gene fail' 
+{% elif v.filter.startswith('VQSRTrancheSNP') %}
+<tr class='table-gene warn' 
+{% elif v.filter=='PASS' %}
+ <tr style="table-gene word-wrap; break-word"
+{% endif %}
+ id='{{variant_type}}-{{ v.HUGO|upper }}'>
+
+
+<!-- HUGO cell -->
+<td class='HUGO-cell'>
+{% if v.HUGO in gene_info %}
+    {% set gene=gene_info[v['HUGO']]  %}
+{% if gene.known %}
+    <span class='known'>[K]</span>
+{% endif %}
+{% if gene.disease %}
+    <span class='pop pointer' 
+        data-toggle='popover' 
+        title='<a href="https://sph.uth.edu/Retnet/disease.htm" target="_blank">A RetNet gene</a>'                                   
+        data-content='
+            {% if gene.omim %}
+                <p style="color:black;margin-bottom:0"><b>OMIM:</b>
+                {% for o in gene.omim %}
+                    <a href="http://omim.org/entry/{{ o }}" target="_blank">{{ o }}</a>
+                {% endfor %}
+            {% endif %}
+            </p><hr/><p style="color:black;margin-top:0"><b>Disease:</b><br /> {{ gene.disease }}
+        </p>'>
+        <span class="retnet-mode"><b>[{{ gene.mode|capitalize() }}]</b></span>
+    </span>
+{% endif %}
+{% endif %}
+<a title='<b>score: </b>' class='tip' href='/gene3/{{ v.HUGO }}'>{{ v.HUGO }}</a>
+</td>
+
+
+<!-- HPO term -->
+<td class=HPO-cell>
+{% if v.HPO %}
+    {% for h in v.HPO %}
+        <a href='/hpo/{{ h.hpo_id }}' class='tip' title="{{ h.hpo_term }}" target='_blank'>{{ h.hpo_term | truncate(10)}}...</a><br />
+    {% endfor %}
+{% endif %}
+</td>
+
+
+<!-- consequence -->
+<td class=consequence-cell>
+    <span class='pop' data-toggle='popover' title='{{ v.consequence }}' data-content=''>{{ v.consequence }}</span>
+    v.consequence
+</td>
+
+
+<!-- pubmed cell -->
+<td class='pubmed-cell'>
+</td>
+
+
+<!-- description -->
+<td class='description-cell'>
+<span class='tip' title="{{ v['description'] }}"> 
+    {% if v.description|length > 35 %}
+        {{ v.description|truncate(35)}}...
+    {% else %}
+        {{ v.description }}
+    {% endif %}
+    </span>
+</td>
+
+
+<!-- OMIM -->
+<td class='OMIM-cell'>
+<a href='http://omim.org/entry/{{ v.OMIM }}' target='_blank'>{{ v.OMIM }}</a>
+</td>
+
+
+<!-- UCLex allele_freq -->
+<td class='allele-freq-cell'>
+<!-- <span class='tip' title='{{ v.allele_count~'/'~v.allele_num }}<br /><b>Missing cases: </b>{{ v.MISS_COUNT }}'>{{'%0.4f' % v.allele_freq|float }}</span> -->
+<span class='tip' title='{{ v.allele_freq }}<br /><b>Missing: </b>{{ v.MISS_COUNT}}'>{{'%0.4f' % v.allele_freq }}</span>
+</td>
+
+
+<!-- ExAC allele_freq -->
+<td class='ExAC_freq-cell'>
+    {% if v.ExAC_freq|length > 0 %}
+        <span class='tip' title="<b>hom_count: </b>{{v.ExAC_freq['total_homs']|int}}<br />
+            {% for k in v.ExAC_freq['pop_af']|sort %}
+               <b>{{k}}: </b> {{'%0.4f' % v.ExAC_freq['pop_af'][k]|float }}<br />
+            {% endfor %}
+            ">{{'%0.4f' % v.ExAC_freq['allele_freq']|float }}</span>
+    {% else %}
+        <b>Not in ExAC</b>
+    {% endif %}
+</td>
+
+
+<!-- variant_id cell -->
+<td class="variant_id-cell">
+    <span style='word-break: break-all;' data-placement='left' class='pop pointer variant_id'>{{ v.variant_id }}</span><br />
+    <a href='/sequence?variant_id={{ v.variant_id }}&symbol={{ v.HUGO }}&build=grch37'><small>Primer design</small></a>
+
+</td>
+
+
+<!-- protein change cell -->
+<td class="p_change-cell">
+{% if v.p_change %}
+<span class='pop pointer p-change' data-placement="left" title='<b>Details</b>' data-content='
+        {% for k in v.p_change|sort %}
+            <b>{{ k }}: </b> {{ v.p_change[k] }}<br /> 
+        {% endfor %}
+        '>{{ v.p_change['hgvs_p'] }}</span>
+{% endif %}
+</td>
+
+
+{% if patient is defined %}
+<!-- status -->
+<td class="status-cell">
+<form name={{v.variant_id}}>
+  <input type="radio" name="{{v['variant_id']}}" class="variant_status" value="{{v.variant_id}}/Y"
+  {% if v.status=="Y" or v.HUGO in candidate_genes or v.HUGO in patient.solved.gene %}
+      checked="checked"
+  {% endif %}
+  > Y</input>
+  <input type="radio" name="{{v.variant_id}}" class="variant_status" value="{{v.variant_id}}/N"
+  {% if v.status=="N" %}
+      checked="checked"
+  {% endif %}
+  > N</input>
+  <input type="radio" name="{{v.variant_id}}" class="variant_status" value="{{v.variant_id}}/M"
+  {% if v.status== "M" %}
+      checked="checked"
+  {% endif %}
+  > M</input>
+</form>
+</td>
+{% endif %}
+
+</tr>
+
+
