@@ -33,6 +33,7 @@ import math
 from Bio import Entrez
 from phenotips_python_client import PhenotipsClient
 from phenotips_python_client import browser
+from phenotips_python_client import PhenotipsClientNew
 from bson.json_util import loads
 from mongodb import *
 # fizz: hpo lookup
@@ -132,23 +133,26 @@ def check_auth(username, password):
     Will try to connect to phenotips instance.
     """
     print username
-    if config.LOCAL:
+    if config.LOCAL: 
         print 'LOCAL'
         if username=='demo' and password=='demo123':
-            session['password2'] = password
             password=md5.new(password).hexdigest()
             session['user'] = username
             session['password'] = password
+            if True: #TODO LMTW set up local phenotips config
+                conn = PhenotipsClientNew()
+                phenotips_session = conn.get_session(username, password)
+                session['phenotips_session'] = phenotips_session
             return True
         else:
             return False
-    conn=PhenotipsClient()
-    response=conn.get_patient(auth='%s:%s' % (username, password,),number=1)
-    if response:
-        session['password2'] = password
+    conn = PhenotipsClientNew()
+    phenotips_session = conn.get_session(username, password)
+    if phenotips_session:
         password=md5.new(password).hexdigest()
         session['user'] = username
         session['password'] = password
+        session['phenotips_session'] = phenotips_session
         return True
     else: return False
     # can also check that user name and hash of password exist in database

@@ -139,10 +139,11 @@ After this, `python hpo_gene_anlaysis.py` will extract all genes with significan
 ## Running servers
 
 Run Phenotips:
+Check with [Nikolas Pontikos](https://github.com/pontikos), what version is being used and replace '''1.3-milestone-4''' in the script below accordingly.
 ```
-wget https://nexus.phenotips.org/nexus/content/repositories/releases/org/phenotips/phenotips-standalone/1.3-milestone-2/phenotips-standalone-1.3-milestone-2.zip
-unzip phenotips-standalone-1.3-milestone-2.zip
-cd phenotips-standalone-1.3-milestone-2
+wget https://nexus.phenotips.org/nexus/content/repositories/releases/org/phenotips/phenotips-standalone/1.3-milestone-4/phenotips-standalone-1.3-milestone-4.zip
+unzip phenotips-standalone-1.3-milestone-4.zip
+cd phenotips-standalone-1.3-milestone-4
 bash start.sh
 ```
 
