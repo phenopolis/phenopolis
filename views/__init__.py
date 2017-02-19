@@ -224,24 +224,6 @@ def login():
                return redirect('https://uclex.cs.ucl.ac.uk/')
     return render_template('login.html', error=error)
 
-# 
-@app.route('/login2', methods=['GET','POST'])
-def login2():
-    print request.method
-    error = None
-    print 'login', request.method
-    if request.method == 'POST':
-       username=request.form['username']
-       password=request.form['password']
-       if not check_auth(username,password):
-          error = 'Invalid Credentials. Please try again.'
-       else:
-           if config.LOCAL:
-               return redirect('/')
-           else:
-               return redirect('https://uclex.cs.ucl.ac.uk')
-    return render_template('login2.html', error=error)
-
 
 # 
 @app.route('/logout')
