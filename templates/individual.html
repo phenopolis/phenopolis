@@ -251,6 +251,7 @@
             {% endif %}
         </p>
         <p>
+        <span class='candidate_gene' id="candidate_gene">
             <b> Candidate Genes: </b>
             {% if patient.genes %}
                 {% set candiate_genes=patient.genes|map(attribute='gene') %}
@@ -258,6 +259,7 @@
                     <a href="/gene/{{g.gene}}">{{g.gene}}</a> 
                 {% endfor %}
             {% endif %}
+        </span>
         </p>
     </div><!--end of col-md-6-->
 </div><!--end of row-->
@@ -350,31 +352,35 @@
         },
         {
           element: '#sex',
-          intro: "This patient is a " + gender + '.'
+          intro: "This patient is " + gender + '.'
+        },
+        {
+          element: '#candidate_gene',
+          intro: "This the gene which we believe is responsible for this patient's phenotype. The mutations in that gene are listed in the tables below."
         },
         {
           element: '#individual-tab_hpo_omim_tab',
-          intro: "Below is OMIM data for this patient."
+          intro: "The Venn diagram represents the overlap of the genes assigned to the patient features from OMIM. If you click on the intersection below you will see the genes which overlap the phenotypes."
         },
         {
           element: '#individual-tab_hom_variants_tab',
-          intro: "This patient is a " + gender + '.'
+          intro: "These are the rare homozygote variants in this patient."
         },
         {
           element: '#hom-variants-2',
-          intro: "This patient is a " + gender + '.'
+          intro: "The Exomiser score is based on how well the gene matches similar phenotypes in human, mouse or zebrafish."
         },
         {
           element: '#individual-tab_comp_variants_tab',
-          intro: "This patient is a "
+          intro: "These are the rare compound heterozygote variants in this patient."
         },
         {
           element: '#individual-tab_rare_variants_tab',
-          intro: "This patient is a " + gender + '.'
+          intro: "These are all the rare variants of this patient."
         },
         {
           element: '#individual-tab_Exomiser_tab',
-          intro: "This patient is a " + gender + '.'
+          intro: "This is the Exomiser output run under different inheritance models."
         }
       ]
     });
