@@ -223,7 +223,7 @@ def login():
            else:
                return redirect('https://uclex.cs.ucl.ac.uk/search')
     if config.LOCAL:
-        return render_template('/', error=error)
+        return jsonify(error=error), 403
     else:
         return redirect('https://uclex.cs.ucl.ac.uk/')
 
