@@ -219,29 +219,13 @@ def login():
        else:
            print 'LOGIN SUCCESS'
            if config.LOCAL:
-               return redirect('/')
+               return redirect('/search')
            else:
-               return redirect('https://uclex.cs.ucl.ac.uk/')
-    return render_template('login.html', error=error)
-
-# 
-@app.route('/login2', methods=['GET','POST'])
-def login2():
-    print request.method
-    error = None
-    print 'login', request.method
-    if request.method == 'POST':
-       username=request.form['username']
-       password=request.form['password']
-       if not check_auth(username,password):
-          error = 'Invalid Credentials. Please try again.'
-       else:
-           if config.LOCAL:
-               return redirect('/')
-           else:
-               return redirect('https://uclex.cs.ucl.ac.uk')
-    return render_template('login2.html', error=error)
-
+               return redirect('https://uclex.cs.ucl.ac.uk/search')
+    if config.LOCAL:
+        return jsonify(error=error), 403
+    else:
+        return redirect('https://uclex.cs.ucl.ac.uk/')
 
 # 
 @app.route('/logout')
@@ -251,11 +235,9 @@ def logout():
     session.pop('password',None)
     session.pop('password2',None)
     if config.LOCAL:
-        return redirect('/login')
+        return redirect('/')
     else:
-        return redirect('https://uclex.cs.ucl.ac.uk/login')
-    #return render_template('login.html', error="You have been logged out")
-
+        return redirect('https://uclex.cs.ucl.ac.uk/')
 
 @app.route('/set/<query>')
 def set(query):
@@ -1628,6 +1610,7 @@ import views.individuals
 #import views.pubmedbatch
 import views.igv
 import views.hpo
+import views.search
 import views.home
 import views.exomiser
 # work in progress, comment out if not needed
