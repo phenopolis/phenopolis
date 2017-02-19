@@ -63,9 +63,11 @@ class PhenotipsClientNew():
         Get patient with eid or all patients if not
         specified
         """
-        if not session or not session['phenotips']:
+        if not session or not 'phenotips_session' in session:
             return None
-        s = session['phenotips']
+        s = session['phenotips_session']
+        if not s:
+            return None
         username = str((session['user']))
 
         headers={'Accept':'application/json'} 
@@ -78,7 +80,6 @@ class PhenotipsClientNew():
             r=self.db.phenotips_cache.find_one({'key':k})
 
             if r:
-                print('Got from cache #########################################') # TODO LMTW remove
                 return r
             else:
                 r=s.get(url, headers=headers)
@@ -86,7 +87,6 @@ class PhenotipsClientNew():
                     r=r.json()
                     r.update({'key':k})
                     self.db.phenotips_cache.insert_one(r)
-                    print('Got from phenotips #########################################') # TODO LMTW remove
                     return r
                 except:
                     return None
@@ -100,7 +100,7 @@ class PhenotipsClientNew():
             if r:
                 return r
             else:
-                r=s.get(url)
+                r=s.get(url, headers=headers)
                 try:
                     r=r.json()
                     r.update({'key':k})
@@ -121,9 +121,11 @@ class PhenotipsClientNew():
         Retrieves all permissions: owner, collaborators, visibility.
         """
 
-        if not session or not session['phenotips']:
+        if not session or not 'phenotips_session' in session:
             return None
-        s = session['phenotips']
+        s = session['phenotips_session']
+        if not s:
+            return None
 
         headers={'Accept':'application/json; application/xml'}
         r=s.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
