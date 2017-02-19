@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/pontikos/phenopolis.svg?branch=master)](https://travis-ci.org/pontikos/phenopolis)
-[![Coverage Status](https://coveralls.io/repos/github/pontikos/phenopolis/badge.svg?branch=master)](https://coveralls.io/github/pontikos/phenopolis?branch=master)
+[![Build Status](https://travis-ci.org/phenopolis/phenopolis.svg?branch=master)](https://travis-ci.org/phenopolis/phenopolis)
+[![Coverage Status](https://coveralls.io/repos/github/phenopolis/phenopolis/badge.svg?branch=master)](https://coveralls.io/github/phenopolis/phenopolis?branch=master)
 
 
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
