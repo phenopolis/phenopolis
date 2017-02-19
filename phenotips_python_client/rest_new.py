@@ -34,25 +34,28 @@ import pymongo
 
 class PhenotipsClientNew():
 
-    def __init__(self, host='localhost', port='8080',debug=True,print_requests=True):
+    def __init__(self, host='localhost', port='8080',debug=True,print_requests=True,test=False):
         self.site='%s:%s'%(host,port,)
         conn = pymongo.MongoClient(host='localhost', port=27017)
-        self.db=conn.cache
+        if not test:
+            self.db=conn.cache
+        else:
+            self.db=conn['test_cache']
 
     def get_session(self, username, password):
         auth='%s:%s' % (username, password,)
         encoded_auth=b2a_base64(auth).strip()
-        common_headers={'Accept':'application/json'}
-        auth_headers={'Authorization':'Basic %s'%encoded_auth}
-        url = 'http://localhost:8080/rest/patients/P0000001/permissions'
-        s = requests.Session()
-        s.headers.update(common_headers)
-        r = s.get(url, headers=auth_headers)
-        assert(r.status_code == 200) 
-        return s
+        headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
+        url='http://%s/rest/patients?start=%d&number=%d' % (self.site,0,1)
+        session = requests.Session()
+        response = session.get(url, headers=headers)
+        if response :
+            return session
+        else:
+            return None
 
     def clear_cache(self):
-        self.db.phenotips_cache.remove() # TODO LMTW make a test cache
+        self.db.phenotips_cache.remove() 
 
 
     def get_patient(self,session,eid=None,number=10000,start=0):
@@ -60,42 +63,44 @@ class PhenotipsClientNew():
         Get patient with eid or all patients if not
         specified
         """
-        headers={'Accept':'application/json'} # Put header in session too.
+        if not session or not session['phenotips']:
+            return None
+        s = session['phenotips']
+        username = str((session['user']))
+
+        headers={'Accept':'application/json'} 
         if not eid:
             url='http://%s/rest/patients?start=%d&number=%d' % (self.site,start,number)
             k={'url':url}
+            k.update({'user':'%s'%username})
             k.update(headers)
             k = hashlib.md5(bencode.bencode(k)).hexdigest()
             r=self.db.phenotips_cache.find_one({'key':k})
 
-            # TODO LMTW remove # testing r=session.get(url, headers=headers)
-            r = session.get(url)
-            status_code = r.status_code 
-            print("Using session, status code is {}".format(r.status_code))
-            r = None
-            # TODO LMTW remove #
             if r:
+                print('Got from cache #########################################') # TODO LMTW remove
                 return r
             else:
-                r=session.get(url)
-                print("Just ran this line - r=session.get(url)") # TODO LMTW remove
+                r=s.get(url, headers=headers)
                 try:
                     r=r.json()
                     r.update({'key':k})
                     self.db.phenotips_cache.insert_one(r)
+                    print('Got from phenotips #########################################') # TODO LMTW remove
                     return r
                 except:
                     return None
         else:
             url='http://%s/rest/patients/eid/%s' % (self.site,str(eid))
             k={'url':url}
+            k.update({'user':'%s'%username})
             k.update(headers)
             k = hashlib.md5(bencode.bencode(k)).hexdigest()
             r=self.db.phenotips_cache.find_one({'key':k})
             if r:
                 return r
             else:
-                r=requests.get(url)
+                r=s.get(url)
                 try:
                     r=r.json()
                     r.update({'key':k})
@@ -104,21 +109,24 @@ class PhenotipsClientNew():
                 except:
                     return None
 
-    def patient_exists(self,auth,eid):
-        p=self.get_patient(auth,eid)
+    def patient_exists(self,session,eid):
+        p=self.get_patient(session,eid)
         if p is None:
             return False
         else:
             return True
 
-    def get_permissions(self,auth,ID):
+    def get_permissions(self,session,ID):
         """
         Retrieves all permissions: owner, collaborators, visibility.
         """
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Accept':'application/json; application/xml'}
-        #p=self.get_page('/patients/%s/permissions',ID, headers=headers)
-        r=requests.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
+
+        if not session or not session['phenotips']:
+            return None
+        s = session['phenotips']
+
+        headers={'Accept':'application/json; application/xml'}
+        r=s.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
         return r.json()
 
     # create patient
