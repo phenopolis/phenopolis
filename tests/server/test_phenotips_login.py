@@ -1,24 +1,19 @@
 
 import unittest
 
-
-# TODO LMTW remove - for debugging
+# Uncomment to run this module directly.
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-import phenotips_python_client
-# end TODO LMTW remove
+# End of Uncomment to run this module directly.
 
 import runserver
-from phenotips_python_client import PhenotipsClient
+import phenotips_python_client
 from phenotips_python_client import PhenotipsClientNew
-import httpie
-from binascii import b2a_base64, a2b_base64
-import requests
+from config import config
 import helper
 
 from flask import Flask, session
 from flask.ext.session import Session
-from flask import current_app
 
 
 class PhenotipsLoginTestCase(unittest.TestCase):
@@ -33,40 +28,9 @@ class PhenotipsLoginTestCase(unittest.TestCase):
 
     def test_login(self):
        
-
-        print('doing session')
-        url = 'http://localhost:8080/rest/patients/P0000001/permissions'
-        
-        s = requests.Session()
-        s.auth = requests.auth.HTTPDigestAuth('Admin', 'admin')
-        r2 = s.get('http://localhost:8080/rest/patients/P0000001/permissions')
-
-
-        encoded_auth=b2a_base64('Admin:admin').strip()
-        headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
-        r=requests.get(url, headers=headers)
-        assert(r.status_code == 200) 
-
-        s = requests.Session()
-        r = s.get(url, headers=headers)
-        assert(r.status_code == 200) 
-
-        small_headers={'Accept':'application/json'}
-        r = s.get(url, headers=small_headers)
-        status_code = r.status_code 
-
-        new_url='http://localhost:8080/rest/patients?start=0&number=5'
-        r = s.get(new_url, headers=small_headers)
-        status_code = r.status_code 
-
-
-        with self.app.session_transaction() as sess:
-            sess['phenotips'] = s 
-            s2 = sess['phenotips']
-            r = s2.get(new_url, headers=small_headers)
-            status_code = r.status_code 
-            assert(r.status_code == 200) 
-
+        if not config.LOCAL_WITH_PHENOTIPS:
+            return
+            
         conn = PhenotipsClientNew(test=True)
         phenotips_session = conn.get_session('demo', 'demo123')
         assert(phenotips_session)
@@ -78,33 +42,41 @@ class PhenotipsLoginTestCase(unittest.TestCase):
         assert(not invalid_password_session)
 
         with self.app.session_transaction() as sess:
-            #sess['phenotips'] = phenotips_session 
-            s2 = sess['phenotips']
-            r = s2.get(new_url, headers=small_headers)
-            status_code = r.status_code 
-            assert(r.status_code == 200) 
 
             conn.clear_cache()
-            all_patients=conn.get_patient(sess).get('patientSummaries',[]) 
-            all_eids=[p['eid'] for p in all_patients if p['eid']]
-            total=len(all_eids)
-            assert(total>0)
+            all_patients_from_phenotips = conn.get_patient(sess)
+            assert(all_patients_from_phenotips)
+            all_patients_from_phenotips = all_patients_from_phenotips.get('patientSummaries',[]) 
+            all_eids = [p['eid'] for p in all_patients_from_phenotips if p['eid']]
+            total_from_phenotips = len(all_eids)
+            assert(total_from_phenotips>0)
 
-            # Get again, this time from cache -
-            all_patients=conn.get_patient(sess).get('patientSummaries',[]) 
-            all_eids=[p['eid'] for p in all_patients if p['eid']]
-            total=len(all_eids)
-            assert(total>0)
+            all_patients_from_cache = conn.get_patient(sess)
+            assert(all_patients_from_cache)
+            all_patients_from_cache = all_patients_from_cache.get('patientSummaries',[]) 
+            all_eids = [p['eid'] for p in all_patients_from_cache if p['eid']]
+            total_from_cache = len(all_eids)
+            assert(total_from_cache == total_from_phenotips)
 
             new_phenotips_session = conn.get_session('demo', 'demo123')
-            sess['phenotips'] = new_phenotips_session 
-            all_patients=conn.get_patient(sess).get('patientSummaries',[]) 
-            all_eids=[p['eid'] for p in all_patients if p['eid']]
-            total=len(all_eids)
-            assert(total>0)
+            sess['phenotips_session'] = new_phenotips_session 
+            all_patients_new_session = conn.get_patient(sess)
+            assert(all_patients_new_session)
+            all_patients_new_session = all_patients_new_session.get('patientSummaries',[]) 
+            all_eids = [p['eid'] for p in all_patients_new_session if p['eid']]
+            total_new_session = len(all_eids)
+            assert(total_from_cache == total_new_session)
 
+            patient_id = 'P0000797'
+            patient_from_phenotips = conn.get_patient(sess, patient_id)
+            assert(patient_from_phenotips)
+            eid_from_phenotips = str(patient_from_phenotips['external_id'])
+            assert(eid_from_phenotips == patient_id)
 
-        temp =''
+            patient_from_cache = conn.get_patient(sess, patient_id)
+            assert(patient_from_cache)
+            eid_from_cache = str(patient_from_cache['external_id'])
+            assert(eid_from_cache == eid_from_phenotips)
 
 
     

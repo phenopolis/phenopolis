@@ -136,13 +136,13 @@ def check_auth(username, password):
     if config.LOCAL: 
         print 'LOCAL'
         if username=='demo' and password=='demo123':
-            password=md5.new(password).hexdigest()
-            session['user'] = username
-            session['password'] = password
-            if True: #TODO LMTW set up local phenotips config
+            if config.LOCAL_WITH_PHENOTIPS: 
                 conn = PhenotipsClientNew()
                 phenotips_session = conn.get_session(username, password)
                 session['phenotips_session'] = phenotips_session
+            password=md5.new(password).hexdigest()
+            session['user'] = username
+            session['password'] = password
             return True
         else:
             return False
@@ -155,10 +155,10 @@ def check_auth(username, password):
         session['phenotips_session'] = phenotips_session
         return True
     else: return False
+
     # can also check that user name and hash of password exist in database
     # if we don't use phenotips for authentication
     db_users=get_db('users')
-    session['password2'] = password
     password=md5.new(password).hexdigest()
     session['user'] = username
     session['password'] = password
@@ -254,7 +254,7 @@ def logout():
     print('DELETE SESSION')
     session.pop('user',None)
     session.pop('password',None)
-    session.pop('password2',None)
+    session.pop('password2',None) # TODO LMTW delete phenotips session too.
     if config.LOCAL:
         return redirect('/login')
     else:
