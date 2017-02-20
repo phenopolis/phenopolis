@@ -151,7 +151,6 @@ def get_candidate_genes(dbs, genes=None, fields=None):
             gene_names.append(k2['gene'])
 
     gene_dict = gene_names_to_ids(dbs['phenopolis_db'],gene_names)
-    G.ids = gene_dict.values()
     for p in all_valid_p:
         # deal with hpo and solve and sex
         temp  = {f:p.get(f,None) for f in fields}
