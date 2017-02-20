@@ -95,14 +95,14 @@ def gene_names_to_ids(db, queries):
     if not queries:
         return result
     gs = db.genes.find({'$or':
-        [{
-            'gene_name':{'$in':queries},
-            'other_names':{'$in':queries},
-        }]
+        [
+            {'gene_name':{'$in':queries}},
+            {'other_names':{'$in':queries}},
+        ]
     })
     qs = set(queries)
     for g in gs:
-        name = qs & set(g['other_names'] + [g['gene_name']])
+        name = list(qs & set(g['other_names'] + [g['gene_name']]))[0]
         result[name] = {
                 'id':g['gene_id'],
                 'symbol':g['gene_name'],
