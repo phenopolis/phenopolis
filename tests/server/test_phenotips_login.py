@@ -32,13 +32,13 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             return
             
         conn = PhenotipsClientNew(test=True)
-        phenotips_session = conn.get_session('demo', 'demo123')
+        phenotips_session = conn.get_phenotips_session('demo', 'demo123')
         assert(phenotips_session)
 
-        invalid_user_session = conn.get_session('demox', 'demo123')
+        invalid_user_session = conn.get_phenotips_session('demox', 'demo123')
         assert(not invalid_user_session)
 
-        invalid_password_session = conn.get_session('demo', 'demo123x')
+        invalid_password_session = conn.get_phenotips_session('demo', 'demo123x')
         assert(not invalid_password_session)
 
         with self.app.session_transaction() as sess:
@@ -58,7 +58,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             total_from_cache = len(all_eids)
             assert(total_from_cache == total_from_phenotips)
 
-            new_phenotips_session = conn.get_session('demo', 'demo123')
+            new_phenotips_session = conn.get_phenotips_session('demo', 'demo123')
             sess['phenotips_session'] = new_phenotips_session 
             all_patients_new_session = conn.get_patient(sess)
             assert(all_patients_new_session)
@@ -78,7 +78,14 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             eid_from_cache = str(patient_from_cache['external_id'])
             assert(eid_from_cache == eid_from_phenotips)
 
+            authorised_patient_id = 'P0000002'
+            permission = conn.get_permissions(sess, authorised_patient_id)
+            assert(permission)
 
-    
+            unauthorised_patient_id = 'P0000001'
+            permission = conn.get_permissions(sess, unauthorised_patient_id)
+            assert(not permission)
+            
+
 if __name__ == '__main__':
     unittest.main()

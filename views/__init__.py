@@ -77,7 +77,6 @@ import numpy
 import subprocess
 import datetime
 
-from load_individual import load_patient 
 from Crypto.Cipher import DES
 import base64
 
@@ -136,37 +135,20 @@ def check_auth(username, password):
     if config.LOCAL: 
         print 'LOCAL'
         if username=='demo' and password=='demo123':
+            session['user'] = username
             if config.LOCAL_WITH_PHENOTIPS: 
                 conn = PhenotipsClientNew()
-                phenotips_session = conn.get_session(username, password)
+                phenotips_session = conn.get_phenotips_session(username, password)
                 session['phenotips_session'] = phenotips_session
-            password=md5.new(password).hexdigest()
-            session['user'] = username
-            session['password'] = password
             return True
         else:
             return False
-    conn = PhenotipsClientNew()
-    phenotips_session = conn.get_session(username, password)
-    if phenotips_session:
-        password=md5.new(password).hexdigest()
-        session['user'] = username
-        session['password'] = password
-        session['phenotips_session'] = phenotips_session
-        return True
-    else: return False
 
-    # can also check that user name and hash of password exist in database
-    # if we don't use phenotips for authentication
-    db_users=get_db('users')
-    password=md5.new(password).hexdigest()
-    session['user'] = username
-    session['password'] = password
-    r=db_users.users.find_one({'user':username})
-    if r is None:
-        return False
-    elif md5.new(r['password']).hexdigest() == md5.new(password).hexdigest():
-        print('LOGIN', session['user'])
+    conn = PhenotipsClientNew()
+    phenotips_session = conn.get_phenotips_session(username, password)
+    if phenotips_session:
+        session['user'] = username
+        session['phenotips_session'] = phenotips_session
         return True
     else:
         return False
@@ -180,8 +162,9 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+
         if session:
-          if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
+          if 'user' in session: 
              return f(*args, **kwargs)
           else:
              print 'login'
@@ -189,7 +172,7 @@ def requires_auth(f):
                  return redirect('login')
              else:
                  return redirect('https://uclex.cs.ucl.ac.uk/login')
-             #return render_template('login.html', error='Invalid Credentials. Please try again.')
+
         print 'method', request.method
         error=None
         if request.method == 'POST':
@@ -230,36 +213,15 @@ def login():
     return render_template('login.html', error=error)
 
 # 
-@app.route('/login2', methods=['GET','POST'])
-def login2():
-    print request.method
-    error = None
-    print 'login', request.method
-    if request.method == 'POST':
-       username=request.form['username']
-       password=request.form['password']
-       if not check_auth(username,password):
-          error = 'Invalid Credentials. Please try again.'
-       else:
-           if config.LOCAL:
-               return redirect('/')
-           else:
-               return redirect('https://uclex.cs.ucl.ac.uk')
-    return render_template('login2.html', error=error)
-
-
-# 
 @app.route('/logout')
 def logout():
     print('DELETE SESSION')
     session.pop('user',None)
-    session.pop('password',None)
-    session.pop('password2',None) # TODO LMTW delete phenotips session too.
+    session.pop('phenotips_session',None)
     if config.LOCAL:
         return redirect('/login')
     else:
         return redirect('https://uclex.cs.ucl.ac.uk/login')
-    #return render_template('login.html', error="You have been logged out")
 
 
 @app.route('/set/<query>')
@@ -687,10 +649,9 @@ serve the Vincent annotated csv files
 @app.route('/download/send_csv', methods=['GET','POST'])
 @requires_auth
 def download_csv():
-    conn=PhenotipsClient()
+    conn=PhenotipsClientNew()
     p_id = request.args.get('p_id')
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=p_id,auth=auth)
+    p=conn.get_patient(eid=p_id,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
     path = DROPBOX
@@ -706,10 +667,9 @@ def download_csv():
 @app.route('/download', methods=['GET','POST'])
 @requires_auth
 def download():
-    conn=PhenotipsClient()
+    conn=PhenotipsClientNew()
     p_id = request.args.get('p_id')
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=p_id,auth=auth,number=1)
+    p=conn.get_patient(eid=p_id,session=session,number=1)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     filetype = request.args.get('filetype')
     index = request.args.get('index')

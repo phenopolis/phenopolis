@@ -42,15 +42,15 @@ class PhenotipsClientNew():
         else:
             self.db=conn['test_cache']
 
-    def get_session(self, username, password):
+    def get_phenotips_session(self, username, password):
         auth='%s:%s' % (username, password,)
         encoded_auth=b2a_base64(auth).strip()
         headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
         url='http://%s/rest/patients?start=%d&number=%d' % (self.site,0,1)
-        session = requests.Session()
-        response = session.get(url, headers=headers)
+        s = requests.Session()
+        response = s.get(url, headers=headers)
         if response :
-            return session
+            return s
         else:
             return None
 
@@ -129,6 +129,8 @@ class PhenotipsClientNew():
 
         headers={'Accept':'application/json; application/xml'}
         r=s.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
+        if not r:
+            return None
         return r.json()
 
     # create patient

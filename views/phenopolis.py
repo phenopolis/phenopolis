@@ -1,5 +1,4 @@
 from views import *
-from load_individual import load_patient 
 
 #import matplotlib
 #matplotlib.use('Agg')
@@ -204,10 +203,9 @@ serve the Vincent annotated csv files
 @app.route('/download/send_csv', methods=['GET','POST'])
 @requires_auth
 def download_csv():
-    conn=PhenotipsClient()
+    conn=PhenotipsClientNew()
     p_id = request.args.get('p_id')
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=p_id,auth=auth)
+    p=conn.get_patient(eid=p_id,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
     path = DROPBOX+session['user']
@@ -224,9 +222,8 @@ def download_csv():
 @requires_auth
 def individual_page(individual):
     # make sure that individual is accessible by user
-    conn=PhenotipsClient()
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=individual,auth=auth)
+    conn=PhenotipsClientNew()
+    p=conn.get_patient(eid=individual,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
@@ -364,9 +361,8 @@ def individual_page(individual):
 
 @app.route('/individual_update/<individual>')
 def individual_update(individual):
-    conn=PhenotipsClient()
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=individual,auth=auth)
+    conn=PhenotipsClientNew()
+    p=conn.get_patient(eid=individual,session=session)
     print 'UPDATE'
     print p
     print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p},w=0)
@@ -403,9 +399,8 @@ def individuals_page(page=None):
         #p['all_variants_count']=get_db().patients.find_one({'external_id':p['external_id']},{'_id':0,'all_variants_count':1})['all_variants_count']
         #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
         return p
-    conn=PhenotipsClient()
-    auth='%s:%s' % (session['user'],session['password2'],)
-    patients=conn.get_patient(auth=auth).get('patientSummaries',[])
+    conn=PhenotipsClientNew()
+    patients=conn.get_patient(session=session).get('patientSummaries',[])
     eids=[p['eid'] for p in patients]
     print(eids)
     patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
