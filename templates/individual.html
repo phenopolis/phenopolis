@@ -242,7 +242,11 @@
         <span class='consanguinity' id="consanguinity">
             <b>Consanguinity:</b> 
             {% if patient.family_history %}
-            <span class='ind-header'> {{ patient.family_history.consanguinity }}</span>
+            {% if not patient.family_history.consanguinity %}
+                <span class='ind-header'> unknown </span>
+            {% else %}
+                <span class='ind-header'> {{ patient.family_history.consanguinity }}</span>
+            {% endif %}
             {% endif %}
         </span>
         </p>
@@ -260,7 +264,7 @@
         <span class='candidate_gene' id="candidate_gene">
             <b> Candidate Genes: </b>
             {% if patient.genes %}
-                {% set candidate_genes=patient.genes|map(attribute='gene') %}
+                {% set candidate_genes=patient.genes|map(attribute='gene')|list %}
                 {% for g in patient.genes %}
                     <a href="/gene/{{g.gene}}">{{g.gene}}</a> 
                 {% endfor %}
@@ -369,11 +373,11 @@
         },
         {
           element: '#clinical_features',
-          intro: "These are the clinical features of this patient entered as Human Phenotype Ontology (HPO) terms. You can edit them in Phenotips. Clicking on any of these will take you the page with all individuals who have that HPO term in Phenopolis."
+          intro: "These are the clinical features of this patient entered as Human Phenotype Ontology (HPO) terms. You can edit them in <a href=https://uclex.cs.ucl.ac.uk/{{patient.report_id}}>Phenotips</a>. Clicking on any of these will take you the page with all individuals who have that HPO term in Phenopolis."
         },
         {
           element: '#consanguinity',
-          intro: "Indicates whether there is consanguinity based on family history.  If there is, we might expect the causal mutation to be homozygote. A high number of rare homozygote variants (below) may also suggest consaguinity."
+          intro: "Indicates whether there is known consanguinity based on family history.  If there is, we might expect the causal mutation to be homozygote. A high number of rare homozygote mutations (below) may also suggest consaguinity."
         },
         {
           element: '#inheritance_mode',
@@ -381,15 +385,15 @@
         },
         {
           element: '#candidate_gene',
-          intro: "This the gene which we believe is responsible for this individual's phenotype. The mutations in that gene will be listed in the variant tables below."
+          intro: "This the gene which we believe is responsible for this individual's phenotype. The mutations in that gene is highlighted in the table of mutations below."
         },
         {
           element: '#venn',
-                   intro: "This Venn diagram represents the overlap of the genes assigned to the patient features according to the <a href=http://compbio.charite.de/jenkins/job/hpo.annotations/lastStableBuild/>HPO to OMIM mapping</a>. If you click on the intersection you will see the genes that overlap between the phenotypes for this individual. Clicking on the gene name will then take you to the mutation."
+          intro: "This Venn diagram represents the overlap of the genes assigned to the patient features according to the <a href=http://compbio.charite.de/jenkins/job/hpo.annotations/lastStableBuild/>HPO to OMIM mapping</a>. If you click on the intersection you will see the genes that overlap between the phenotypes for this individual. Clicking on the gene name will then take you to the mutation."
         },
         {
           element: '#individual-tab_hom_variants_tab',
-          intro: "There are {{patient.homozygous_variants|length}} rare homozygote variants in this individual, listed in the table below. If the inheritance mode is recessive and there is consanguinity, then this is the most likely type of causal mutations."
+          intro: "There are {{patient.homozygous_variants|length}} rare homozygote mutations in this individual, listed in the table below. If the inheritance mode is recessive and there is consanguinity, then this is the most likely type of causal mutations."
         },
         {
           element: '#hom-variants-2',
@@ -397,7 +401,7 @@
         },
         {
           element: '#hom-variants-3',
-          intro: "The Phenogenon score is based on the -log10 p-value of the gene for the 'Retinal Dystrophy' HPO term. If you sort on this column you should find that the candidate gene "+candidate_genes+" is near the top. "
+          intro: "The Phenogenon score is based on the -log10 p-value of the gene for the 'Retinal Dystrophy' HPO term. If you sort on this column you should find that the candidate gene "+candidate_genes+" mutation is near the top. "
         },
         {
           element: '#individual-tab_comp_variants_tab',
@@ -405,7 +409,7 @@
         },
         {
           element: '#individual-tab_rare_variants_tab',
-          intro: "These are the {{patient.rare_variants|length}} rare variants for this indvidual. If the inheritance mode is dominant, X-linked or sporadic, this is the variant list to check. "
+          intro: "These are the {{patient.rare_variants|length}} rare variants for this indvidual. If the inheritance mode is dominant, X-linked or sporadic, this is the mutation list to check. "
         },
         {
           element: '#individual-tab_Exomiser_tab',
@@ -582,16 +586,16 @@ venDiv.selectAll("g")
             .attr('title', function(d){
                 var result = '';
                 if ($.inArray(d, hom_genes) != -1){
-                    result = '<b>HOM-V: </b>' + $('#hom-' + d).find('.p-change').text();
+                    result = '<b>Rare homozygote: </b>' + $('#hom-' + d).find('.p-change').text();
                 } else if ($.inArray(d, compound_het_genes) != -1){
                     var p = '';
                     $('.compound_het-' + d).each(function(){
                         console.log($(this));
                         p += $(this).find('.p-change').text() + ' ';
                     });
-                    result = '<b>COMPOUND HET-V: </b><br />' + p; //$('#compound_het-' + d).find('.p-change').text();
+                    result = '<b>Rare compound heterozygote: </b><br />' + p; //$('#compound_het-' + d).find('.p-change').text();
                 } else if ($.inArray(d, rare_genes) != -1){
-                    result = '<b> HET-V: </b>' + $('#rare-' + d).find('.p-change').text();
+                    result = '<b> Rare heterozygote variant: </b>' + $('#rare-' + d).find('.p-change').text();
                 }
                 return result;
             })
