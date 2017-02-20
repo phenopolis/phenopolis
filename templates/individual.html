@@ -230,31 +230,37 @@
 <div class='row'>
     <div class='col-md-6'>
         <p>
+        <span class='clinical_features' id="clinical_features">
             <b>Features:</b>
             {% for f in features %}
                   <span class='ind-header'>
                       <a href='/hpo/{{ f[0] }}'>{{ f[1] }}</a>
                   </span>
             {% endfor %}
+        </span>
         </p>
+        <span class='consanguinity' id="consanguinity">
             <b>Consanguinity:</b> 
             {% if patient.family_history %}
             <span class='ind-header'> {{ patient.family_history.consanguinity }}</span>
             {% endif %}
+        </span>
         </p>
         <p>
+        <span class='inheritance_mode' id="inheritance_mode">
             <b>Global Mode of Inheritance:</b> 
             {% if patient.global_mode_of_inheritance %}
                 {% for inh in patient.global_mode_of_inheritance %}
                     <span class='ind-header'>{{inh.label}}</span>
                 {% endfor %}
             {% endif %}
+        </span>
         </p>
         <p>
         <span class='candidate_gene' id="candidate_gene">
             <b> Candidate Genes: </b>
             {% if patient.genes %}
-                {% set candiate_genes=patient.genes|map(attribute='gene') %}
+                {% set candidate_genes=patient.genes|map(attribute='gene') %}
                 {% for g in patient.genes %}
                     <a href="/gene/{{g.gene}}">{{g.gene}}</a> 
                 {% endfor %}
@@ -342,41 +348,64 @@
     var gender;
     // set gender to male or female depending on patient sex variable 
     if ('{{ patient.sex }}' === 'M') { gender = 'Male' } else { gender = 'Female' }
+    var candidate_genes = [
+    {% if patient.genes %}
+        {% for g in patient.genes %}
+            "{{ g.gene }}",
+        {% endfor %}
+    {% endif %}
+    ];
 
     var intro = introJs();
     intro.setOptions({
       steps: [
         {
           element: '#individual_header',
-          intro: "This is a tutorial for this patient."
+          intro: "This is a tutorial for individual with id {{external_id}}. If you click this link this will open the patient record in Phenotips which you can then edit."
         },
         {
           element: '#sex',
           intro: "This patient is " + gender + '.'
         },
         {
-          element: '#candidate_gene',
-          intro: "This the gene which we believe is responsible for this patient's phenotype. The mutations in that gene are listed in the tables below."
+          element: '#clinical_features',
+          intro: "These are the clinical features of this patient entered as Human Phenotype Ontology (HPO) terms. You can edit them in Phenotips. Clicking on any of these will take you the page with all individuals who have that HPO term in Phenopolis."
         },
         {
-          element: '#individual-tab_hpo_omim_tab',
-          intro: "The Venn diagram represents the overlap of the genes assigned to the patient features from OMIM. If you click on the intersection below you will see the genes which overlap the phenotypes."
+          element: '#consanguinity',
+          intro: "Indicates whether there is consanguinity based on family history.  If there is, we might expect the causal mutation to be homozygote."
+        },
+        {
+          element: '#inheritance_mode',
+          intro: "The mode of inheritance of the patient's phenotype based on family history. This will indicate what type of causal mutation (homozygote, compound heterozygote or heterozygote) to expect. The mode of inheritance can also be specified as an HPO term (above)."
+        },
+        {
+          element: '#candidate_gene',
+          intro: "This the gene which we believe is responsible for this individual's phenotype. The mutations in that gene will be listed in the variant tables below."
+        },
+        {
+          element: '#venn',
+                   intro: "This Venn diagram represents the overlap of the genes assigned to the patient features according to the <a href=http://compbio.charite.de/jenkins/job/hpo.annotations/lastStableBuild/>HPO to OMIM mapping</a>. If you click on the intersection you will see the genes that overlap between the phenotypes for this individual. Clicking on the gene name will then take you to the mutation."
         },
         {
           element: '#individual-tab_hom_variants_tab',
-          intro: "These are the rare homozygote variants in this patient."
+          intro: "There are {{patient.homozygous_variants|length}} rare homozygote variants in this individual, listed in the table below. If the inheritance mode is recessive and there is consanguinity, then this is the most likely type of causal mutations."
         },
         {
           element: '#hom-variants-2',
-          intro: "The Exomiser score is based on how well the gene matches similar phenotypes in human, mouse or zebrafish."
+          intro: "The Exomiser score is based on how well the gene matches similar phenotypes in human, mouse or zebrafish. "
+        },
+        {
+          element: '#hom-variants-3',
+          intro: "The Phenogenon score is based on the -log10 p-value of the gene for the 'Retinal Dystrophy' HPO term. If you sort on this column you should find that the candidate gene "+candidate_genes+" is near the top. "
         },
         {
           element: '#individual-tab_comp_variants_tab',
-          intro: "These are the rare compound heterozygote variants in this patient."
+          intro: "These are the {{patient.compound_hets|length}} rare compound heterozygote variants in this individual. If the inheritance mode is recessive but there is no consanguinity then this is the most likely type of causal variant."
         },
         {
           element: '#individual-tab_rare_variants_tab',
-          intro: "These are all the rare variants of this patient."
+          intro: "These are the {{patient.rare_variants|length}} rare variants for this indvidual. If the inheritance mode is dominant, X-linked or sporadic, this is the variant list to check. "
         },
         {
           element: '#individual-tab_Exomiser_tab',
@@ -402,6 +431,8 @@
     intro.onbeforechange(function(targetElement) {
       if (targetElement == $('#hom-variants-2')[0]) {
         $('#individual-tab_hom_variants_tab').click();
+      } else if (targetElement == $('#hom-variants3')[0]) {
+        $('#hom-variants-2').click();
       }
     });
     intro.start();
