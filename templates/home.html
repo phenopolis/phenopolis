@@ -29,8 +29,8 @@
     <div class="section" style="background-color: #ececec;">
         <div class="container">
             <h4 class="center" style="padding-bottom:1rem;">Phenopolis Statistics</h4>
-            <h5 class="center light">Samples: There are 6052 exomes (773 male, 1128 female, and 4144 unknown).</h5>
-            <h5 class="center light">Variants: There is a total of 3,813,475 variants in this data. 2,975,765 variants pass the GATK filter.</h5>
+            <h5 class="center light">Samples: There are {{total_patients}} exomes ({{male_patients}} male, {{female_patients}} female, and {{unknown_patients}} unknown).</h5>
+            <h5 class="center light"> There is a total of {{ '{0:,}'.format(total_variants) }} variants.  {{ '{0:,}'.format(pass_variants) }} variants pass the GATK filter.  </h5>
         </div>
     </div>
     <div class="section">
