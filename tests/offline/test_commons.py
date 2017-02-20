@@ -30,8 +30,15 @@ class utilsTestCase(unittest.TestCase):
         case = get_chrom_genes([2,1],self.db['phenopolis_db'])
         assert 'ENSG00000196944' in case
 
+    def test_gene_names_to_ids(self):
+        case = gene_names_to_ids(self.db['phenopolis_db'],['LARGE','ERO1L'])
+        self.assertEqual(case['LARGE']['id'],'ENSG00000133424')
+        self.assertEqual(case['LARGE']['symbol'],'LARGE1')
+        self.assertEqual(case['ERO1L']['id'],'ENSG00000197930')
+        self.assertEqual(case['ERO1L']['symbol'],'ERO1A')
+
     def test_get_candidate_genes(self):
-        result = get_candidate_genes(self.db['patient_db'],fields=['hpo'])
+        result = get_candidate_genes(self.db,fields=['hpo'])
         # HP:0000548 in at least one of the returned TTLL5 result
         case = result['ENSG00000156171']
         self.assertEqual(case['symbol'],'DRAM2')
