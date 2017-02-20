@@ -7,9 +7,6 @@ import ConfigParser
 import os
 import errno
 import sys
-path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(path,'..','..','BioTools'))
-from Genes import *
 import sqlite3
 import re
 
@@ -91,9 +88,33 @@ def mkdir_p(path):
             raise
 
 '''
+translate gene_names to ensembl ids. db = dbs['phenopolis_db']
+'''
+def gene_names_to_ids(db, queries):
+    result = {}
+    if not queries:
+        return result
+    gs = db.genes.find({'$or':
+        [{
+            'gene_name':{'$in':queries},
+            'other_names':{'$in':queries},
+        }]
+    })
+    qs = set(queries)
+    for g in gs:
+        name = qs & set(g['other_names'] + [g['gene_name']])
+        result[name] = {
+                'id':g['gene_id'],
+                'symbol':g['gene_name'],
+                }
+
+    return result
+
+
+'''
 get candidate genes and patients' hpos, solve, candidate genes, sex
 '''
-def get_candidate_genes(db, genes=None, fields=None):
+def get_candidate_genes(dbs, genes=None, fields=None):
     # set up some defaults. hpos = observed features.
     # solve would be 0 for unsolved and 1 for solved
     # sex 0 unknown, 1 male, 2 female
@@ -107,13 +128,10 @@ def get_candidate_genes(db, genes=None, fields=None):
             'unsolved':0,
         }
     
-    # make a G for translation
-    biotools_db = sqlite3.connect(OFFLINE_CONFIG['biotools']['db_file'])
-    G = Genes(biotools_db)
     # fields of interests
     fields = fields or ['hpo','solve','genes','sex']
 
-    all_valid_p = [p for p in db.patients.find({}) if p.get('genes',[])]
+    all_valid_p = [p for p in dbs['patient_db'].patients.find({}) if p.get('genes',[])]
     result = {}
     gene_names = []
     for k1 in all_valid_p:
@@ -132,7 +150,7 @@ def get_candidate_genes(db, genes=None, fields=None):
                 raise ValueError('Error: Illegal gene name "%s"' % k2['gene'])
             gene_names.append(k2['gene'])
 
-    gene_dict = G.symbols_to_ensemblIds(gene_names)
+    gene_dict = gene_names_to_ids(dbs['phenopolis_db'],gene_names)
     G.ids = gene_dict.values()
     for p in all_valid_p:
         # deal with hpo and solve and sex
@@ -149,9 +167,9 @@ def get_candidate_genes(db, genes=None, fields=None):
                 g['gene'] = 'NLRP3'
             if g['gene'] == 'GPR98':
                 g['gene'] = 'ADGRV1'
-            gene_id = gene_dict[g['gene']]
+            gene_id = gene_dict[g['gene']]['id']
             result[gene_id] = result.get(gene_id,{
-                'symbol':G.symbol[gene_id],
+                'symbol':gene_dict[g['gene']]['symbol'],
                 'data':[],
                 })
             result[gene_id]['data'].append(temp)
