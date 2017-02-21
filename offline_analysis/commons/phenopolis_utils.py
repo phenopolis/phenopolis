@@ -118,6 +118,7 @@ def get_candidate_genes(dbs, genes=None, fields=None):
     # set up some defaults. hpos = observed features.
     # solve would be 0 for unsolved and 1 for solved
     # sex 0 unknown, 1 male, 2 female
+    # if genes == None, get all genes
     SEX_DICT = {
             'F': 2,
             'M': 1,
@@ -148,7 +149,8 @@ def get_candidate_genes(dbs, genes=None, fields=None):
             k2['gene'] = k2['gene'].strip()
             if re.search(r'[^a-zA-Z0-9-]', k2['gene']):
                 raise ValueError('Error: Illegal gene name "%s"' % k2['gene'])
-            gene_names.append(k2['gene'])
+            if not genes or k2['gene'] in genes:
+                gene_names.append(k2['gene'])
 
     gene_dict = gene_names_to_ids(dbs['phenopolis_db'],gene_names)
     for p in all_valid_p:
