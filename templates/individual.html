@@ -437,8 +437,14 @@
         $('#individual-tab_hom_variants_tab').click();
       } else if (targetElement == $('#hom-variants-3')[0]) {
         $('#individual-tab_hom_variants_tab').click();
-      } else if (targetElement == $('#venn')[0]) {
+      }
+      if (targetElement == $('#venn')[0]) {
         $('#individual-tab_hpo_omim_tab').click();
+        $('.venntooltip').css('z-index', '9999999');
+        $('#omim-genes-modal').css('z-index', '9999999');
+      } else {
+        $('.venntooltip').css('z-index', 'initial');
+        $('#omim-genes-modal').css('z-index', '1050');
       }
     });
     intro.start();
