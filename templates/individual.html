@@ -433,10 +433,12 @@
     });
 
     intro.onbeforechange(function(targetElement) {
-      if (targetElement == $('#hom-variants-2')[0]) {
+     if (targetElement == $('#hom-variants-2')[0]) {
         $('#individual-tab_hom_variants_tab').click();
-      } else if (targetElement == $('#hom-variants3')[0]) {
-        $('#hom-variants-2').click();
+      } else if (targetElement == $('#hom-variants-3')[0]) {
+        $('#individual-tab_hom_variants_tab').click();
+      } else if (targetElement == $('#venn')[0]) {
+        $('#individual-tab_hpo_omim_tab').click();
       }
     });
     intro.start();
