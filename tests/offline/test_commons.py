@@ -41,9 +41,6 @@ class utilsTestCase(unittest.TestCase):
         result = get_candidate_genes(self.db,fields=['hpo'])
         case = result['ENSG00000156171']
         self.assertEqual(case['symbol'],'DRAM2')
-        result = get_candidate_genes(self.db,genes=['ABCA4','DRAM2'],fields=['hpo'])
-        case = result['ENSG00000156171']
-        self.assertEqual(case['symbol'],'DRAM2')
         
 
 if __name__ == '__main__':
