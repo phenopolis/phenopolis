@@ -102,7 +102,7 @@ def gene_names_to_ids(db, queries):
     })
     qs = set(queries)
     for g in gs:
-        name = list(qs & set(g['other_names'] + [g['gene_name']]))[0]
+        name = list(qs & set(g.get('other_names',[]) + [g['gene_name']]))[0]
         result[name] = {
                 'id':g['gene_id'],
                 'symbol':g['gene_name'],
