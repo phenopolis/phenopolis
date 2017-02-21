@@ -42,7 +42,7 @@ class PhenotipsClientNew():
         else:
             self.db=conn['test_cache']
 
-    def get_phenotips_session(self, username, password):
+    def request_phenotips_session(self, username, password):
         auth='%s:%s' % (username, password,)
         encoded_auth=b2a_base64(auth).strip()
         headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
@@ -54,6 +54,14 @@ class PhenotipsClientNew():
         else:
             return None
 
+    def get_phenotips_session(self, session):
+        if not session or not 'phenotips_session' in session:
+            return None
+        phenotips_session = session['phenotips_session']
+        if not phenotips_session:
+            return None
+        return phenotips_session
+
     def clear_cache(self):
         self.db.phenotips_cache.remove() 
 
@@ -63,9 +71,7 @@ class PhenotipsClientNew():
         Get patient with eid or all patients if not
         specified
         """
-        if not session or not 'phenotips_session' in session:
-            return None
-        s = session['phenotips_session']
+        s = self.get_phenotips_session(session)
         if not s:
             return None
         username = str((session['user']))
@@ -121,9 +127,7 @@ class PhenotipsClientNew():
         Retrieves all permissions: owner, collaborators, visibility.
         """
 
-        if not session or not 'phenotips_session' in session:
-            return None
-        s = session['phenotips_session']
+        s = self.get_phenotips_session(session)
         if not s:
             return None
 
@@ -134,48 +138,51 @@ class PhenotipsClientNew():
         return r.json()
 
     # create patient
-    def create_patient(self, auth, patient):
-        headers={'Authorization':'Basic %s'% b2a_base64(auth).strip(), 'Content-Type':'application/json', 'Accept':'application/json'}
+    def create_patient(self, session, patient):
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
         io=StringIO()
         json.dump(patient,io)
         json_patient=io.getvalue()
-        #p=self.get_page('/rest/patients', headers=headers, post=json_patient)
-        print(p)
-        return(p)
+        s.post('http://%s/rest/patients' % (self.site), headers=headers, data=json_patient)
 
-    def update_patient(self, eid, auth, patient):
+    def update_patient(self, eid, session, patient):
         """
         Update patient if exists, otherwise create.
         """
-        patient['external_id']=eid
-        if self.patient_exists(auth=auth,eid=eid):
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
+        #patient['external_id']=eid
+        if self.patient_exists(session=session,eid=eid):
             io=StringIO()
             json.dump(patient,io)
             json_patient=io.getvalue()
             print('update')
             print(json_patient)
-            headers={'Authorization':'Basic %s'% b2a_base64(auth).strip(),'Content-Type':'application/json', 'Accept':'application/json'}
-            self.get_page('/rest/patients/eid/%s'%eid, headers=headers, post=json_patient, special='PUT')
+            headers={'Content-Type':'application/json', 'Accept':'application/json'}
+            s.put('http://%s/rest/patients/%s' % (self.site,eid), headers=headers, data=json_patient)
         else:
             print('create')
             print(patient)
-            self.create_patient(auth=auth,patient=patient)
+            self.create_patient(session=session,patient=patient)
 
 
-    def update_permissions(self, permissions, auth, ID=None, eid=None):
+    def update_permissions(self, permissions, session, ID=None, eid=None):
         """
         Update permissions of patient.
         """
         #permission = { "owner" : { "id" : "xwiki:XWiki.RachelGillespie" }, "visibility" : { "level":  "private" }, "collaborators" : [{ "id" : "xwiki:XWiki.UKIRDC", "level" : "edit" }, { "id" : "xwiki:Groups.UKIRDC Administrators)", "level" : "edit" }] }
         if not ID:
-            p=self.get_patient(auth=auth,eid=eid)
+            p=self.get_patient(session=session,eid=eid)
             ID=p['id']
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Content-Type':'application/json', 'Accept':'application/json'}
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
         io=StringIO()
         json.dump(permissions,io)
         json_permissions=io.getvalue()
-        p=self.get_page('/patients/%s/permissions'%ID, headers=headers, post=json_permissions, special='PUT')
+        p=s.get_page('/patients/%s/permissions'%ID, headers=headers, post=json_permissions, special='PUT')
         print(p)
         return(p)
 

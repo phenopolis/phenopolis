@@ -9,11 +9,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 import runserver
 import phenotips_python_client
 from phenotips_python_client import PhenotipsClientNew
+from phenotips_python_client import PhenotipsClient # TODO LMTW remove
 from config import config
 import helper
 
 from flask import Flask, session
 from flask.ext.session import Session
+
+import json
 
 
 class PhenotipsLoginTestCase(unittest.TestCase):
@@ -32,13 +35,13 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             return
             
         conn = PhenotipsClientNew(test=True)
-        phenotips_session = conn.get_phenotips_session('demo', 'demo123')
+        phenotips_session = conn.request_phenotips_session('demo', 'demo123')
         assert(phenotips_session)
 
-        invalid_user_session = conn.get_phenotips_session('demox', 'demo123')
+        invalid_user_session = conn.request_phenotips_session('demox', 'demo123')
         assert(not invalid_user_session)
 
-        invalid_password_session = conn.get_phenotips_session('demo', 'demo123x')
+        invalid_password_session = conn.request_phenotips_session('demo', 'demo123x')
         assert(not invalid_password_session)
 
         with self.app.session_transaction() as sess:
@@ -58,7 +61,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             total_from_cache = len(all_eids)
             assert(total_from_cache == total_from_phenotips)
 
-            new_phenotips_session = conn.get_phenotips_session('demo', 'demo123')
+            new_phenotips_session = conn.request_phenotips_session('demo', 'demo123')
             sess['phenotips_session'] = new_phenotips_session 
             all_patients_new_session = conn.get_patient(sess)
             assert(all_patients_new_session)
@@ -85,7 +88,36 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             unauthorised_patient_id = 'P0000001'
             permission = conn.get_permissions(sess, unauthorised_patient_id)
             assert(not permission)
-            
+
+    @staticmethod
+    def single_patient():
+        return {"genes": [{"status": "", "gene": "", "comments": ""}], "external_id": "P0000101", "features": [{"observed": "no", "type": "phenotype", "id": "HP:0000593", "label": "Abnormality of the anterior chamber"}, {"observed": "no", "type": "phenotype", "id": "HP:0000481", "label": "Abnormality of the cornea"}, {"observed": "yes", "id": "HP:0000479", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003577", "label": "Congenital onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}], "label": "Abnormality of the retina"}, {"observed": "no", "type": "phenotype", "id": "HP:0000589", "label": "Coloboma"}, {"observed": "no", "type": "phenotype", "id": "HP:0000316", "label": "Hypertelorism"}, {"observed": "no", "type": "phenotype", "id": "HP:0000601", "label": "Hypotelorism"}, {"observed": "no", "type": "phenotype", "id": "HP:0000568", "label": "Microphthalmos"}, {"observed": "yes", "id": "HP:0000556", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003577", "label": "Congenital onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}, {"type": "severity", "id": "HP:0012828", "label": "Severe"}], "label": "Retinal dystrophy"}, {"observed": "yes", "id": "HP:0000550", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003593", "label": "Infantile onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}], "label": "Undetectable electroretinogram"}, {"observed": "yes", "id": "HP:0000505", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003577", "label": "Congenital onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}, {"type": "severity", "id": "HP:0012828", "label": "Severe"}], "label": "Visual impairment"}]}
+    
+    @staticmethod
+    def load_patient(file_location):
+        with open(file_location, 'r') as json_data:
+            for line in json_data:
+                dataset = json.loads(line)
+            return dataset
+     
+    def test_update_patient(self):      
+        if not config.LOCAL_WITH_PHENOTIPS:
+            return   
+        conn = PhenotipsClientNew(test=True)
+        with self.app.session_transaction() as sess:
+            file_location = "./tests/data/patient-update-name.json"
+            patient = PhenotipsLoginTestCase.load_patient(file_location)
+            eid = 'P0000003'
+            conn.update_patient(eid, sess, patient)
+
+    #def test_create_patient(self):
+    #    if not config.LOCAL_WITH_PHENOTIPS:
+    #        return
+    #    conn = PhenotipsClientNew(test=True)
+    #    with self.app.session_transaction() as sess:
+    #        file_location = "./tests/data/simple-patient-P0000006.json"
+    #        patient = PhenotipsLoginTestCase.load_patient(file_location)
+    #        conn.create_patient(sess, patient)                 
 
 if __name__ == '__main__':
     unittest.main()
