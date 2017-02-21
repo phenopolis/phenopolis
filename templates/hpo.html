@@ -539,7 +539,11 @@ function fetchPhenoGenon() {
                         //var gene_name=document.createTextNode(dominant_genes[i].gene_name);
                         var gene_name = document.createElement("div");
                         gene_name.className = "description";
-                        gene_name.innerHTML = "<a target=_blank href=/gene/"+dominant_genes[i].gene_name+">"+dominant_genes[i].gene_name+"</a>";
+                        if (dominant_genes[i].known) {
+                            gene_name.innerHTML = "<a target=_blank href=/gene/"+dominant_genes[i].gene_name+"><b>"+dominant_genes[i].gene_name+"</b></a>";
+                        } else {
+                            gene_name.innerHTML = "<a target=_blank href=/gene/"+dominant_genes[i].gene_name+">"+dominant_genes[i].gene_name+"</a>";
+                        }
                         var p_value=document.createTextNode(dominant_genes[i].p_val);
                         cell_1.appendChild(gene_name);
                         cell_2.appendChild(p_value);
@@ -558,7 +562,11 @@ function fetchPhenoGenon() {
                         var cell_2=document.createElement('td');
                         var gene_name = document.createElement("div");
                         gene_name.className = "description";
-                        gene_name.innerHTML = "<a target=_blank href=/gene/"+recessive_genes[i].gene_name+">"+recessive_genes[i].gene_name+"</a>";
+                        if (recessive_genes[i].known) {
+                            gene_name.innerHTML = "<a target=_blank href=/gene/"+recessive_genes[i].gene_name+"><b>"+recessive_genes[i].gene_name+"</b></a>";
+                        } else {
+                            gene_name.innerHTML = "<a target=_blank href=/gene/"+recessive_genes[i].gene_name+">"+recessive_genes[i].gene_name+"</a>";
+                        }
                         var p_value=document.createTextNode(recessive_genes[i].p_val);
                         cell_1.appendChild(gene_name);
                         cell_2.appendChild(p_value);
