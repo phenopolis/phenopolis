@@ -32,7 +32,7 @@ def individual_page(individual):
     #print  'url_root', request.url_root
     #if session['user']=='demo': individual=decrypt(str(individual))
     # make sure that individual is accessible by user
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p=conn.get_patient(eid=individual,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
@@ -194,7 +194,7 @@ def individual_page(individual):
 
 @app.route('/individual_update/<individual>')
 def individual_update(individual):
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p=conn.get_patient(eid=individual,session=session)
     print 'UPDATE'
     print p

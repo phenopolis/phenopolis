@@ -68,7 +68,7 @@ def set_variant_causal(individual, variant_str):
     gene_name=db.genes.find_one({'gene_id':gene_id})['gene_name_upper']
     print 'GENE_NAME', gene_name
     # update Gene in phenotips
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p=conn.get_patient(eid=individual,session=session)
     p['genes']=p.get('genes',[])+[{'gene':gene_name}]
     print conn.update_patient( eid=p['external_id'], session=session, patient=p )
@@ -92,7 +92,7 @@ def unset_variant_causal(individual, variant_str):
     if variant_str in p.get('causal_variants',[]):
         p['causal_variants']=p['causal_variants'].remove(variant_str)
     db.patients.update({'external_id':individual},{'$set':{'causal_variants':p['causal_variants']}},w=0)
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p2=conn.get_patient(eid=individual,session=session)
     p2['genes']=[]
     for var in p['causal_variants']:

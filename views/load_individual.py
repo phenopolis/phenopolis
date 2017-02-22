@@ -25,7 +25,7 @@ import csv
 from collections import defaultdict, Counter
 #import rest as annotation
 import vcf
-from phenotips_python_client import PhenotipsClientNew
+from phenotips_python_client import PhenotipsClient
 from optparse import OptionParser
 import mygene
 import lookups
@@ -70,7 +70,7 @@ def load_patient(individual,auth,hpo='HP:0000001',AC=6,kaviar=.05,consequence_ex
     patient_db = client['patients']
     patient_id=individual
     # Add patient to phenotips if it does not already exist
-    pheno=PhenotipsClientNew()
+    pheno=PhenotipsClient()
     patient={u'features': {u'observed': u'yes', u'type': u'phenotype', u'id': hpo}, 'clinicalStatus': {u'clinicalStatus': u'affected'}, u'ethnicity': {u'maternal_ethnicity': [], u'paternal_ethnicity': []}, u'family_history': {}, u'disorders': [], u'life_status': u'alive', u'reporter': u'', u'genes': [], u'prenatal_perinatal_phenotype': {u'prenatal_phenotype': [], u'negative_prenatal_phenotype': []}, u'prenatal_perinatal_history': {u'twinNumber': u''}, u'sex': u'U', u'solved': {u'status': u'unsolved'}}
     eid=patient_id
     pheno_session = pheno.create_session_with_phenotips(auth=auth)

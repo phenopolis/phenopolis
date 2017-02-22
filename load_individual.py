@@ -23,7 +23,7 @@ import csv
 from collections import defaultdict, Counter
 #import rest as annotation
 import vcf
-from phenotips_python_client import PhenotipsClientNew
+from phenotips_python_client import PhenotipsClient
 from optparse import OptionParser
 import mygene
 import lookups

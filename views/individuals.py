@@ -41,7 +41,7 @@ def individuals_page():
         #p['all_variants_count']=get_db().patients.find_one({'external_id':p['external_id']},{'_id':0,'all_variants_count':1})['all_variants_count']
         #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
         return p
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     all_patients=conn.get_patient(session=session).get('patientSummaries',[]) 
     all_eids=[p['eid'] for p in all_patients if p['eid']]
     total=len(all_eids)

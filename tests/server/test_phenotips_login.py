@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
 import runserver
 import phenotips_python_client
-from phenotips_python_client import PhenotipsClientNew
+from phenotips_python_client import PhenotipsClient
 from config import config
 import helper
 
@@ -33,7 +33,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
         if not config.LOCAL_WITH_PHENOTIPS:
             return
             
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
         phenotips_session = conn.request_phenotips_session('demo', 'demo123')
         assert(phenotips_session)
 
@@ -54,7 +54,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
        
         if not config.LOCAL_WITH_PHENOTIPS:
             return   
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
 
         with self.app.session_transaction() as sess:
 
@@ -108,7 +108,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
         '''
         if not config.LOCAL_WITH_PHENOTIPS:
             return   
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
         conn.clear_cache()
         auth='demo:demo123'
         session_phenotips = conn.create_session_with_phenotips(auth=auth)
@@ -137,7 +137,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
     def test_update_patient(self):      
         if not config.LOCAL_WITH_PHENOTIPS:
             return   
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
         with self.app.session_transaction() as sess:
             file_location = "./tests/data/patient-update-name.json"
             patient = PhenotipsLoginTestCase.load_patient(file_location)
@@ -155,7 +155,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
     def test_create_and_delete_patient(self):
         if not config.LOCAL_WITH_PHENOTIPS:
             return
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
         with self.app.session_transaction() as sess:
             file_location = "./tests/data/simple-patient-Test01.json"
             patient = PhenotipsLoginTestCase.load_patient(file_location)
@@ -173,7 +173,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
     def test_get_permissions(self):      
         if not config.LOCAL_WITH_PHENOTIPS:
             return   
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
 
         with self.app.session_transaction() as sess:  
             file_location = "./tests/data/simple-patient-Test01.json"
@@ -197,7 +197,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
     def test_update_permissions(self):      
         if not config.LOCAL_WITH_PHENOTIPS:
             return   
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
 
         with self.app.session_transaction() as sess:  
             file_location = "./tests/data/simple-patient-Test01.json"
@@ -217,7 +217,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
     def test_update_owner(self):      
         if not config.LOCAL_WITH_PHENOTIPS:
             return   
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
 
         with self.app.session_transaction() as sess: 
             file_location = "./tests/data/simple-patient-Test01.json"
@@ -237,7 +237,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
     def test_get_vocabularies(self):      
         if not config.LOCAL_WITH_PHENOTIPS:
             return   
-        conn = PhenotipsClientNew(test=True)
+        conn = PhenotipsClient(test=True)
 
         with self.app.session_transaction() as sess: 
             vocab = 'terms/HP:0000556'
