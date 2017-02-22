@@ -65,7 +65,6 @@ class PhenotipsClientNew():
     def clear_cache(self):
         self.db.phenotips_cache.remove() 
 
-
     def get_patient(self,session,eid=None,number=10000,start=0):
         """
         Get patient with eid or all patients if not
@@ -155,7 +154,7 @@ class PhenotipsClientNew():
         s = self.get_phenotips_session(session)
         if not s:
             return None
-        #patient['external_id']=eid
+        patient['external_id']=eid
         if self.patient_exists(session=session,eid=eid):
             io=StringIO()
             json.dump(patient,io)
@@ -163,7 +162,7 @@ class PhenotipsClientNew():
             print('update')
             print(json_patient)
             headers={'Content-Type':'application/json', 'Accept':'application/json'}
-            s.put('http://%s/rest/patients/%s' % (self.site,eid), headers=headers, data=json_patient)
+            s.put('http://%s/rest/patients/eid/%s' % (self.site,eid), headers=headers, data=json_patient)
         else:
             print('create')
             print(patient)
@@ -175,6 +174,9 @@ class PhenotipsClientNew():
         Update permissions of patient.
         """
         #permission = { "owner" : { "id" : "xwiki:XWiki.RachelGillespie" }, "visibility" : { "level":  "private" }, "collaborators" : [{ "id" : "xwiki:XWiki.UKIRDC", "level" : "edit" }, { "id" : "xwiki:Groups.UKIRDC Administrators)", "level" : "edit" }] }
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
         if not ID:
             p=self.get_patient(session=session,eid=eid)
             ID=p['id']
@@ -182,25 +184,27 @@ class PhenotipsClientNew():
         io=StringIO()
         json.dump(permissions,io)
         json_permissions=io.getvalue()
-        p=s.get_page('/patients/%s/permissions'%ID, headers=headers, post=json_permissions, special='PUT')
+        p=s.put('http://%s/rest/patients/%s/permissions'% (self.site,ID), headers=headers, data=json_permissions, )
         print(p)
         return(p)
 
 
-    def update_owner(self, owner, auth, ID=None, eid=None):
+    def update_owner(self, owner, session, ID=None, eid=None):
         """
         Update owner of patient.
         """
         #permission = { "owner" : { "id" : "xwiki:XWiki.RachelGillespie" }, "visibility" : { "level":  "private" }, "collaborators" : [{ "id" : "xwiki:XWiki.UKIRDC", "level" : "edit" }, { "id" : "xwiki:Groups.UKIRDC Administrators)", "level" : "edit" }] }
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
         if not ID:
-            p=self.get_patient(auth=auth,eid=eid)
+            p=self.get_patient(session=session,eid=eid)
             ID=p['id']
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Content-Type':'application/json', 'Accept':'application/json'}
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
         io=StringIO()
         json.dump(owner,io)
         json_owner=io.getvalue()
-        p=self.get_page('/patients/%s/permissions/owner'%ID, headers=headers, post=json_owner, special='PUT')
+        p=s.put('http://%s/rest/patients/%s/permissions/owner'%(self.site,ID), headers=headers, data=json_owner)
         print(p)
         return(p)
 
