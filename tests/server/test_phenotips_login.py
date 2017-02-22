@@ -90,10 +90,6 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             assert(not permission)
 
     @staticmethod
-    def single_patient():
-        return {"genes": [{"status": "", "gene": "", "comments": ""}], "external_id": "P0000101", "features": [{"observed": "no", "type": "phenotype", "id": "HP:0000593", "label": "Abnormality of the anterior chamber"}, {"observed": "no", "type": "phenotype", "id": "HP:0000481", "label": "Abnormality of the cornea"}, {"observed": "yes", "id": "HP:0000479", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003577", "label": "Congenital onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}], "label": "Abnormality of the retina"}, {"observed": "no", "type": "phenotype", "id": "HP:0000589", "label": "Coloboma"}, {"observed": "no", "type": "phenotype", "id": "HP:0000316", "label": "Hypertelorism"}, {"observed": "no", "type": "phenotype", "id": "HP:0000601", "label": "Hypotelorism"}, {"observed": "no", "type": "phenotype", "id": "HP:0000568", "label": "Microphthalmos"}, {"observed": "yes", "id": "HP:0000556", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003577", "label": "Congenital onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}, {"type": "severity", "id": "HP:0012828", "label": "Severe"}], "label": "Retinal dystrophy"}, {"observed": "yes", "id": "HP:0000550", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003593", "label": "Infantile onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}], "label": "Undetectable electroretinogram"}, {"observed": "yes", "id": "HP:0000505", "type": "phenotype", "qualifiers": [{"type": "age_of_onset", "id": "HP:0003577", "label": "Congenital onset"}, {"type": "laterality", "id": "HP:0012832", "label": "Bilateral"}, {"type": "severity", "id": "HP:0012828", "label": "Severe"}], "label": "Visual impairment"}]}
-    
-    @staticmethod
     def load_patient(file_location):
         with open(file_location, 'r') as json_data:
             for line in json_data:
@@ -118,14 +114,29 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             unauthorised_eid = 'P0000798'
             conn.update_patient(unauthorised_eid, sess, patient)            
 
-    #def test_create_patient(self):
-    #    if not config.LOCAL_WITH_PHENOTIPS:
-    #        return
-    #    conn = PhenotipsClientNew(test=True)
-    #    with self.app.session_transaction() as sess:
-    #        file_location = "./tests/data/simple-patient-P0000006.json"
-    #        patient = PhenotipsLoginTestCase.load_patient(file_location)
-    #        conn.create_patient(sess, patient) 
+    def test_create_patient(self):
+        if not config.LOCAL_WITH_PHENOTIPS:
+            return
+        conn = PhenotipsClientNew(test=True)
+        with self.app.session_transaction() as sess:
+            file_location = "./tests/data/simple-patient-P0000006.json"
+            patient = PhenotipsLoginTestCase.load_patient(file_location)
+            conn.create_patient(sess, patient)
+            eid = 'P0000006'
+            patient_retrieved = conn.get_patient(sess, eid)
+            assert(patient_retrieved)
+            patient_name = patient_retrieved['patient_name']
+            name_retrieved = str(patient_name['first_name'])
+            assert(name_retrieved == 'Paolo') 
+
+    def test_delete_patient(self):
+        if not config.LOCAL_WITH_PHENOTIPS:
+            return
+        conn = PhenotipsClientNew(test=True)
+        with self.app.session_transaction() as sess:
+            eid = 'P0000007'
+            conn.delete_patient(eid, sess) 
+            assert(not conn.patient_exists(sess, eid))
             
     def test_get_permissions(self):      
         if not config.LOCAL_WITH_PHENOTIPS:
@@ -154,9 +165,8 @@ class PhenotipsLoginTestCase(unittest.TestCase):
 
         with self.app.session_transaction() as sess:  
             ID = 'P0000006'
-            # TODO LMTW remove email address
-            original_permissions =  {"links":[{"allowedMethods":["GET","PATCH","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions","rel":"self"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"},{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"},{"allowedMethods":["DELETE","GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006","rel":"https://phenotips.org/rel/patientRecord"}],"owner":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"}],"id":"xwiki:XWiki.demo","name":"Demo Guest","email":"lucymtw@hotmail.com","type":"user"},"visibility":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"}],"level":"private","label":"private","description":"Private cases are only accessible to their owners, but they do contribute to aggregated statistics."},"collaborators":{"links":[{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"}],"collaborators":[]}}
-            new_permissions =       {"links":[{"allowedMethods":["GET","PATCH","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions","rel":"self"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"},{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"},{"allowedMethods":["DELETE","GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006","rel":"https://phenotips.org/rel/patientRecord"}],"owner":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"}],"id":"xwiki:XWiki.demo","name":"Demo Guest","email":"lucymtw@hotmail.com","type":"user"},"visibility":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"}],"level":"public","label":"private","description":"Private cases are only accessible to their owners, but they do contribute to aggregated statistics."},"collaborators":{"links":[{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"}],"collaborators":[]}}
+            original_permissions =  {"links":[{"allowedMethods":["GET","PATCH","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions","rel":"self"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"},{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"},{"allowedMethods":["DELETE","GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006","rel":"https://phenotips.org/rel/patientRecord"}],"owner":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"}],"id":"xwiki:XWiki.demo","name":"Demo Guest","email":"support@phenotips.org","type":"user"},"visibility":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"}],"level":"private","label":"private","description":"Private cases are only accessible to their owners, but they do contribute to aggregated statistics."},"collaborators":{"links":[{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"}],"collaborators":[]}}
+            new_permissions =       {"links":[{"allowedMethods":["GET","PATCH","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions","rel":"self"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"},{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"},{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"},{"allowedMethods":["DELETE","GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006","rel":"https://phenotips.org/rel/patientRecord"}],"owner":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"https://phenotips.org/rel/owner"}],"id":"xwiki:XWiki.demo","name":"Demo Guest","email":"support@phenotips.org","type":"user"},"visibility":{"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/visibility","rel":"https://phenotips.org/rel/visibility"}],"level":"public","label":"private","description":"Private cases are only accessible to their owners, but they do contribute to aggregated statistics."},"collaborators":{"links":[{"allowedMethods":["DELETE","GET","PUT","PATCH"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/collaborators","rel":"https://phenotips.org/rel/collaborators"}],"collaborators":[]}}
             conn.update_permissions(new_permissions, sess, ID)
             permissions = conn.get_permissions(sess, ID)
             assert(permissions['visibility']['label'] == 'public')
@@ -172,7 +182,7 @@ class PhenotipsLoginTestCase(unittest.TestCase):
         with self.app.session_transaction() as sess:  
             ID = 'P0000006'
             # TODO LMTW remove email address
-            original_owner =    {"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"self"},{"allowedMethods":["GET","PATCH","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions","rel":"https://phenotips.org/rel/permissions"},{"allowedMethods":["DELETE","GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006","rel":"https://phenotips.org/rel/patientRecord"}],"id":"xwiki:XWiki.demo","name":"Demo Guest","email":"lucymtw@hotmail.com","type":"user"}
+            original_owner =    {"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions/owner","rel":"self"},{"allowedMethods":["GET","PATCH","PUT"],"href":"http://localhost:8080/rest/patients/P0000006/permissions","rel":"https://phenotips.org/rel/permissions"},{"allowedMethods":["DELETE","GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000006","rel":"https://phenotips.org/rel/patientRecord"}],"id":"xwiki:XWiki.demo","name":"Demo Guest","email":"support@phenotips.org","type":"user"}
             new_owner =         {"links":[{"allowedMethods":["GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000001/permissions/owner","rel":"self"},{"allowedMethods":["GET","PATCH","PUT"],"href":"http://localhost:8080/rest/patients/P0000001/permissions","rel":"https://phenotips.org/rel/permissions"},{"allowedMethods":["DELETE","GET","PUT"],"href":"http://localhost:8080/rest/patients/P0000001","rel":"https://phenotips.org/rel/patientRecord"}],"id":"xwiki:XWiki.Admin","name":"Administrator","email":"support@phenotips.org","type":"user"}
             conn.update_owner(new_owner, sess, ID)
             permissions = conn.get_permissions(sess, ID)

@@ -209,13 +209,15 @@ class PhenotipsClientNew():
         return(p)
 
 
-    def delete_patient(self, eid, auth):
+    def delete_patient(self, eid, session):
         """
         Delete patient.
         """
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Content-Type':'application/json', 'Accept':'application/json'}
-        p=self.get_page('/rest/patients/eid/%s'%eid, headers=headers, post='', special='DELETE')
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
+        p=s.delete('http://%s/rest/patients/eid/%s'%(self.site,eid), headers=headers)
         print(p)
 
     def update_phenotips_from_csv(self, info, auth, owner_group=[], collaborators=[], contact={}):
