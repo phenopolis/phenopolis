@@ -1,76 +1,139 @@
-{% extends "layout.html" %}
-{% block body %}
-<div class="container">
-    <div class="col-md-12">
-        <h1>About Phenopolis</h1>
-        <p class="lead">
-            The Phenopolis is a coalition of investigators seeking to aggregate and harmonize sequencing and phenotype data using the Human Phenotype Ontology.
-        </p>
-        <p class="lead">
-            The data set provided on this website spans <span class="number_samples">{{ total_patients }}</span> individuals sequenced All of the raw data from these projects have been reprocessed through the same pipeline, and jointly variant-called to increase consistency across projects.
-        </p>
-        <p class="lead">
-            A list of the Principal Investigators and groups that have contributed data to the current release is available below.
-        </p>
-        <p style="padding-top: 10px;" class="lead">
-            Please send feedback to: <a href="mailto:n.pontikos@ucl.ac.uk">n.pontikos@ucl.ac.uk</a>.
-        </p>
+{% extends "material_layout.html" %} {% block body %}
+<div class="section">
+    <div class="container">
+        <h4 class="center" style="padding-bottom:1rem;">About Phenopolis</h4>
+        <p style="font-size:1.2rem;">Phenopolis is a coalition of investigators seeking to aggregate and harmonize sequencing and phenotype data using the Human Phenotype Ontology.</p>
+        <p style="font-size:1.2rem;">The data set provided on this website spans <span class="number_samples">{{ total_patients }}</span> individuals sequenced. All of the raw data from these projects have been reprocessed through the same pipeline, and jointly variant-called to increase consistency across projects.</p>
+        <p style="font-size:1.2rem;">Phenopolis is an open platform for harmonization and analysis of sequencing and phenotype data. The Phenopolis code is available at github. Funding is currently provided mainly by RP Fighting Blindness, NIHR (UCL-Moorfields Eyes Hospital Biomedical Research Center) and in part by the UK Medical Research Council and the British Heart Foundation.</p>
     </div>
-    <div class="col-md-12">
-        <h2>Individuals involved in Phenopolis</h2>
+</div>
+<div class="section" id="team" style="background-color: #ececec;">
+    <div class="container">
+        <h4 class="center" style="padding-bottom:1rem;">The Team behind Phenopolis</h4>
         <div class="row">
-            <div class="col-md-4">
-                <h4>Principal Investigators</h4>
-                <ul>
-                    <li>Tony Segal</li>
-                    <li>Andrew Webster</li>
-                    <li>Alison Hardcastle</li>
-                    <li>Tom Vulliamy</li>
-                </ul>
-                <h4>Contributing projects</h4>
-                <ul>
-                    <li>Institue of Ophthalmology</li>
-                    <li>Tony Segal Lab</li>
-                </ul>
-                <h4>Funding</h4>
-                <ul>
-                    <li> (PI: Vincent Plagnol)</li>
-                    <li> (PI: Alison Hardcastle)</li>
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/nikolas_pic.jpeg" alt="" class="circle">
+                        <h5>Dr. Nikolas Pontikos</h5>
+                        <p>I started the development of Phenopolis.</p>
+                    </li>
                 </ul>
             </div>
-            <div class="col-md-4">
-                <h4>Production team</h4>
-                <ul>
-                    <li>Vincent Plagnol</li>
-                    <li>Nikolas Pontikos</li>
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/jing_pic.jpeg" alt="" class="circle">
+                        <h5>Dr. Jing Yu</h5>
+                        <p>I helped construct the website, and developed pubmedBatch, Phenogenon and several other analyses / visualisations in Phenopolis.</p>
+                    </li>
                 </ul>
-                <h4>Analysis team</h4>
-                <ul>
-                    <li>Nikolas Pontikos</li>
-                    <li>Vincent Plagnol</li>
-                    <li>Cian Murphy</li>
-                    <li>Doug Speed</li>
-                    <li>Jing Yu</li>
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h4>Website team</h4>
-                <ul>
-                    <li>Jing Yu</li>
-                    <li>Nikolas Pontikos</li>
-                </ul>
-                <h4>Ethics team</h4>
-                <ul>
-                    <li>Elena Schiff</li>
-                </ul>
-                <h4>UCL Computer Science Cluster</h4>
-                <ul>
-                    <li>Tristan Clarck</li>
-                    <li>David Gregory</li>
-                </ul>
-                <br>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/cian_pic.jpeg" alt="" class="circle">
+                        <h5>Dr. Cian Murphy</h5>
+                        <p>I developed gene burden tests and run the CNV pipeline (data to be integrated).</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/daniel_pic.jpeg" alt="" class="circle">
+                        <h5>Daniel Greene</h5>
+                        <p>I helped integrate the SimReg method for discovering genotype-phenotype associations into phenopolis. SimReg evaluates the evidence of association between ontologically encoded phenotypes and rare alleles in given genes. Where there is strong evidence of association, SimReg also estimates a characteristic phenotype for the disease caused by pathogenic variants.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/ismail_pic.jpeg" alt="" class="circle">
+                        <h5>Ismail Moghul</h5>
+                        <p>I worked on the front-end aspect of Phenopolis with a particular focus on improving the user interphase and user experience as well as the general performance of the web application.</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/lucy_pic.jpeg" alt="" class="circle">
+                        <h5>Dr. Lucy Withington</h5>
+                        <p>I wrote unit tests and did security and usability tests on the website.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/tom_pic.jpeg" alt="" class="circle">
+                        <h5>Dr. Tom Vulliamy</h5>
+                        <p>I have been sequencing patients who have a bone marrow failure syndrome that is clinically and genetically heterogeneous. <br>
+                        We have been trying to identify the genes responsible. Although we have had some success, a significant proportion remain uncharacterised, and we are interesting in novel analysis approaches using the Human Phenotype Ontology.</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/fiona_pic.png" alt="" class="circle">
+                        <h5>Dr. Fiona Blanco-Kelly</h5>
+                        <p>I entered and curated a large number of phenotypes encoded using the Human Phenotype Ontology</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/baron_pic.jpeg" alt="" class="circle">
+                        <h5>Baron Koylass</h5>
+                        <p>I am an MSc student of the Genetics of Human Disease program at University College London, doing my Masters project on Phenopolis.</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="col m6">
+                <ul class="collection">
+                    <li class="collection-item avatar">
+                        <img src="/static/images/team/sajid_pic.jpeg" alt="" class="circle">
+                        <h5>Sajid Mughal</h5>
+                        <p>I am a software developer developing graph databases for Phenopolis.My project page is <a href="https://github.com/sajid-mughal/pheno4j">here</a>.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+
+
+
     </div>
 </div>
 {% endblock %}
+<ul>
+    <li>Tony Segal</li>
+    <li>Andrew Webster</li>
+    <li>Alison Hardcastle</li>
+    <li>Tom Vulliamy</li>
+    <li>Nikolas Pontikos</li>
+    <li>Vincent Plagnol</li>
+    <li>Cian Murphy</li>
+    <li>Doug Speed</li>
+    <li>Jing Yu</li>
+    <li>Elena Schiff</li>
+    <li>Tristan Clarck</li>
+    <li>David Gregory</li>
+</ul>

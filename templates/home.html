@@ -1,0 +1,42 @@
+{% extends "material_layout.html" %} {% block body %}
+    <div class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col s12 m4">
+                    <div class="icon-block">
+                        <h2 class="center blue-text text-darken-1"><i class="material-icons" style="font-size: inherit;">flash_on</i></h2>
+                        <h5 class="center">Speed Up Genetic Diagnosis</h5>
+                        <p class="light">Prioritises genetic mutations in patients based on their phenotypes described using the Human Phenotype Ontology. </p>
+                    </div>
+                </div>
+                <div class="col s12 m4">
+                    <div class="icon-block">
+                        <h2 class="center blue-text text-darken-1"><i class="material-icons" style="font-size: inherit;">group</i></h2>
+                        <h5 class="center">Multiple Analysis Tools</h5>
+                        <p class="light">Exomiser, PubmedScore, Phenogenon, SimReg, Bevimed and SKAT score genetic variants and phenotypes.</p>
+                    </div>
+                </div>
+                <div class="col s12 m4">
+                    <div class="icon-block">
+                        <h2 class="center blue-text text-darken-1"><i class="material-icons" style="font-size: inherit;">insert_chart</i></h2>
+                        <h5 class="center">Discover Gene-Phenotype Relations</h5>
+                        <p class="light">Using the gene or phenotype view you will be able to understand the spectrum of phenotypes that mutations in a given gene can lead to.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section" style="background-color: #ececec;">
+        <div class="container">
+            <h4 class="center" style="padding-bottom:1rem;">Phenopolis Statistics</h4>
+            <h5 class="center light">Samples: There are {{total_patients}} exomes ({{male_patients}} male, {{female_patients}} female, and {{unknown_patients}} unknown).</h5>
+            <h5 class="center light"> There is a total of {{ '{0:,}'.format(total_variants) }} variants.  {{ '{0:,}'.format(pass_variants) }} variants pass the GATK filter.  </h5>
+        </div>
+    </div>
+    <div class="section">
+        <div class="container">
+            <h4 class="center" style="padding-bottom:1rem;">Contact Us</h4>
+            <h5 class="center light">Please feel free to contact us <a href="mailto:phenopolis@gmail.com">here</a> to give us feedback or report any issues.</h5>
+        </div>
+    </div>
+{% endblock %}

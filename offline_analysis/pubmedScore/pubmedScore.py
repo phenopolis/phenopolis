@@ -243,29 +243,31 @@ if __name__ == '__main__':
 
     parser.add_option('-k', '--keywords',
                       dest='keywords',
-                      default="retina,retinal,retinitis,blindness,macula,macular,stargardt,pigmentosa",
+                      default="retina-retinal-retinitis-blindness-macula-macular-stargardt-pigmentosa",
                       help='')
 
     (options, args) = parser.parse_args()
-    keywords=[i.strip() for i in options.keywords.split(',')]
+    keywords=[i.strip() for i in re.split(',|-', options.keywords)]
     if options.gene:
-        pubmed(options.gene,dbs,keywords,now)
+        pubmed(options.gene,keywords,now)
     elif options.patient:
-        print options.patient
-        patient=dbs['uclex'].patients.find_one({'external_id':options.patient})
+        print('---searching pubmed---')
+        print(options.patient)
+        patient=dbs['phenopolis_db'].patients.find_one({'external_id':options.patient})
         for v in patient['rare_variants']+patient['homozygous_variants']+patient['compound_hets']:
-            pubmed(v['canonical_gene_name_upper'],dbs,keywords,now)
+            gene_name = v['canonical_gene_name_upper']
+            print(gene_name)
+            pubmed(gene_name,keywords,now)
             keywords.sort()
-            term = ','.join(keywords).lower()
-            print(term)
-            dbs['uclex'].patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
+            term = '-'.join(keywords).lower()
+            dbs['phenopolis_db'].patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
     else:
         patients = open(options.input, 'r')
         for p in patients:
             p = p.rstrip()
             print p
-            for v in dbs['uclex'].patients.find_one({'external_id':p})['compound_hets']:
+            for v in dbs['phenopolis_db'].patients.find_one({'external_id':p})['compound_hets']:
                 pubmed(v['canonical_gene_name_upper'],dbs,keywords,now)
                 keywords.sort()
                 term = '-'.join(keywords).lower()
-                dbs['uclex'].patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})
+                dbs['phenopolis_db'].patients.update({'external_id':options.patient},{'$set':{'pubmed_key':term}})

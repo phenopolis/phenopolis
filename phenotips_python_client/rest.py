@@ -78,7 +78,7 @@ class PhenotipsClient():
     def clear_cache(self):
         self.db.phenotips_cache.remove() 
 
-    def get_patient(self,session,eid=None,number=10000,start=0):
+    def get_patient(self,session,eid=None,number=10000,start=0,cache=True):
         """
         Get patient with eid or all patients if not
         specified
@@ -99,9 +99,11 @@ class PhenotipsClient():
             k = hashlib.md5(bencode.bencode(k)).hexdigest()
             r=self.db.phenotips_cache.find_one({'key':k})
 
-            if r:
+            if r and cache:
+                print('CACHED')
                 return r
             else:
+                print('NOT CACHED')
                 r=s.get(url, headers=headers)
                 try:
                     r=r.json()
@@ -117,14 +119,17 @@ class PhenotipsClient():
             k.update(headers)
             k = hashlib.md5(bencode.bencode(k)).hexdigest()
             r=self.db.phenotips_cache.find_one({'key':k})
-            if r:
+            if r and cache:
+                print('CACHED')
                 return r
             else:
+                print('NOT CACHED')
                 r=s.get(url, headers=headers)
                 try:
                     r=r.json()
                     r.update({'key':k})
                     self.db.phenotips_cache.insert_one(r)
+                    del r['_id']
                     return r
                 except:
                     return None
