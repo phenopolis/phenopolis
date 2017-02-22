@@ -456,11 +456,19 @@ function fetchIndividuals() {
              $('#individuals-div').html("<table id=individuals_table class=tablesorter> <thead> <tr> <th>Individual </th> <th>Gender</th> <th>Phenotype</th> <th tooltip=scaled score from Monarch>Phenotype Score</th> <th>Rare Hom</th> <th>Rare Comp Het</th> <th>Rare</th> <th>Candidate Genes</th> <th>Candidate Variants</th>  </tr> </thead> <tbody id=individuals_table_body> </tbody> </table>");
             var individuals=data.result['individuals'];
             for (var i=0; i<individuals.length; i++) {
-                var individual_cell_html ='<a href="/individual/'+individuals[i]['external_id']+ ' target="_blank"> '+individuals[i]['external_id']+'</a>';
+                // individual cell HTML
+                var individual_cell_html ='<a href="/individual/'+individuals[i]['external_id']+ ' target="_blank">'+individuals[i]['external_id']+'</a>';
+                // iterate over features to phenotypes HTML
+                var phenotype_html = ''
+                var features = individuals[i]['features']
+                for (var j = 0; j < features.length; j++) {
+                  phenotype_html =+ '<a href="/hpo/'+features[j].id+' target="_blank">'+features[j].label+'</a>';                  
+                }
+                // generate tr
                 var $tr = $('<tr>').append(
                   $('<td>').html(individual_cell_html),
                   $('<td>').text(individuals[i]['sex']), //gender_cell
-                  $('<td>').text(individuals[i]['features']), //phenotype_cell
+                  $('<td>').html(phenotype_html), //phenotype_cell
                   $('<td>').text(individuals[i]['specificity']['score']), // phenotype_score_cell          
                   $('<td>').text(individuals[i]['specificity']['rare_homozygous_variants_count']), // rare_hom_cell
                   $('<td>').text(individuals[i]['specificity']['rare_compound_hets_count']), // rare_comp_cell
