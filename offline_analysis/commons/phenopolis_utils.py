@@ -168,6 +168,8 @@ def get_candidate_genes(dbs, genes=None, fields=None):
                 g['gene'] = 'NLRP3'
             if g['gene'] == 'GPR98':
                 g['gene'] = 'ADGRV1'
+            # when defined genes, gene_dict might not have g['gene']
+            if g['gene'] not in gene_dict: continue
             gene_id = gene_dict[g['gene']]['id']
             result[gene_id] = result.get(gene_id,{
                 'symbol':gene_dict[g['gene']]['symbol'],
