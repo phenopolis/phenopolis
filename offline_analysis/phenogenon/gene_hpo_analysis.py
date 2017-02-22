@@ -20,6 +20,7 @@ import time
 import rest
 import fisher
 import copy
+from collections import defaultdict
 #from plinkio import plinkfile
 
 # get dbs
@@ -93,10 +94,12 @@ def populate_fisher_p(data,mode,calc_cutoffs):
     # populate result
     result = {
             'patients':list(unrelated_pass),
-            'variants':{},
+            'variants':defaultdict(int),
             }
     for p in unrelated_pass:
-        result['variants'].update({v:1 for v in data['patients'][p]['variants'] if v in qualified_v})
+        for v in data['patients'][p]['variants']:
+            if v in qualified_v:
+                result['variants'][v] += 1
     # calculate
     for k1,v1 in data['data'].items():
         if k1 == 'HP:0000001':continue
