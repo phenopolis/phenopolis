@@ -2,8 +2,8 @@
 import sys
 
 password_file=sys.argv[1]
-from phenotips_python_client import PhenotipsClient
-conn=PhenotipsClient(host='localhost',port=8080) 
+from phenotips_python_client import PhenotipsClientNew
+conn=PhenotipsClientNew(host='localhost',port=8080) 
 password=file(password_file,'r').read().strip() 
 conn.dump_to_mongodb(auth='Admin:%s'%password,mongo_host='localhost',mongo_port='27017',mongo_dbname='patients')
 

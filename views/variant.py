@@ -71,7 +71,7 @@ def set_variant_causal(individual, variant_str):
     conn=PhenotipsClientNew()
     p=conn.get_patient(eid=individual,session=session)
     p['genes']=p.get('genes',[])+[{'gene':gene_name}]
-    print conn.update_patient( eid=p['external_id'], auth=auth, patient=p )
+    print conn.update_patient( eid=p['external_id'], session=session, patient=p )
     print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p},w=0)
     p=db.patients.find_one({'external_id':individual})
     p['causal_variants']=list(frozenset(p.get('causal_variants',[])+[variant_str]))
@@ -102,7 +102,7 @@ def unset_variant_causal(individual, variant_str):
         print 'GENE_NAME', gene_name
         p2['genes']=list(frozenset(p2.get('genes',[])+[{'gene':gene_name}]))
     # update Gene in phenotips
-    print conn.update_patient( eid=p2['external_id'], auth=auth, patient=p2 )
+    print conn.update_patient( eid=p2['external_id'], session=session, patient=p2 )
     print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p2},w=0)
     if request.referrer:
         referrer=request.referrer

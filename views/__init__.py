@@ -31,8 +31,6 @@ import md5
 from scipy.stats import chisquare
 import math 
 from Bio import Entrez
-from phenotips_python_client import PhenotipsClient
-from phenotips_python_client import browser
 from phenotips_python_client import PhenotipsClientNew
 from bson.json_util import loads
 from mongodb import *
@@ -138,14 +136,14 @@ def check_auth(username, password):
             session['user'] = username
             if config.LOCAL_WITH_PHENOTIPS: 
                 conn = PhenotipsClientNew()
-                phenotips_session = conn.get_phenotips_session(username, password)
+                phenotips_session = conn.request_phenotips_session(username, password)
                 session['phenotips_session'] = phenotips_session
             return True
         else:
             return False
 
     conn = PhenotipsClientNew()
-    phenotips_session = conn.get_phenotips_session(username, password)
+    phenotips_session = conn.request_phenotips_session(username, password)
     if phenotips_session:
         session['user'] = username
         session['phenotips_session'] = phenotips_session
