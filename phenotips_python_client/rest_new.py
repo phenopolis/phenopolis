@@ -358,7 +358,7 @@ class PhenotipsClientNew():
             print(eid)
             p=self.get_patient(auth,eid)
             print(p)
-            if p is None: raise 'patient does not exists maybe your credential are wrongs?'
+            if p is None: raise 'patient does not exist maybe your credential are wrong?'
             # if patient does not exist in mongodb, create it
             if db.patients.find_one({'external_id':eid}) is None:
                 db.patients.insert(p,w=0)
@@ -369,14 +369,17 @@ class PhenotipsClientNew():
                 db.patients.update({'external_id':eid},{'$set':{u:p[u]}},w=0)
 
 
-    def get_vocabularies(self,auth,vocabulary):
-        auth=b2a_base64(auth).strip()
+    def get_vocabularies(self,session,vocabulary):
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
         # get vocabularies
         #http://localhost:1235/rest/vocabularies/terms/HP:0000556
-        headers={'Authorization':'Basic %s'%auth, 'Accept':'application/json; application/xml'}
-        p=self.get_page('/rest/vocabularies/%s'%vocabulary, headers=headers)
-        print(p)
-        return p
+        headers={'Accept':'application/json; application/xml'}
+        r=s.get('http://%s/rest/vocabularies/%s'%(self.site,vocabulary), headers=headers)
+        if not r:
+            return None
+        return r.json()
 
 
 

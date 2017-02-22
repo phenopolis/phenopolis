@@ -196,5 +196,15 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             assert(permissions['owner']['name'] == 'Demo Guest')
             conn.delete_patient(eid, sess) 
 
+    def test_get_vocabularies(self):      
+        if not config.LOCAL_WITH_PHENOTIPS:
+            return   
+        conn = PhenotipsClientNew(test=True)
+
+        with self.app.session_transaction() as sess: 
+            vocab = 'terms/HP:0000556'
+            r = conn.get_vocabularies(session=sess,vocabulary=vocab)
+            assert(str(r['name']) == 'Retinal dystrophy')
+
 if __name__ == '__main__':
     unittest.main()
