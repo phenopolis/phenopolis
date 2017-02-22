@@ -9,7 +9,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 import runserver
 import phenotips_python_client
 from phenotips_python_client import PhenotipsClientNew
-from phenotips_python_client import PhenotipsClient # TODO LMTW remove
 from config import config
 import helper
 
@@ -43,6 +42,19 @@ class PhenotipsLoginTestCase(unittest.TestCase):
 
         invalid_password_session = conn.request_phenotips_session('demo', 'demo123x')
         assert(not invalid_password_session)
+
+        #auth='demo:demo123'
+        #phenotips_session_auth = conn.request_phenotips_session(auth=auth)
+        #assert(phenotips_session_auth)
+
+        #username = (auth.split(':'))[0]
+        #assert(username=='demo')
+   
+    def test_get_patient(self):
+       
+        if not config.LOCAL_WITH_PHENOTIPS:
+            return   
+        conn = PhenotipsClientNew(test=True)
 
         with self.app.session_transaction() as sess:
 
@@ -88,6 +100,32 @@ class PhenotipsLoginTestCase(unittest.TestCase):
             unauthorised_patient_id = 'P0000001'
             permission = conn.get_permissions(sess, unauthorised_patient_id)
             assert(not permission)
+
+    def test_get_patient_auth(self):
+       
+        ''' 
+        As used by command line functions, e.g. load_patient
+        '''
+        if not config.LOCAL_WITH_PHENOTIPS:
+            return   
+        conn = PhenotipsClientNew(test=True)
+        conn.clear_cache()
+        auth='demo:demo123'
+        session_phenotips = conn.create_session_with_phenotips(auth=auth)
+        assert(session_phenotips)
+
+        all_patients_from_phenotips = conn.get_patient(session_phenotips)
+        assert(all_patients_from_phenotips)
+        all_patients_from_phenotips = all_patients_from_phenotips.get('patientSummaries',[]) 
+        all_eids = [p['eid'] for p in all_patients_from_phenotips if p['eid']]
+        total_from_phenotips = len(all_eids)
+        assert(total_from_phenotips>0)
+
+        eid = 'P0000797'
+        patient_from_phenotips = conn.get_patient(session_phenotips, eid)
+        assert(patient_from_phenotips)
+        eid_from_phenotips = str(patient_from_phenotips['external_id'])
+        assert(eid_from_phenotips == eid)
 
     @staticmethod
     def load_patient(file_location):

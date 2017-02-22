@@ -42,7 +42,7 @@ class PhenotipsClientNew():
         else:
             self.db=conn['test_cache']
 
-    def request_phenotips_session(self, username, password):
+    def request_phenotips_session(self, username=None, password=None):
         auth='%s:%s' % (username, password,)
         encoded_auth=b2a_base64(auth).strip()
         headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
@@ -51,6 +51,19 @@ class PhenotipsClientNew():
         response = s.get(url, headers=headers)
         if response :
             return s
+        else:
+            return None
+
+    def create_session_with_phenotips(self, auth=None):
+        encoded_auth=b2a_base64(auth).strip()
+        headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
+        url='http://%s/rest/patients?start=%d&number=%d' % (self.site,0,1)
+        s = requests.Session()
+        response = s.get(url, headers=headers)
+        if response :
+            username = (auth.split(':'))[0]
+            session_dict = {'phenotips_session': s, 'user': username}
+            return session_dict
         else:
             return None
 
@@ -70,10 +83,12 @@ class PhenotipsClientNew():
         Get patient with eid or all patients if not
         specified
         """
-        s = self.get_phenotips_session(session)
-        if not s:
+        phenotips_session = self.get_phenotips_session(session)
+        if not phenotips_session:
             return None
         username = str((session['user']))
+
+        s = phenotips_session
 
         headers={'Accept':'application/json'} 
         if not eid:
@@ -230,12 +245,11 @@ class PhenotipsClientNew():
         """
         info=pandas.read_csv(info,sep=',')
         print(info.columns.values)
+        session = self.create_session_with_phenotips(auth=auth)
         for i, r, in info.iterrows():
             print(r)
             #if r['owner']!=owner: continue
             patient=dict()
-            #auth=login
-            #auth=b2a_base64(auth).strip()
             patient['external_id']=r['sample']
             if  not isinstance(r['sample'],basestring) or len(r['sample']) < 4: continue
             if 'ethnicity' in r:
@@ -258,21 +272,21 @@ class PhenotipsClientNew():
             print(patient)
             r['phenotype']=str(r['phenotype'])
             patient['features']=[ { "id":hpo, 'label':'', 'type':'phenotype', 'observed':'yes' } for hpo in r['phenotype'].split(';') ]
-            #update_patient(ID=r['sample'],auth=auth,patient=patient)
-            self.update_patient(patient['external_id'], auth, patient)
-            #delete_patient(ID=r['sample'],auth=auth,patient=patient)
+            #update_patient(ID=r['sample'],session=session,patient=patient)
+            self.update_patient(patient['external_id'], session, patient)
+            #delete_patient(ID=r['sample'],session=session,patient=patient)
             # if patient exists, update patient, otherwise create patient
-            #self.update_patient(eid=patient['external_id'],auth=auth,patient=patient)
+            #self.update_patient(eid=patient['external_id'],session=session,patient=patient)
             permissions = { "owner" : owner_group, "visibility" : { "level":  "private" }, "collaborators" : collaborators  }
             print(permissions)
-            #self.update_permissions(permissions=permissions,eid=patient['external_id'],auth=auth)
-            self.update_owner(owner=owner_group,auth=auth,eid=patient['external_id'])
+            #self.update_permissions(permissions=permissions,eid=patient['external_id'],session=session)
+            self.update_owner(owner=owner_group,session=session,eid=patient['external_id'])
 
-    def patient_hpo(self, eid, auth):
+    def patient_hpo(self, eid, session):
         """
         Retrieve HPO terms for patient
         """
-        patient=self.get_patient(auth,eid=eid)
+        patient=self.get_patient(session=session,eid=eid)
         if patient:
             if 'features' in patient: return [f['id'] for f in patient['features']]
             else:  return []
@@ -283,14 +297,15 @@ class PhenotipsClientNew():
         Dumps the HPO terms from a patient record
         to tsv file.
         """
-        patients=self.get_patient(auth)['patientSummaries']
+        session = self.create_session_with_phenotips(auth=auth)
+        patients=self.get_patient(session=session)['patientSummaries']
         #file(sprintf('uclex_hpo_%d-%d-%d.txt'),)
         hpo_file=open(outFile, 'w+')
         print('eid', 'hpo', 'genes', 'solved', sep='\t',file=hpo_file)
         for p in patients:
             eid=p['eid']
             print(eid)
-            patient=self.get_patient(auth,eid)
+            patient=self.get_patient(session=session,eid=eid)
             print(patient)
             if 'features' in patient:
                 hpo=','.join([f['id'] for f in patient['features']])
@@ -311,12 +326,12 @@ class PhenotipsClientNew():
         """
         Dumps patient to JSON.
         """
-        auth='%s:%s' % (owner, password,)
-        patients=self.get_patient(auth)['patientSummaries']
+        session = self.create_session_with_phenotips(auth=auth)
+        patients=self.get_patient(session=session)['patientSummaries']
         for p in patients:
             eid=p['eid']
             print(eid)
-            patient=self.get_patient(auth,eid)
+            patient=self.get_patient(session=session,eid=eid)
             io=StringIO()
             json.dump(patient,io)
             json_patient=io.getvalue()
@@ -331,11 +346,12 @@ class PhenotipsClientNew():
         client = pymongo.MongoClient(host=mongo_host, port=int(mongo_port))
         db=client[mongo_dbname]
         db.patients.drop()
-        patients=self.get_patient(auth)['patientSummaries']
+        session = self.create_session_with_phenotips(auth=auth)
+        patients=self.get_patient(session)['patientSummaries']
         for p in patients:
             eid=p['eid']
             print(eid)
-            p=self.get_patient(auth,eid)
+            p=self.get_patient(session=session,eid=eid)
             db.patients.insert(p,w=0)
         db.patients.ensure_index('external_id')
         db.patients.ensure_index('report_id')
@@ -354,9 +370,10 @@ class PhenotipsClientNew():
         import pymongo
         client = pymongo.MongoClient(host=mongo_host, port=int(mongo_port))
         db=client[mongo_dbname]
+        session = self.create_session_with_phenotips(auth=auth)
         for eid in patient_ids:
             print(eid)
-            p=self.get_patient(auth,eid)
+            p=self.get_patient(session=session,eid=eid)
             print(p)
             if p is None: raise 'patient does not exist maybe your credential are wrong?'
             # if patient does not exist in mongodb, create it

@@ -2,11 +2,11 @@
 import requests
 import json
 import pymongo
-from phenotips_python_client import PhenotipsClient 
+from phenotips_python_client import PhenotipsClientNew 
 import sys
 
 
-conn=PhenotipsClient()
+conn=PhenotipsClientNew()
 client = pymongo.MongoClient(port=27017)
 patients_db = client['patients']
 
@@ -42,8 +42,8 @@ def hpo_terms(p):
 
 
 def compare(individual,individual2):
-    individual=conn.get_patient(eid=individual,auth=auth)
-    individual2=conn.get_patient(eid=individual2,auth=auth)
+    individual=conn.get_patient(eid=individual,session=session)
+    individual2=conn.get_patient(eid=individual2,session=session)
     hpo1='+'.join([h['id'] for h in hpo_terms(individual)])
     hpo2='+'.join([h['id'] for h in hpo_terms(individual2)])
     url='https://monarchinitiative.org/compare/{}/{}.json'.format(hpo1,hpo2)

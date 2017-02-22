@@ -29,10 +29,10 @@ class Individual(object):
         patient_id=os.path.basename(filename.replace('.csv','')) 
         parent_dir=os.path.basename(os.path.abspath(os.path.join(filename, os.pardir)))
         # Add patient to phenotips if it does not already exist
-        pheno=PhenotipsClient()
+        pheno=PhenotipsClientNew()
         patient={u'features':[], 'clinicalStatus': {u'clinicalStatus': u'affected'}, u'ethnicity': {u'maternal_ethnicity': [], u'paternal_ethnicity': []}, u'family_history': {}, u'disorders': [], u'life_status': u'alive', u'reporter': u'', u'genes': [], u'prenatal_perinatal_phenotype': {u'prenatal_phenotype': [], u'negative_prenatal_phenotype': []}, u'prenatal_perinatal_history': {u'twinNumber': u''}, u'sex': u'U', u'solved': {u'status': u'unsolved'}}
         eid=patient_id
-        p=pheno.get_patient(auth=auth,eid=eid)
+        p=pheno.get_patient(session=session,eid=eid)
         print p
         if p is None:
             print 'MISSING', eid
@@ -42,7 +42,7 @@ class Individual(object):
             print pheno.create_patient(auth,patient)
         if not patient_db.patients.find_one({'external_id':eid}):
             # update database
-            p=pheno.get_patient(eid=eid,auth=auth)
+            p=pheno.get_patient(eid=eid,session=session)
             print 'UPDATE'
             print patient_db.patients.update({'external_id':eid},{'$set':p},w=0,upsert=True)
         patient_hpo_terms=lookups.get_patient_hpo(hpo_db, patient_db, patient_id, ancestors=False)
