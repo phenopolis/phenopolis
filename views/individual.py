@@ -193,19 +193,41 @@ def individual_page(individual):
 
 
 @app.route('/individual_update/<individual>')
+@requires_auth
 def individual_update(individual):
     conn=PhenotipsClient()
-    p=conn.get_patient(eid=individual,session=session)
+    p=conn.get_patient(eid=individual,session=session,cache=False)
     print 'UPDATE'
     print p
-    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p},w=0)
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p})
+    print 'DB'
+    print get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':individual})
     if request.referrer:
         referrer=request.referrer
         u = urlparse(referrer)
         referrer='%s://%s' % (u.scheme,u.hostname,)
         if u.port: referrer='%s:%s' % (referrer,u.port,)
-    return redirect(referrer+'/individual/'+individual)
+        return redirect(referrer+'/individual/'+individual)
+    else:
+        return 'done'
 
 
+'''
+progress bar query
+'''
+@app.route('/pubmedbatch_progress_bar/<id>')
+def pubmedbatch_progress(id):
+    user = session.get('user') or app.config['DEFAULT_USER']
+    progress_id = user + id
+    return jsonify(PROGRESS_BAR[progress_id])
+
+'''
+get pubmedbatch cache results based on pubmedkey
+'''
+@app.route('/pubmedbatch-cache/<pubmedkey>')
+def pubmedbatch_getcache(pubmedkey):
+    db = get_db('pubmedbatch') 
+    result = db.cache.find_one({'key':pubmedkey},{'_id':False})
+    return jsonify(result)
 
 

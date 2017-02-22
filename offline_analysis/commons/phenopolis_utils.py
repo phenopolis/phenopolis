@@ -6,6 +6,9 @@ import pymongo
 import ConfigParser
 import os
 import errno
+import sys
+import sqlite3
+import re
 
 '''
 constants
@@ -85,12 +88,37 @@ def mkdir_p(path):
             raise
 
 '''
+translate gene_names to ensembl ids. db = dbs['phenopolis_db']
+'''
+def gene_names_to_ids(db, queries):
+    result = {}
+    if not queries:
+        return result
+    gs = db.genes.find({'$or':
+        [
+            {'gene_name':{'$in':queries}},
+            {'other_names':{'$in':queries}},
+        ]
+    })
+    qs = set(queries)
+    for g in gs:
+        name = list(qs & set(g.get('other_names',[]) + [g['gene_name']]))[0]
+        result[name] = {
+                'id':g['gene_id'],
+                'symbol':g['gene_name'],
+                }
+
+    return result
+
+
+'''
 get candidate genes and patients' hpos, solve, candidate genes, sex
 '''
-def get_candidate_genes(db, genes=None, fields=None):
+def get_candidate_genes(dbs, genes=None, fields=None):
     # set up some defaults. hpos = observed features.
     # solve would be 0 for unsolved and 1 for solved
     # sex 0 unknown, 1 male, 2 female
+    # if genes == None, get all genes
     SEX_DICT = {
             'F': 2,
             'M': 1,
@@ -100,21 +128,50 @@ def get_candidate_genes(db, genes=None, fields=None):
             'solved':1,
             'unsolved':0,
         }
+    
+    # fields of interests
+    fields = fields or ['hpo','solve','genes','sex']
 
-    fields = fields or ['hpo','solve','candidate_genes','sex']
-    all_valid_p = [p for p in db.patients.find({}) if p.get('genes',[])]
+    all_valid_p = [p for p in dbs['patient_db'].patients.find({}) if p.get('genes',[])]
     result = {}
-    for p in all_valid_p:
-        for g in p['genes']:
-            # deal with hpo and solve and sex
-            temp  = {f:p.get(f,None) for f in fields}
-            if 'hpo' in fields:
-                temp['hpo'] = [f for f in p['features'] if f['observed'] == 'yes']
-            if 'solve' in fields:
-                temp['solve'] = SOLVE_DICT[p['solved']['status']]
-            if 'sex' in fields:
-                temp['sex'] = SEX_DICT[p['sex']]
+    gene_names = []
+    for k1 in all_valid_p:
+        for k2 in k1['genes']:
+            # there's one patient that has Somatic NLRP3 as gene.
+            # and there's one patient has GPR98. should be ADGRV1
+            if k2['gene'] == 'Somatic NLRP3':
+                gene_names.append('NLRP3')
+                continue
+            if k2['gene'] == 'GPR98':
+                gene_names.append('ADGRV1')
+                continue
+            # illegal char?
+            k2['gene'] = k2['gene'].strip()
+            if re.search(r'[^a-zA-Z0-9-]', k2['gene']):
+                raise ValueError('Error: Illegal gene name "%s"' % k2['gene'])
+            if not genes or k2['gene'] in genes:
+                gene_names.append(k2['gene'])
 
-            result[g['gene']] = result.get(g['gene'],[])
-            result[g['gene']].append(temp)
+    gene_dict = gene_names_to_ids(dbs['phenopolis_db'],gene_names)
+    for p in all_valid_p:
+        # deal with hpo and solve and sex
+        temp  = {f:p.get(f,None) for f in fields}
+        if 'hpo' in fields:
+            temp['hpo'] = [f for f in p['features'] if f['observed'] == 'yes']
+        if 'solve' in fields:
+            temp['solve'] = SOLVE_DICT[p['solved']['status']]
+        if 'sex' in fields:
+            temp['sex'] = SEX_DICT[p['sex']]
+        for g in p['genes']:
+            if not g['gene']: continue
+            if g['gene'] == 'Somatic NLRP3':
+                g['gene'] = 'NLRP3'
+            if g['gene'] == 'GPR98':
+                g['gene'] = 'ADGRV1'
+            gene_id = gene_dict[g['gene']]['id']
+            result[gene_id] = result.get(gene_id,{
+                'symbol':gene_dict[g['gene']]['symbol'],
+                'data':[],
+                })
+            result[gene_id]['data'].append(temp)
     return result

@@ -14,14 +14,12 @@ import subprocess
 
 
 
-@app.route('/', methods=['GET','POST'])
-@requires_auth
+@app.route('/', methods=['GET'])
 def homepage():
-    cache_key = 't-homepage'
-    #t = cache.get(cache_key)
-    #if t: return t
+    cache_key = 't-home'
     db=get_db()
     patients_db=get_db(app.config['DB_NAME_PATIENTS']) 
+    total_variants=db.variants.count()
     total_variants=db.variants.count()
     print('total_variants',total_variants,)
     total_patients=patients_db.patients.count()
@@ -52,46 +50,13 @@ def homepage():
     pass_nonexac_variants=0
     nonpass_variants=(total_variants-pass_variants)
     nonpass_nonexac_variants=nonexac_variants-pass_nonexac_variants
-    #labels = 'PASS', 'non-PASS',
-    #sizes =[100*pass_variants/float(total_variants),100*(nonpass_variants)/float(total_variants)]
-    #print(sizes)
-    #colors = ['yellowgreen', 'red']
-    #explode = (0.1, 0)
-    #plt.figure(figsize=(5,5))
-    #plt.margins(1, 1)
-    #plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%', shadow=True, startangle=90)
-     ## Set aspect ratio to be equal so that pie is drawn as a circle.
-    #plt.axis('equal')
-    #plt.axis('off')
-    #plt.show()
-    # word cloud
-    #from os import path
-    #from wordcloud import WordCloud
-    #text = 'HPO HPO HPO HPO all day'
-    ## Read the whole text.
-    ## take relative word frequencies into account, lower max_font_size
-    #wordcloud = WordCloud().generate(text)
-    #plt.figure()
-    #plt.imshow(wordcloud)
-    #plt.axis("off")
-    #plt.show()
-    #imgdata = StringIO.StringIO()
-    #plt.savefig(imgdata, format='svg')
-    #imgdata.seek(0)  # rewind the data
-    #import urllib
-    #image=urllib.quote(base64.b64encode(imgdata.buf))
-    #image=imgdata.buf
-    #image = '<svg' + image.split('<svg')[1]
-
     try:
         version_number = subprocess.check_output(['git', 'describe', '--exact-match'])
     except:
         version_number = None
     print('Version number is:-')
     print(version_number)
-
-    t = render_template('homepage.html',
-        title='home',
+    return render_template('home.html', title='Phenopolis - Home Page',
         total_patients=total_patients,
         male_patients=male_patients,
         female_patients=female_patients,
@@ -103,10 +68,5 @@ def homepage():
         nonpass_variants=nonpass_variants,
         pass_exac_variants=pass_exac_variants,
         pass_nonexac_variants=pass_nonexac_variants,
-        #image=image.decode('utf8'))
-        image="",
         version_number=version_number)
-    #cache.set(cache_key, t)
-    return t
-
 

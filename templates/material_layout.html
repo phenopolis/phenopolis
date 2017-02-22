@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+    .home .section {
+        padding-top: 5rem;
+        padding-bottom: 5rem
+    }
+    nav i.left {
+      margin-right: 5px;
+    }
+
+    .section .collection-item.avatar {
+      min-height: 118px;padding-left: 134px;
+    }
+
+    .section .collection-item.avatar img.circle {
+      height:100px; width: 100px;
+    }
+
+    #team .row {
+      margin-bottom: initial;
+    }
+    #team .collection .collection-item.avatar p {
+      height: 9rem;
+      overflow-y: scroll;
+      margin-bottom: 1rem !important;
+    }
+    </style>
+</head>
+
+<body class="home">
+    <nav class="light-blue darken-2" role="navigation">
+        <div class="container">
+            <div class="nav-wrapper" style="padding:0 10px">
+                <a href="/" class="brand-logo"> Phenopolis</a>
+                <a href="#" data-activates="mobile-menu" class="button-collapse"><i class="material-icons" style="font-size: 2.6rem;">menu</i></a>
+
+                <ul class="right hide-on-med-and-down" style="position:absolute;top:0 !important;right:0;">
+                    <li><a href="https://phenotips.cs.ucl.ac.uk" target="_blank"><i class="material-icons left">assignment_ind </i>Phenotips</a></li>
+                    <li><a href="http://biorxiv.org/content/early/2016/10/31/084582" target="_blank"><i class="material-icons left">class</i>Publication</a></li>
+                    <li><a href="/about"><i class="material-icons left">info_outline</i>About</a></li>
+                    <li><a class="modal-trigger" href="#login_modal"><i class="material-icons left">perm_identity</i>Login</a></li>
+                </ul>
+                <ul class="side-nav" id="mobile-menu">
+                    <li><a href="https://phenotips.cs.ucl.ac.uk" target="_blank"><i class="material-icons left">assignment_ind</i>Phenotips</a></li>
+                    <li><a href="http://biorxiv.org/content/early/2016/10/31/084582" target="_blank"><i class="material-icons left">class</i>Publication</a></li>
+                    <li><a href="/about"><i class="material-icons left">info_outline</i>About</a></li>
+                    <li><a class="modal-trigger" href="#login_modal"><i class="material-icons left">perm_identity</i>Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="index-banner" class="parallax-container">
+        <div class="section no-pad-bot">
+            <div class="container">
+                <br>
+                <br>
+                <h1 class="header center blue-text text-darken-4">Phenopolis</h1>
+                <div class="row center">
+                    <h5 class="header col s12" style="font-size:2rem;">An Open Platform for Harmonization &amp; Analysis of Sequencing &amp; Phenotype Data.</h5>
+                </div>
+                <div class="row center">
+                    <a href="#!" id="parallax_demo_login_btn" class="btn-large waves-effect z-depth-5 waves-light blue">Login as Demo User</a>
+                </div>
+                <br>
+                <br>
+            </div>
+        </div>
+        <div class="parallax" style="opacity: 0.5; background-color: #849DAD;"><img src="/static/images/background_home.jpg" alt="Unsplashed background img 1"></div>
+    </div>
+
+    {% block body %}{% endblock %}
+
+    <!-- Footer -->
+    {% include "material_footer.html" %}
+
+    <!-- Login Modal -->
+    <div id="login_modal" class="modal">
+        <div class="modal-content">
+            <i class="material-icons right modal-close">close</i>
+            <h4>Login</h4>
+            <p>Please enter your credentials in order to login.</p>
+            <form id="login_form" class="col s12" action="/login" method="POST">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">account_circle</i>
+                        <input id="username" type="text" placeholder="demo" name="username" value="{{request.form.username }}" class="validate">
+                        <label for="username">Username:</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">lock</i>
+                        <input id="password" type="password" placeholder="demo123" name="password" value="{{request.form.password }}" class="validate">
+                        <label for="password">Password</label>
+                    </div>
+                </div>
+            </form>
+            <p>Alternatively, select the 'Demo Login' button below to login as a demo user.</p>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
+            <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Close</a>
+            <a id="login_btn" href="#!" type="submit" class="modal-action modal-close waves-effect waves-green btn-flat">Login</a>
+            <a id="demo_login_btn" href="#!" type="submit" class="modal-action modal-close waves-effect waves-green btn-flat">Demo Login</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('.parallax').parallax(); // Init parallax
+        $('.modal').modal();  // Init Modals
+        $(".button-collapse").sideNav(); // Init Mobile menu
+
+        // Submit form upon clicking the login button in the modal
+        $('#login_btn').on('click', function() {
+            $('#login_form').submit();
+        });
+
+        // Automatically login when selecting the login button
+        $('#demo_login_btn, #parallax_demo_login_btn').on('click', function() {
+            $('#username').val('demo');
+            $('#password').val('demo123');
+            $('#login_form').submit();
+        });
+
+        // submit form upon pressing enter in the login form
+        $('#login_form input').keydown(function(e) {
+            if (e.keyCode == 13) {
+                $('#login_form').submit();
+            }
+        });
+    });
+    </script>
+</body>
+
+</html>

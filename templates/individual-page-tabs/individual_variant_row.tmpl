@@ -1,5 +1,9 @@
 
 
+{% if v.canonical_gene_name_upper in candidate_genes %}
+<div id='candidate_gene_variant' class='candidate_gene_variant' >
+{% endif %}
+
 <!-- filter cell -->
 {% if v.FILTER == 3 %}
 <tr class='table-gene error' 
@@ -12,7 +16,11 @@
 {% else %}
  <tr style="table-gene word-wrap; break-word"
 {% endif %}
- id='{{variant_type}}-{{ v.canonical_gene_name_upper }}'>
+ id='{{variant_type}}-{{ v.canonical_gene_name_upper }}'
+ {% if v.canonical_gene_name_upper in candidate_genes %}
+ class='highlight'
+ {% endif %}
+ >
 
 
 <!-- Gene cell -->
@@ -220,3 +228,9 @@
 {% endif %}
 
 </tr>
+
+{% if v.canonical_gene_name_upper in candidate_genes %}
+</div>
+{% endif %}
+
+

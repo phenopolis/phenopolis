@@ -31,7 +31,9 @@ import md5
 from scipy.stats import chisquare
 import math 
 from Bio import Entrez
+import phenotips_python_client 
 from phenotips_python_client import PhenotipsClient
+print phenotips_python_client 
 from bson.json_util import loads
 from mongodb import *
 # fizz: hpo lookup
@@ -205,10 +207,14 @@ def login():
        else:
            print 'LOGIN SUCCESS'
            if config.LOCAL:
-               return redirect('/')
+               return redirect('/search')
            else:
-               return redirect('https://uclex.cs.ucl.ac.uk/')
-    return render_template('login.html', error=error)
+               return redirect('https://uclex.cs.ucl.ac.uk/search')
+    if config.LOCAL:
+        return jsonify(error=error), 403
+    else:
+        return redirect('https://uclex.cs.ucl.ac.uk/')
+
 
 # 
 @app.route('/logout')
@@ -217,9 +223,9 @@ def logout():
     session.pop('user',None)
     session.pop('phenotips_session',None)
     if config.LOCAL:
-        return redirect('/login')
+        return redirect('/')
     else:
-        return redirect('https://uclex.cs.ucl.ac.uk/login')
+        return redirect('https://uclex.cs.ucl.ac.uk/')
 
 
 @app.route('/set/<query>')
@@ -726,7 +732,7 @@ def research_pubmed():
     db=get_db()
     db.patients.update({'external_id':patient_id},{'$set': {'pubmedbatch_status': 1}})
     # do the actual update
-    exit_status = subprocess.call(['python','pubmedBatch/pubmedBatch_jing.py', '-p', patient_id, '--keywords', search_term])
+    exit_status = subprocess.call(['python','offline_analysis/pubmedScore/pubmedScore.py', '-p', patient_id, '--keywords', search_term])
     #exit_status=0
     # reset update status to 0
     db.patients.update({'external_id':patient_id},{'$set': {'pubmedbatch_status': 0}})
@@ -1588,9 +1594,9 @@ import views.uclex_irdc
 import views.variant
 import views.individual
 import views.individuals
-#import views.pubmedbatch
 import views.igv
 import views.hpo
+import views.search
 import views.home
 import views.exomiser
 # work in progress, comment out if not needed
