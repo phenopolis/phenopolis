@@ -132,61 +132,9 @@
 <div class="tab-content">
 
     <div id="tab1" class="tab-pane active">
-    <table id="individuals_table" class="tablesorter">
-        <thead>
-              <tr>
-                  <th>Individual (total: {{individuals|length}})</th>
-                  <th>Gender</th>
-                  <th>Phenotype</th>
-                  <th tooltip='scaled score from Monarch'>Phenotype Score</th>
-                  <th>Rare Hom</th>
-                  <th>Rare Comp Het</th>
-                  <th>Rare</th>
-                  <th>Candidate Genes</th>
-                  {% if session['user'] != 'demo' %}
-                  <th>Candidate Variants</th>
-                  {% endif %}
-              </tr>
-        </thead>
-        <tbody id="individuals_table_body">
-        {% for ind in individuals %}
-        <tr>
-            {% if session['user'] == 'demo' %}
-            <td>hidden</td>
-            {% else %}
-            <td><a href="/individual/{{ ind.external_id }}" target="_blank">{{ ind.external_id }}</a></td>
-            {% endif %}
-            <td>{{ind.sex}}</td>
-            <td>{{ ind.features|map('get_attributes','id','label')|map('map_format', '<a href="/hpo/{0}">{1}</a>')|join(', ')|safe }}</td>
-            <td>{{ind.specificity.score|round(2,'floor')}}</td>
-            {% if session['user'] == 'demo' %}
-                <td id="variant_count">{{ind.rare_homozygous_variants_count}}</td>
-            {% else %}
-                <td id="{{ind.external_id}}_variant_count">{{ind.rare_homozygous_variants_count}}</td>
-            {% endif %}
-            <td> {{ind.rare_compound_hets_count}} </td>
-            <td>{{ ind.rare_variants_count}}</td>
-            <td>
-            {% for g in ind.genes %}
-                {{ '<a href="/gene/%s">%s</a>'|format(g,g)|safe  }}
-            {% endfor %}
-            </td>
-            {% if session['user']!='demo' %}
-            <td>
-                {% for k in ind.solved_variants %}
-                {% for v in ind.solved_variants[k].het %}
-                    <a href=/variant/{{v}}>het:{{v[:20]}}</a><br>
-                {% endfor %}
-                {% for v in ind.solved_variants[k].hom %}
-                    <a href=/variant/{{v}}>hom:{{v[:20]}}</a><br>
-                {% endfor %}
-                {% endfor %}
-            </td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+
+
+      <div class='col-md-12' id="individuals-div"> <img src='/static/Loading_icon.gif' style="width:60px;height:60px;" > </div>
 
     </div>
 
@@ -477,7 +425,7 @@ function fetchPatients(hpo_id) {
                             a.target="_blank";
                             var text = document.createTextNode(i + ":" + r );
                             a.appendChild(text);
-                            td.appendChild(a);
+                            td.innerHTML = a;
                             row.appendChild(td);
                             document.getElementById("individuals").appendChild(row);
                             var x=document.getElementById("individuals_loaded");
@@ -496,6 +444,84 @@ function fetchPatients(hpo_id) {
 
 
 // fetches patients with hpo term
+function fetchIndividuals() {
+    $.ajax( {
+                type : 'GET',
+                url : '/hpo_individuals_json/{{hpo_id}}', 
+                data : {},
+                success : function(data) {
+
+                //individuals
+                $('individuals-div').empty();
+                $('#individuals-div').html("<table id=individuals_table class=tablesorter> <thead> <tr> <th>Individual </th> <th>Gender</th> <th>Phenotype</th> <th tooltip=scaled score from Monarch>Phenotype Score</th> <th>Rare Hom</th> <th>Rare Comp Het</th> <th>Rare</th> <th>Candidate Genes</th> <th>Candidate Variants</th>  </tr> </thead> <tbody id=individuals_table_body> </tbody> </table>");
+                 var individuals=data.result['individuals'];
+                 var tbody=document.getElementById('individuals_table_body');
+                 for (var i=0; i<individuals.length; i++) {
+                        var row=document.createElement('tr');
+                        var individual_cell=document.createElement('td');
+                        var gender_cell=document.createElement('td');
+                        var phenotype_cell=document.createElement('td');
+                        var phenotype_score_cell = document.createElement('td');
+                        var rare_hom_cell = document.createElement('td');
+                        var rare_comp_cell = document.createElement('td');
+                        var rare_cell = document.createElement('td');
+                        var candidate_genes_cell = document.createElement('td');
+                        var candidate_variants_cell = document.createElement('td');
+                        var phenotype_score_cell = document.createElement("div");
+                        //var unrelated_dominant_all_p_val=document.createTextNode(lit_genes[i]['phenogenon']['het'].unrelated_dominant_all_p_val);
+
+                        individual_cell.appendChild(document.createTextNode('<a href="/individual/'+individuals[i]['external_id']+ ' target="_blank"> '+individuals[i]['external_id']+'</a>'));
+                        gender_cell.appendChild(document.createTextNode(individuals[i]['sex']));
+                        phenotype_cell.appendChild(document.createTextNode(individuals[i]['features']));
+                        // ind.features|map('get_attributes','id','label')|map('map_format', '<a href="/hpo/{0}">{1}</a>')|join(', ')|safe
+                        phenotype_score_cell.appendChild(document.createTextNode(individuals[i]['specificity']['score']));
+                        rare_hom_cell.appendChild(document.createTextNode(individuals[i]['rare_homozygous_variants_count']));
+                        rare_comp_cell.appendChild(document.createTextNode(individuals[i]['rare_compound_hets_count']));
+                        rare_cell.appendChild(document.createTextNode(individuals[i]['rare_variants_count']));
+                        candidate_genes_cell.appendChild(document.createTextNode(individuals[i]['genes']));
+                        candidate_variants_cell.appendChild(document.createTextNode(individuals[i]['solved_variants']));
+                        //
+                        row.appendChild(individual_cell);
+                        row.appendChild(gender_cell);
+                        row.appendChild(phenotype_cell);
+                        row.appendChild(phenotype_score_cell);
+                        row.appendChild(rare_hom_cell);
+                        row.appendChild(rare_comp_cell);
+                        row.appendChild(rare_cell);
+                        row.appendChild(candidate_genes_cell);
+                        row.appendChild(candidate_variants_cell);
+                        tbody.appendChild(row);
+                    }
+
+                    $('.table-sorter').tablesorter({
+                        theme : 'bootstrap',
+                        headerTemplate : '{content}{icon}',
+                        // hidden filter input/selects will resize the columns, so try to minimize the change
+                        widthFixed : true,
+                        // initialize zebra striping and filter widgets
+                        widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
+                        widgetOptions : {
+                            zebra : ["even", "odd"],
+                            // Use the $.tablesorter.storage utility to save the most recent filters
+                            //filter_saveFilters : true,
+                            // jQuery selector string of an element used to reset the filters
+                            filter_reset : 'button.reset',
+                            filter_columnFilters : true,
+                            textSorter: {
+                                 3: $.tablesorter.sortNatural,
+                            }
+                        }
+                    });
+                },
+                dataType :  "json",
+                timeout: 120000
+        } );
+}
+
+
+
+
+// fetches patients with hpo term
 // calls fetchPrivateVariants on completion
 function fetchPhenoGenon() {
     $.ajax( {
@@ -503,7 +529,7 @@ function fetchPhenoGenon() {
                 url : '/phenogenon_json/{{hpo_id}}', 
                 data : {},
                 success : function(data) {
-
+                //lit_genes
                     $('phenogenon_lit_genes-div').empty();
                     $('#phenogenon_lit_genes-div').html(" <table class=table-sorter> <thead> <tr> <th>Gene</th> <th>Phenogenon Dominant pvalue</th> <th>Phenogenon Recessive pvalue</th> </tr> </thead> <tbody id=phenogenon_lit_genes> </tbody> </table> ");
                     var lit_genes=data.result['lit_genes'];
@@ -526,7 +552,6 @@ function fetchPhenoGenon() {
                         row.appendChild(cell_2);
                         tbody.appendChild(row);
                     }
-
                     //dominant_genes
                     $('#gene-hpo-dominant-table-div').empty();
                     $('#gene-hpo-dominant-table-div').html(" <table id=gene-dominant-table class=table-sorter> <thead> <tr> <th>Dominant Genes</th> <th title='fisher test'>p value</th> </tr> </thead> <tbody id=dominant_table_body> </tbody> </table> ");
@@ -593,8 +618,6 @@ function fetchPhenoGenon() {
                             }
                         }
                     });
-
-
                 },
                 dataType :  "json",
                 timeout: 120000
@@ -602,7 +625,7 @@ function fetchPhenoGenon() {
 }
 
 
-render_table();
+//render_table();
 // calls getData if more data left to fetch
 // otherwise calls finish to group downloaded variants
 // by gene
@@ -703,6 +726,7 @@ $('.table-sorter').tablesorter({
 //$(individuals_table).tablesorter();
 //getData(0);
 
+fetchIndividuals(hpo_id);
 fetchPhenoGenon(hpo_id);
 
 });
