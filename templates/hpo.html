@@ -459,10 +459,10 @@ function fetchIndividuals() {
                 // individual cell HTML
                 var individual_cell_html ='<a href="/individual/'+individuals[i]['external_id']+ ' target="_blank">'+individuals[i]['external_id']+'</a>';
                 // iterate over features to phenotypes HTML
-                var phenotype_html = ''
+                var phenotype_html = "";
                 var features = individuals[i]['features']
                 for (var j = 0; j < features.length; j++) {
-                  phenotype_html =+ '<a href="/hpo/'+features[j].id+' target="_blank">'+features[j].label+'</a>';                  
+                  phenotype_html =  phenotype_html + ' <a href="/hpo/'+features[j]['id']+'" target="_blank">'+features[j]['label']+'</a>, ';
                 }
                 // generate tr
                 var $tr = $('<tr>').append(
