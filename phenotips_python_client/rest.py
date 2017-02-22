@@ -34,28 +34,75 @@ import pymongo
 
 class PhenotipsClient():
 
-    def __init__(self, host='localhost', port='8080',debug=True,print_requests=True):
+    def __init__(self, host='localhost', port='8080',debug=True,print_requests=True,test=False):
         self.site='%s:%s'%(host,port,)
         conn = pymongo.MongoClient(host='localhost', port=27017)
-        self.db=conn.cache
+        if not test:
+            self.db=conn.cache
+        else:
+            self.db=conn['test_cache']
 
-    def get_patient(self,auth,eid=None,number=10000,start=0):
+    def request_phenotips_session(self, username=None, password=None):
+        auth='%s:%s' % (username, password,)
+        encoded_auth=b2a_base64(auth).strip()
+        headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
+        url='http://%s/rest/patients?start=%d&number=%d' % (self.site,0,1)
+        s = requests.Session()
+        response = s.get(url, headers=headers)
+        if response :
+            return s
+        else:
+            return None
+
+    def create_session_with_phenotips(self, auth=None):
+        encoded_auth=b2a_base64(auth).strip()
+        headers={'Authorization':'Basic %s'%encoded_auth, 'Accept':'application/json'}
+        url='http://%s/rest/patients?start=%d&number=%d' % (self.site,0,1)
+        s = requests.Session()
+        response = s.get(url, headers=headers)
+        if response :
+            username = (auth.split(':'))[0]
+            session_dict = {'phenotips_session': s, 'user': username}
+            return session_dict
+        else:
+            return None
+
+    def get_phenotips_session(self, session):
+        if not session or not 'phenotips_session' in session:
+            return None
+        phenotips_session = session['phenotips_session']
+        if not phenotips_session:
+            return None
+        return phenotips_session
+
+    def clear_cache(self):
+        self.db.phenotips_cache.remove() 
+
+    def get_patient(self,session,eid=None,number=10000,start=0):
         """
         Get patient with eid or all patients if not
         specified
         """
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Accept':'application/json'}
+        phenotips_session = self.get_phenotips_session(session)
+        if not phenotips_session:
+            return None
+        username = str((session['user']))
+
+        s = phenotips_session
+
+        headers={'Accept':'application/json'} 
         if not eid:
             url='http://%s/rest/patients?start=%d&number=%d' % (self.site,start,number)
             k={'url':url}
+            k.update({'user':'%s'%username})
             k.update(headers)
             k = hashlib.md5(bencode.bencode(k)).hexdigest()
             r=self.db.phenotips_cache.find_one({'key':k})
+
             if r:
                 return r
             else:
-                r=requests.get(url, headers=headers)
+                r=s.get(url, headers=headers)
                 try:
                     r=r.json()
                     r.update({'key':k})
@@ -66,13 +113,14 @@ class PhenotipsClient():
         else:
             url='http://%s/rest/patients/eid/%s' % (self.site,str(eid))
             k={'url':url}
+            k.update({'user':'%s'%username})
             k.update(headers)
             k = hashlib.md5(bencode.bencode(k)).hexdigest()
             r=self.db.phenotips_cache.find_one({'key':k})
             if r:
                 return r
             else:
-                r=requests.get(url, headers=headers)
+                r=s.get(url, headers=headers)
                 try:
                     r=r.json()
                     r.update({'key':k})
@@ -81,95 +129,112 @@ class PhenotipsClient():
                 except:
                     return None
 
-    def patient_exists(self,auth,eid):
-        p=self.get_patient(auth,eid)
+    def patient_exists(self,session,eid):
+        p=self.get_patient(session,eid)
         if p is None:
             return False
         else:
             return True
 
-    def get_permissions(self,auth,ID):
+    def get_permissions(self,session,ID=None, eid=None):
         """
         Retrieves all permissions: owner, collaborators, visibility.
         """
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Accept':'application/json; application/xml'}
-        #p=self.get_page('/patients/%s/permissions',ID, headers=headers)
-        r=requests.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
+
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
+        if not ID:
+            p=self.get_patient(session=session,eid=eid)
+            ID=p['id']
+        headers={'Accept':'application/json; application/xml'}
+        r=s.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
+        if not r:
+            return None
         return r.json()
 
     # create patient
-    def create_patient(self, auth, patient):
-        headers={'Authorization':'Basic %s'% b2a_base64(auth).strip(), 'Content-Type':'application/json', 'Accept':'application/json'}
+    def create_patient(self, session, patient):
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
         io=StringIO()
         json.dump(patient,io)
         json_patient=io.getvalue()
-        #p=self.get_page('/rest/patients', headers=headers, post=json_patient)
-        print(p)
-        return(p)
+        s.post('http://%s/rest/patients' % (self.site), headers=headers, data=json_patient)
 
-    def update_patient(self, eid, auth, patient):
+    def update_patient(self, eid, session, patient):
         """
         Update patient if exists, otherwise create.
         """
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
         patient['external_id']=eid
-        if self.patient_exists(auth=auth,eid=eid):
+        if self.patient_exists(session=session,eid=eid):
             io=StringIO()
             json.dump(patient,io)
             json_patient=io.getvalue()
             print('update')
             print(json_patient)
-            headers={'Authorization':'Basic %s'% b2a_base64(auth).strip(),'Content-Type':'application/json', 'Accept':'application/json'}
-            self.get_page('/rest/patients/eid/%s'%eid, headers=headers, post=json_patient, special='PUT')
+            headers={'Content-Type':'application/json', 'Accept':'application/json'}
+            s.put('http://%s/rest/patients/eid/%s' % (self.site,eid), headers=headers, data=json_patient)
         else:
             print('create')
             print(patient)
-            self.create_patient(auth=auth,patient=patient)
+            self.create_patient(session=session,patient=patient)
 
 
-    def update_permissions(self, permissions, auth, ID=None, eid=None):
+    def update_permissions(self, permissions, session, ID=None, eid=None):
         """
         Update permissions of patient.
         """
         #permission = { "owner" : { "id" : "xwiki:XWiki.RachelGillespie" }, "visibility" : { "level":  "private" }, "collaborators" : [{ "id" : "xwiki:XWiki.UKIRDC", "level" : "edit" }, { "id" : "xwiki:Groups.UKIRDC Administrators)", "level" : "edit" }] }
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
         if not ID:
-            p=self.get_patient(auth=auth,eid=eid)
+            p=self.get_patient(session=session,eid=eid)
             ID=p['id']
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Content-Type':'application/json', 'Accept':'application/json'}
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
         io=StringIO()
         json.dump(permissions,io)
         json_permissions=io.getvalue()
-        p=self.get_page('/patients/%s/permissions'%ID, headers=headers, post=json_permissions, special='PUT')
+        p=s.put('http://%s/rest/patients/%s/permissions'% (self.site,ID), headers=headers, data=json_permissions, )
         print(p)
         return(p)
 
 
-    def update_owner(self, owner, auth, ID=None, eid=None):
+    def update_owner(self, owner, session, ID=None, eid=None):
         """
         Update owner of patient.
         """
         #permission = { "owner" : { "id" : "xwiki:XWiki.RachelGillespie" }, "visibility" : { "level":  "private" }, "collaborators" : [{ "id" : "xwiki:XWiki.UKIRDC", "level" : "edit" }, { "id" : "xwiki:Groups.UKIRDC Administrators)", "level" : "edit" }] }
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
         if not ID:
-            p=self.get_patient(auth=auth,eid=eid)
+            p=self.get_patient(session=session,eid=eid)
             ID=p['id']
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Content-Type':'application/json', 'Accept':'application/json'}
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
         io=StringIO()
         json.dump(owner,io)
         json_owner=io.getvalue()
-        p=self.get_page('/patients/%s/permissions/owner'%ID, headers=headers, post=json_owner, special='PUT')
+        p=s.put('http://%s/rest/patients/%s/permissions/owner'%(self.site,ID), headers=headers, data=json_owner)
         print(p)
         return(p)
 
 
-    def delete_patient(self, eid, auth):
+    def delete_patient(self, eid, session):
         """
         Delete patient.
         """
-        auth=b2a_base64(auth).strip()
-        headers={'Authorization':'Basic %s'%auth, 'Content-Type':'application/json', 'Accept':'application/json'}
-        p=self.get_page('/rest/patients/eid/%s'%eid, headers=headers, post='', special='DELETE')
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
+        headers={'Content-Type':'application/json', 'Accept':'application/json'}
+        p=s.delete('http://%s/rest/patients/eid/%s'%(self.site,eid), headers=headers)
         print(p)
 
     def update_phenotips_from_csv(self, info, auth, owner_group=[], collaborators=[], contact={}):
@@ -180,12 +245,11 @@ class PhenotipsClient():
         """
         info=pandas.read_csv(info,sep=',')
         print(info.columns.values)
+        session = self.create_session_with_phenotips(auth=auth)
         for i, r, in info.iterrows():
             print(r)
             #if r['owner']!=owner: continue
             patient=dict()
-            #auth=login
-            #auth=b2a_base64(auth).strip()
             patient['external_id']=r['sample']
             if  not isinstance(r['sample'],basestring) or len(r['sample']) < 4: continue
             if 'ethnicity' in r:
@@ -208,21 +272,21 @@ class PhenotipsClient():
             print(patient)
             r['phenotype']=str(r['phenotype'])
             patient['features']=[ { "id":hpo, 'label':'', 'type':'phenotype', 'observed':'yes' } for hpo in r['phenotype'].split(';') ]
-            #update_patient(ID=r['sample'],auth=auth,patient=patient)
-            self.update_patient(patient['external_id'], auth, patient)
-            #delete_patient(ID=r['sample'],auth=auth,patient=patient)
+            #update_patient(ID=r['sample'],session=session,patient=patient)
+            self.update_patient(patient['external_id'], session, patient)
+            #delete_patient(ID=r['sample'],session=session,patient=patient)
             # if patient exists, update patient, otherwise create patient
-            #self.update_patient(eid=patient['external_id'],auth=auth,patient=patient)
+            #self.update_patient(eid=patient['external_id'],session=session,patient=patient)
             permissions = { "owner" : owner_group, "visibility" : { "level":  "private" }, "collaborators" : collaborators  }
             print(permissions)
-            #self.update_permissions(permissions=permissions,eid=patient['external_id'],auth=auth)
-            self.update_owner(owner=owner_group,auth=auth,eid=patient['external_id'])
+            #self.update_permissions(permissions=permissions,eid=patient['external_id'],session=session)
+            self.update_owner(owner=owner_group,session=session,eid=patient['external_id'])
 
-    def patient_hpo(self, eid, auth):
+    def patient_hpo(self, eid, session):
         """
         Retrieve HPO terms for patient
         """
-        patient=self.get_patient(auth,eid=eid)
+        patient=self.get_patient(session=session,eid=eid)
         if patient:
             if 'features' in patient: return [f['id'] for f in patient['features']]
             else:  return []
@@ -233,14 +297,15 @@ class PhenotipsClient():
         Dumps the HPO terms from a patient record
         to tsv file.
         """
-        patients=self.get_patient(auth)['patientSummaries']
+        session = self.create_session_with_phenotips(auth=auth)
+        patients=self.get_patient(session=session)['patientSummaries']
         #file(sprintf('uclex_hpo_%d-%d-%d.txt'),)
         hpo_file=open(outFile, 'w+')
         print('eid', 'hpo', 'genes', 'solved', sep='\t',file=hpo_file)
         for p in patients:
             eid=p['eid']
             print(eid)
-            patient=self.get_patient(auth,eid)
+            patient=self.get_patient(session=session,eid=eid)
             print(patient)
             if 'features' in patient:
                 hpo=','.join([f['id'] for f in patient['features']])
@@ -261,12 +326,12 @@ class PhenotipsClient():
         """
         Dumps patient to JSON.
         """
-        auth='%s:%s' % (owner, password,)
-        patients=self.get_patient(auth)['patientSummaries']
+        session = self.create_session_with_phenotips(auth=auth)
+        patients=self.get_patient(session=session)['patientSummaries']
         for p in patients:
             eid=p['eid']
             print(eid)
-            patient=self.get_patient(auth,eid)
+            patient=self.get_patient(session=session,eid=eid)
             io=StringIO()
             json.dump(patient,io)
             json_patient=io.getvalue()
@@ -281,11 +346,12 @@ class PhenotipsClient():
         client = pymongo.MongoClient(host=mongo_host, port=int(mongo_port))
         db=client[mongo_dbname]
         db.patients.drop()
-        patients=self.get_patient(auth)['patientSummaries']
+        session = self.create_session_with_phenotips(auth=auth)
+        patients=self.get_patient(session)['patientSummaries']
         for p in patients:
             eid=p['eid']
             print(eid)
-            p=self.get_patient(auth,eid)
+            p=self.get_patient(session=session,eid=eid)
             db.patients.insert(p,w=0)
         db.patients.ensure_index('external_id')
         db.patients.ensure_index('report_id')
@@ -304,11 +370,12 @@ class PhenotipsClient():
         import pymongo
         client = pymongo.MongoClient(host=mongo_host, port=int(mongo_port))
         db=client[mongo_dbname]
+        session = self.create_session_with_phenotips(auth=auth)
         for eid in patient_ids:
             print(eid)
-            p=self.get_patient(auth,eid)
+            p=self.get_patient(session=session,eid=eid)
             print(p)
-            if p is None: raise 'patient does not exists maybe your credential are wrongs?'
+            if p is None: raise 'patient does not exist maybe your credential are wrong?'
             # if patient does not exist in mongodb, create it
             if db.patients.find_one({'external_id':eid}) is None:
                 db.patients.insert(p,w=0)
@@ -319,14 +386,17 @@ class PhenotipsClient():
                 db.patients.update({'external_id':eid},{'$set':{u:p[u]}},w=0)
 
 
-    def get_vocabularies(self,auth,vocabulary):
-        auth=b2a_base64(auth).strip()
+    def get_vocabularies(self,session,vocabulary):
+        s = self.get_phenotips_session(session)
+        if not s:
+            return None
         # get vocabularies
         #http://localhost:1235/rest/vocabularies/terms/HP:0000556
-        headers={'Authorization':'Basic %s'%auth, 'Accept':'application/json; application/xml'}
-        p=self.get_page('/rest/vocabularies/%s'%vocabulary, headers=headers)
-        print(p)
-        return p
+        headers={'Accept':'application/json; application/xml'}
+        r=s.get('http://%s/rest/vocabularies/%s'%(self.site,vocabulary), headers=headers)
+        if not r:
+            return None
+        return r.json()
 
 
 

@@ -29,7 +29,7 @@ class Individual(object):
         patient_id=os.path.basename(filename.replace('.csv','')) 
         parent_dir=os.path.basename(os.path.abspath(os.path.join(filename, os.pardir)))
         # Add patient to phenotips if it does not already exist
-        pheno=PhenotipsClientNew()
+        pheno=PhenotipsClient()
         patient={u'features':[], 'clinicalStatus': {u'clinicalStatus': u'affected'}, u'ethnicity': {u'maternal_ethnicity': [], u'paternal_ethnicity': []}, u'family_history': {}, u'disorders': [], u'life_status': u'alive', u'reporter': u'', u'genes': [], u'prenatal_perinatal_phenotype': {u'prenatal_phenotype': [], u'negative_prenatal_phenotype': []}, u'prenatal_perinatal_history': {u'twinNumber': u''}, u'sex': u'U', u'solved': {u'status': u'unsolved'}}
         eid=patient_id
         p=pheno.get_patient(session=session,eid=eid)

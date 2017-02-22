@@ -31,7 +31,7 @@ import md5
 from scipy.stats import chisquare
 import math 
 from Bio import Entrez
-from phenotips_python_client import PhenotipsClientNew
+from phenotips_python_client import PhenotipsClient
 from bson.json_util import loads
 from mongodb import *
 # fizz: hpo lookup
@@ -135,14 +135,14 @@ def check_auth(username, password):
         if username=='demo' and password=='demo123':
             session['user'] = username
             if config.LOCAL_WITH_PHENOTIPS: 
-                conn = PhenotipsClientNew()
+                conn = PhenotipsClient()
                 phenotips_session = conn.request_phenotips_session(username, password)
                 session['phenotips_session'] = phenotips_session
             return True
         else:
             return False
 
-    conn = PhenotipsClientNew()
+    conn = PhenotipsClient()
     phenotips_session = conn.request_phenotips_session(username, password)
     if phenotips_session:
         session['user'] = username
@@ -647,7 +647,7 @@ serve the Vincent annotated csv files
 @app.route('/download/send_csv', methods=['GET','POST'])
 @requires_auth
 def download_csv():
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p_id = request.args.get('p_id')
     p=conn.get_patient(eid=p_id,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
@@ -665,7 +665,7 @@ def download_csv():
 @app.route('/download', methods=['GET','POST'])
 @requires_auth
 def download():
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p_id = request.args.get('p_id')
     p=conn.get_patient(eid=p_id,session=session,number=1)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'

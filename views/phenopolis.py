@@ -203,7 +203,7 @@ serve the Vincent annotated csv files
 @app.route('/download/send_csv', methods=['GET','POST'])
 @requires_auth
 def download_csv():
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p_id = request.args.get('p_id')
     p=conn.get_patient(eid=p_id,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
@@ -222,7 +222,7 @@ def download_csv():
 @requires_auth
 def individual_page(individual):
     # make sure that individual is accessible by user
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p=conn.get_patient(eid=individual,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
@@ -361,7 +361,7 @@ def individual_page(individual):
 
 @app.route('/individual_update/<individual>')
 def individual_update(individual):
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     p=conn.get_patient(eid=individual,session=session)
     print 'UPDATE'
     print p
@@ -399,7 +399,7 @@ def individuals_page(page=None):
         #p['all_variants_count']=get_db().patients.find_one({'external_id':p['external_id']},{'_id':0,'all_variants_count':1})['all_variants_count']
         #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
         return p
-    conn=PhenotipsClientNew()
+    conn=PhenotipsClient()
     patients=conn.get_patient(session=session).get('patientSummaries',[])
     eids=[p['eid'] for p in patients]
     print(eids)

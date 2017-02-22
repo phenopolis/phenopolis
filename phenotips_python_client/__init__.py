@@ -1,2 +1,2 @@
-from rest_new import PhenotipsClientNew
+from rest import PhenotipsClient
 
