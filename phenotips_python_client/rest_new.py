@@ -121,7 +121,7 @@ class PhenotipsClientNew():
         else:
             return True
 
-    def get_permissions(self,session,ID):
+    def get_permissions(self,session,ID=None, eid=None):
         """
         Retrieves all permissions: owner, collaborators, visibility.
         """
@@ -129,7 +129,9 @@ class PhenotipsClientNew():
         s = self.get_phenotips_session(session)
         if not s:
             return None
-
+        if not ID:
+            p=self.get_patient(session=session,eid=eid)
+            ID=p['id']
         headers={'Accept':'application/json; application/xml'}
         r=s.get('http://%s/rest/patients/%s/permissions' % (self.site,ID), headers=headers)
         if not r:
