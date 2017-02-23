@@ -76,48 +76,16 @@ def hpo_individuals_json(hpo_id):
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
     patients_db=get_db(app.config['DB_NAME_PATIENTS'])
-    patients=lookups.get_hpo_patients(hpo_db,patients_db,hpo_id)
+    patients=lookups.get_hpo_patients(hpo_db,patients_db,hpo_id,cached=True)
     print('num patients', len(patients))
-    pmids=[]
-    obs_genes=[]
-    #if len(patients) < 100:
-    if False:
-        for p in patients:
-                p2=db.patients.find_one({'external_id':p['external_id']},{'rare_variants':1})
-                if not p2: continue
-                for rv in p2.get('rare_variants',[]):
-                    if 'HUGO' in rv: obs_genes+=[rv['HUGO']]
-    obs_genes=Counter(obs_genes)
-    obs_genes=obs_genes.most_common(10)
-    print(obs_genes)
-    #obs_genes=[g for g in obs_genes if obs_genes[g]>5]
-    obs_genes=[g for g in obs_genes]
     # candidate genes
     candidate_genes = [p.get('genes',[]) for p in patients]
     # solved genes
     solved_genes = [p.get('solved',[]) for p in patients]
-    ## private variants (not seen in others in the cohort)
-    ##rsession.voidEval('common_variants <- common.variants')
-    #variants=rsession.r.private_variants(hpo_patients)
-    #if type(variants) is str:
-        #variants=[variants]
-    #else:
-        #variants=variants.tolist()
-    #print('num variants',len(variants),)
-    #variants=[db.variants.find_one({'variant_id':v.replace('_','-')}) for v in variants[:100]]
-    #[variant for variant in lookups.get_variants_in_gene(db, g['gene_id'])]
-       #if variant['major_consequence']!='stop_gained': continue
-       #print(variant)
-       #break
-    #print( lookups.get_variants_in_gene(db, 'CNNM4') )
-    #vcf_reader = pysam.VariantFile('chr%s.vcf.gz' % '22')
-    #for record in vcf_reader:
-        #for s in external_ids:
-            #r=record.samples[s]
-            #if 'GT' in r: print(r['GT'])
     hpo_db=get_db(app.config['DB_NAME_HPO'])
     def f(p):
         print p['external_id']
+        if session['user']=='demo': p['external_id']='hidden'
         del p['_id']
         p['features']=[f for f in p.get('features',[]) if f['observed']=='yes']
         if 'solved' in p:
@@ -144,7 +112,7 @@ def hpo_individuals_json(hpo_id):
     #print(eids)
     #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
     #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
-    patients=[f(p) for p in patients[:500] if 'external_id' in p]
+    patients=[f(p) for p in patients if 'external_id' in p]
     print(patients[0])
     return jsonify( result={ 'individuals':patients } )
 
@@ -255,16 +223,15 @@ def hpo_page(hpo_id):
         hpo_id=hpo_term['id'][0]
     print hpo_id 
     hpo_name=hpo_db.hpo.find_one({'id':hpo_id})['name'][0]
-    print('HPO ANCESTORS')
-    hpo_ancestors=lookups.get_hpo_ancestors(hpo_db,hpo_id)
-    print(len(hpo_ancestors))
-    print([h['name'] for h in hpo_ancestors])
+    #print('HPO ANCESTORS')
+    #hpo_ancestors=lookups.get_hpo_ancestors(hpo_db,hpo_id)
+    #print(len(hpo_ancestors))
+    #print([h['name'] for h in hpo_ancestors])
     #print(len([v['VARIANT_ID'] for v in db.variants.find({'HET' : { '$in': patient_ids }})]))
     #print(len([v['VARIANT_ID'] for v in db.variants.find({'HOM' : { '$in': patient_ids }})]))
     #if r: external_ids=r['external_ids']
     #else: external_ids=[]
     #for r in hpo_db.hpo_pubmed.find({'hpoid':hpo_id}): print(r)
-    #pmids=[r['pmid'] for r in hpo_db.hpo_pubmed.find({'hpoid':hpo_id})]
     #print recessive_genes
     #print dominant_genes
     return render_template('hpo.html',
