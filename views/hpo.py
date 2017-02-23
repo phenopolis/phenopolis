@@ -76,7 +76,7 @@ def hpo_individuals_json(hpo_id):
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
     patients_db=get_db(app.config['DB_NAME_PATIENTS'])
-    patients=lookups.get_hpo_patients(hpo_db,patients_db,hpo_id,cached=True)
+    patients=lookups.get_hpo_patients(hpo_db,patients_db,hpo_id,cached=False)
     print('num patients', len(patients))
     # candidate genes
     candidate_genes = [p.get('genes',[]) for p in patients]
@@ -141,8 +141,10 @@ def phenogenon_json(hpo_id):
     false_negatives=len([g for g in lit_genes if 'unrelated_recessive_p_val' in g['phenogenon']['hom_comp'] and g['phenogenon']['hom_comp']['unrelated_recessive_p_val']>threshold])
     false_positives=len([g for g in recessive_genes if not g['known'] and g['p_val']<=threshold])
     true_negatives=len([g for g in recessive_genes if not g['known'] and g['p_val']>threshold])
+    # can have zero denominator sometimes
+    #{'TPR':float(true_positives)/float(true_positives+false_negatives),'FPR':float(false_positives)/float(false_positives+true_negatives)}
     return jsonify( result={
-        'performance':{'TP':true_positives,'FN':false_negatives,'FP':false_positives,'TN':true_negatives,'TPR':float(true_positives)/float(true_positives+false_negatives),'FPR':float(false_positives)/float(false_positives+true_negatives)},
+        'performance':{'TP':true_positives,'FN':false_negatives,'FP':false_positives,'TN':true_negatives},
                     'lit_genes':lit_genes,
                     'omim_genes':omim_genes,
                     'recessive_genes':recessive_genes,
