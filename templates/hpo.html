@@ -470,11 +470,11 @@ function fetchIndividuals() {
                   $('<td>').text(individuals[i]['sex']), //gender_cell
                   $('<td>').html(phenotype_html), //phenotype_cell
                   $('<td>').text(individuals[i]['specificity']['score']), // phenotype_score_cell          
-                  $('<td>').text(individuals[i]['specificity']['rare_homozygous_variants_count']), // rare_hom_cell
-                  $('<td>').text(individuals[i]['specificity']['rare_compound_hets_count']), // rare_comp_cell
-                  $('<td>').text(individuals[i]['specificity']['rare_variants_count']), // rare_cell
-                  $('<td>').text(individuals[i]['specificity']['genes']), // candidate_genes_cell
-                  $('<td>').text(individuals[i]['specificity']['solved_variants']) // candidate_variants_cell
+                  $('<td>').text(individuals[i]['rare_homozygous_variants_count']), // rare_hom_cell
+                  $('<td>').text(individuals[i]['rare_compound_hets_count']), // rare_comp_cell
+                  $('<td>').text(individuals[i]['rare_variants_count']), // rare_cell
+                  $('<td>').text(individuals[i]['genes']), // candidate_genes_cell
+                  $('<td>').text(individuals[i]['solved_variants']) // candidate_variants_cell
                 ).appendTo('#individuals_table_body')
             }
             $('.tablesorter').tablesorter({
