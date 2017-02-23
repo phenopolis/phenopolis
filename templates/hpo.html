@@ -465,7 +465,7 @@ function fetchIndividuals() {
     timeout: 120000,
     success: function (data) {
       var individuals = data.result['individuals'];
-      $('#individuals-div').html('<table id=individuals_table class=tablesorter> <thead> <tr> <th>Individual ('+individuals.length+') </th> <th>Gender</th> <th>Phenotype</th> <th tooltip=scaled score from Monarch>Phenotype Score</th> <th>Rare Hom</th> <th>Rare Comp Het</th> <th>Rare</th> <th>Candidate Genes</th> <th>Candidate Variants</th>  </tr> </thead> <tbody id=individuals_table_body> </tbody> </table>');
+      $('#individuals-div').html('<table id=individuals_table class=tablesorter> <thead> <tr> <th>Individual (<span id="number_of_individuals">'+individuals.length+'</span>) </th> <th>Gender</th> <th>Phenotype</th> <th tooltip=scaled score from Monarch>Phenotype Score</th> <th>Rare Hom</th> <th>Rare Comp Het</th> <th>Rare</th> <th>Candidate Genes</th> <th>Candidate Variants</th>  </tr> </thead> <tbody id=individuals_table_body> </tbody> </table>');
       for (var i = 0; i < individuals.length; i++) {
         // individual cell HTML
         var individual_cell_html = create_url('/individual', individuals[i]['external_id']);
@@ -526,6 +526,9 @@ function fetchIndividuals() {
           }
         }
       });
+      $('#individuals_table').on('filterEnd', function(){
+        $('#number_of_individuals').text($('#individuals_table_body tr:visible').size())
+      })
       $('#individual_loading_image').remove()
     }
   });
