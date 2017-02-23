@@ -88,6 +88,22 @@ def mkdir_p(path):
             raise
 
 '''
+some hpo ids are obsolete
+this is a copy of lookups.py's replace_hpo. lookups.py is not working atm
+'''
+def replace_hpo(hpo_db, hpo):
+    # some hpo_ids are obsolete.
+    record = hpo_db.hpo.find_one({'id':hpo[0]})
+    if not record:
+        print ('no record in replace_hpo')
+        print (hpo)
+    if 'replaced_by' in record:
+        new = hpo_db.hpo.find_one({'id':record['replaced_by'][0]})
+        return [new['id'][0], new['name'][0]]
+    else:
+        return hpo
+
+'''
 translate gene_names to ensembl ids. db = dbs['phenopolis_db']
 '''
 def gene_names_to_ids(db, queries):
@@ -130,7 +146,7 @@ def get_candidate_genes(dbs, genes=None, fields=None):
         }
     
     # fields of interests
-    fields = fields or ['hpo','solve','genes','sex']
+    fields = fields or ['hpo','solve','genes','sex','external_id']
 
     all_valid_p = [p for p in dbs['patient_db'].patients.find({}) if p.get('genes',[])]
     result = {}
@@ -157,7 +173,11 @@ def get_candidate_genes(dbs, genes=None, fields=None):
         # deal with hpo and solve and sex
         temp  = {f:p.get(f,None) for f in fields}
         if 'hpo' in fields:
-            temp['hpo'] = [f for f in p['features'] if f['observed'] == 'yes']
+            temp['hpo'] = []
+            for f in p['features']:
+                if f['observed'] == 'yes':
+                    f['id'],f['label'] = replace_hpo(dbs['hpo_db'],(f['id'],f['label']))
+                    temp['hpo'].append(f)
         if 'solve' in fields:
             temp['solve'] = SOLVE_DICT[p['solved']['status']]
         if 'sex' in fields:
@@ -177,3 +197,4 @@ def get_candidate_genes(dbs, genes=None, fields=None):
                 })
             result[gene_id]['data'].append(temp)
     return result
+

@@ -5,10 +5,10 @@ only consider unrelated individuals calculated by KING
 '''
 import json
 
-release = '2016_Aug'
-outfile = 'hpo_freq_%s.json' % release
+release = '2017_Feb'
+outfile = '../output/phenogenon/hpo_freq_%s.json' % release
 
-infile = 'patients_hpo_snapshot_%s.tsv' % release
+infile = '../output/phenogenon/patients_hpo_snapshot_%s.tsv' % release
 inf = open(infile, 'r')
 
 result = {'related':{},'unrelated':{},'release':release}
