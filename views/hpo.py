@@ -52,6 +52,24 @@ def phenogenon(hpo_id,lit_genes,omim_genes,recessive_genes,dominant_genes,cache=
     #print({'hpo_id':hpo_id,'dominant_genes':dominant_genes,'recessive_genes':recessive_genes,'omim_genes':omim_genes,'lit_genes':lit_genes})
     cache_db.phenogenon_cache.insert_one({'hpo_id':hpo_id,'dominant_genes':dominant_genes,'recessive_genes':recessive_genes,'omim_genes':omim_genes,'lit_genes':lit_genes})
 
+def skat(hpo_id):
+    db=get_db()
+    skat_genes=db.skat.find({'HPO':hpo_id},{'_id':False})
+    skat_genes=[g for g in skat_genes if g['FisherPvalue']<0.05 and g['SKATO']<0.005]
+    for g in skat_genes:
+        pli=get_db('exac').pli.find_one({'gene':g['Symbol']})
+        if pli:
+            g['pli']=pli['pLI'] 
+        else:
+            g['pli']=-1
+    return skat_genes
+
+@app.route('/hpo_skat_json/<hpo_id>')
+@requires_auth
+def hpo_skat_json(hpo_id):
+    skat_genes=skat(hpo_id)
+    return jsonify( result={ 'individuals':skat_genes } )
+
 @app.route('/hpo_individuals_json/<hpo_id>')
 @requires_auth
 def hpo_individuals_json(hpo_id):
@@ -230,8 +248,6 @@ def phenogenon_literature_csv(hpo_id):
 def hpo_page(hpo_id):
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
-    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
-    #patients=[p for p in patients_db.patients.find( { 'features': {'$elemMatch':{'id':str(hpo_id)}} } )]
     print hpo_id 
     if not hpo_id.startswith('HP:'):
         hpo_term=hpo_db.hpo.find_one({'name':re.compile('^'+hpo_id+'$',re.IGNORECASE)})
@@ -241,36 +257,24 @@ def hpo_page(hpo_id):
     hpo_name=hpo_db.hpo.find_one({'id':hpo_id})['name'][0]
     print('HPO ANCESTORS')
     hpo_ancestors=lookups.get_hpo_ancestors(hpo_db,hpo_id)
-    hpo_gene = db.hpo_gene.find_one({'hpo_id':hpo_id})
     print(len(hpo_ancestors))
     print([h['name'] for h in hpo_ancestors])
     #print(len([v['VARIANT_ID'] for v in db.variants.find({'HET' : { '$in': patient_ids }})]))
     #print(len([v['VARIANT_ID'] for v in db.variants.find({'HOM' : { '$in': patient_ids }})]))
-    #r=patients_db.hpo.find_one({'hp_id':hpo_id})
     #if r: external_ids=r['external_ids']
     #else: external_ids=[]
     #for r in hpo_db.hpo_pubmed.find({'hpoid':hpo_id}): print(r)
     #pmids=[r['pmid'] for r in hpo_db.hpo_pubmed.find({'hpoid':hpo_id})]
     #print recessive_genes
     #print dominant_genes
-    lit_genes=[r['Gene-Name'] for r in hpo_db.hpo_gene.find({'HPO-ID':hpo_id})]
-    skat_genes=db.skat.find({'HPO':hpo_id})
-    skat_genes=[g for g in skat_genes if g['FisherPvalue']<0.05 and g['SKATO']<0.005]
-    for g in skat_genes:
-        pli=get_db('exac').pli.find_one({'gene':g['Symbol']})
-        if pli:
-            g['pli']=pli['pLI'] 
-        else:
-            g['pli']=-1
     return render_template('hpo.html',
             title=hpo_id,
             hpo_id=hpo_id,
             hpo_name=hpo_name,
-            lit_genes=lit_genes,
+            lit_genes=[],
             recessive_genes=[],
             dominant_genes=[],
-            hpo_gene=hpo_gene,
-            skat_genes=skat_genes,
+            skat_genes=skat(hpo_id),
             variants=[])
 
 @app.route('/hpo_json/<hpo_id>')
