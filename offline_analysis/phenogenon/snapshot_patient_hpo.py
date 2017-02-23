@@ -4,6 +4,7 @@ this script is to snapshot patient hpo information for further analyses, such as
 '''
 import sys
 import pymongo
+sys.path.append('../..')
 from lookups import *
 
 conn = pymongo.MongoClient(host='phenotips', port=27017)
@@ -11,8 +12,8 @@ hpo_db=conn['hpo']
 db = conn['uclex']
 patient_db=conn['patients']
 
-release = '2016_Aug'
-outf = open('patients_hpo_snapshot_'+release+'.tsv','w')
+release = '2017-Feb'
+outf = open('../output/phenogenon/patients_hpo_snapshot_'+release+'.tsv','w')
 
 
 unrelated = open('/SAN/vyplab/UCLex/mainset_July2016/kinship/UCL-exome_unrelated.txt','r').readlines()
