@@ -444,18 +444,20 @@ function fetchPatients(hpo_id) {
 //fetchCommonVariants(patients);
 
 
-function create_url(base_url, text, url_end) {
+function create_url(base_url, text, url_end, a_class) {
   if (url_end === undefined) {
     return '<a href=' + base_url + '/' + text + ' target="_blank">' + text + '</a>';
-  } else {
+  } else if (a_class === undefined) {
     return '<a href=' + base_url + '/' + url_end + ' target="_blank">' + text + '</a>';
+  } else {
+    return '<a class="'+ a_class +'" href=' + base_url + '/' + url_end + ' target="_blank">' + text + '</a>';
   }
 }
 
 // fetches patients with hpo term
 function fetchIndividuals() {
   $.ajax({
-    type: 'GET',
+    type: 'GET', 
     url : '/hpo_individuals_json/{{hpo_id}}', 
     data: {
     },
@@ -471,9 +473,10 @@ function fetchIndividuals() {
         var phenotype_html = '';
         var features = individuals[i]['features']
         for (var j = 0; j < features.length; j++) {
-          phenotype_html = phenotype_html + ' ' + create_url('/hpo', features[j]['label'], features[j]['id']);
-        }        // iterate over genes for Genes variants HTML
+          phenotype_html = phenotype_html + ' ' + create_url('/hpo', features[j]['label'], features[j]['id'], 'label label-default');
+        }
 
+        // iterate over genes for Genes variants HTML
         var genes_html = '';
         var solved_variants_html = '';
         var genes = individuals[i]['genes']
@@ -481,11 +484,19 @@ function fetchIndividuals() {
         for (var k = 0; k < genes.length; k++) {
           genes_html = genes_html + ' ' + create_url('/gene', genes[k]);
           if (solved_variants !== undefined) {
-            console.log(solved_variants)
-            solved_variants_html = solved_variants_html + ' [' + create_url('/variant', solved_variants[genes[k]]['het']) + ', ' + create_url('/variant', solved_variants[genes[k]]['hom']) + '] '
+            if (solved_variants[genes[k]] !== undefined) {
+              if (solved_variants[genes[k]]['hom'] === undefined) {
+                solved_variants_html = solved_variants_html + ' [ , ' + create_url('/variant', solved_variants[genes[k]]['hom']) + '] '
+              } else if (solved_variants[genes[k]]['het'] === undefined) {
+                solved_variants_html = solved_variants_html + ' [' + create_url('/variant', solved_variants[genes[k]]['het']) + ', ] '
+              } else {
+                solved_variants_html = solved_variants_html + ' [' + create_url('/variant', solved_variants[genes[k]]['het']) + ', ' + create_url('/variant', solved_variants[genes[k]]['hom']) + '] '
+              }            
+            } 
           }
-        }        // generate tr
+        }
 
+        // generate tr
         var $tr = $('<tr>').append($('<td>').html(individual_cell_html), $('<td>').text(individuals[i]['sex']), //gender_cell
           $('<td>').html(phenotype_html), //phenotype_cell
           $('<td>').text(individuals[i]['specificity']['score']), // phenotype_score_cell          
@@ -502,17 +513,9 @@ function fetchIndividuals() {
         // hidden filter input/selects will resize the columns, so try to minimize the change
         widthFixed: true,
         // initialize zebra striping and filter widgets
-        widgets: [
-          'zebra',
-          'filter',
-          'stickyHeaders',
-          'uitheme'
-        ],
+        widgets: ['zebra','filter','stickyHeaders','uitheme'],
         widgetOptions: {
-          zebra: [
-            'even',
-            'odd'
-          ],
+          zebra: ['even','odd'],
           // Use the $.tablesorter.storage utility to save the most recent filters
           //filter_saveFilters : true,
           // jQuery selector string of an element used to reset the filters
@@ -527,9 +530,6 @@ function fetchIndividuals() {
     }
   });
 }
-
-
-
 
 // fetches patients with hpo term
 // calls fetchPrivateVariants on completion
