@@ -232,6 +232,16 @@ def sequence():
             }
     return render_template('primer3_sequence.html', result = result,)
     
+@app.route('/gene_phenogenon_json/<gene_id>',methods=['GET','POST'])
+@requires_auth
+def gene_phenogenon_json(gene_id):
+    # if gene not ensembl id then translate to
+    db=get_db()
+    if not gene_id.startswith('ENSG'): gene_id = lookups.get_gene_by_name(get_db(), gene_id)['gene_id']
+    gene=db.gene_hpo_new.find_one({'gene_id':gene_id})
+    del gene['_id']
+    return json.dumps(gene)
+
 
 # test
 @app.route('/test')
