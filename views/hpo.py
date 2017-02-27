@@ -58,6 +58,7 @@ def skat(hpo_id):
     skat_genes=[g for g in skat_genes if g['FisherPvalue']<0.05 and g['SKATO']<0.005]
     for g in skat_genes:
         pli=get_db('exac').pli.find_one({'gene':g['Symbol']})
+        if str(g['OddsRatio'])=='inf': g['OddsRatio']=9999999
         if pli:
             g['pli']=pli['pLI'] 
         else:
@@ -68,7 +69,7 @@ def skat(hpo_id):
 @requires_auth
 def hpo_skat_json(hpo_id):
     skat_genes=skat(hpo_id)
-    return jsonify( result={ 'individuals':skat_genes } )
+    return jsonify( result={ 'individuals':skat_genes }, allow_nan=False )
 
 @app.route('/hpo_individuals_json/<hpo_id>')
 @requires_auth
