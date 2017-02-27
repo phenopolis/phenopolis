@@ -98,14 +98,15 @@
                         <input id="password" type="password" placeholder="demo123" name="password" value="{{request.form.password }}" class="validate">
                         <label for="password">Password</label>
                     </div>
+                    <p class="col s12" id="login_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">Authentication failed. Please enter your username and passsword again.<br>Contact us if you continue to have issues logging in.</p>
                 </div>
             </form>
             <p>Alternatively, select the 'Demo Login' button below to login as a demo user.</p>
         </div>
         <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
             <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Close</a>
-            <a id="login_btn" href="#!" type="submit" class="modal-action modal-close waves-effect waves-green btn-flat">Login</a>
-            <a id="demo_login_btn" href="#!" type="submit" class="modal-action modal-close waves-effect waves-green btn-flat">Demo Login</a>
+            <a id="login_btn" href="#!" type="submit" class="waves-effect waves-green btn-flat">Login</a>
+            <a id="demo_login_btn" href="#!" type="submit" class="waves-effect waves-green btn-flat">Demo Login</a>
         </div>
     </div>
 
@@ -119,22 +120,41 @@
 
         // Submit form upon clicking the login button in the modal
         $('#login_btn').on('click', function() {
-            $('#login_form').submit();
+            PPlogin();
         });
 
-        // Automatically login when selecting the login button
+        // Automatically login when selecting the demo login button
         $('#demo_login_btn, #parallax_demo_login_btn').on('click', function() {
             $('#username').val('demo');
             $('#password').val('demo123');
-            $('#login_form').submit();
+            PPlogin();
         });
 
         // submit form upon pressing enter in the login form
         $('#login_form input').keydown(function(e) {
             if (e.keyCode == 13) {
-                $('#login_form').submit();
+                PPlogin();
             }
         });
+
+        var PPlogin = function() {
+            // TODO: Replace with JQuery.validate
+            $.ajax({
+                type: 'POST',
+                url: '/login',
+                data: $('#login_form').serialize(),
+                dataType: 'json',
+                timeout: 120000,
+                success: function(data) {
+                    window.location.href = '/search';
+                },
+                error: function(data, msg) {
+                    $("#username, #password").addClass("invalid");
+                    $("#username, #password").prop("aria-invalid", "true");
+                    $('#login_form_error_msg').show();
+                }
+            });
+        };
     });
     </script>
 </body>

@@ -166,25 +166,19 @@ def requires_auth(f):
         if session:
           if 'user' in session: 
              return f(*args, **kwargs)
-          else:
-             print 'login'
-             if config.LOCAL:
-                 return redirect('login')
-             else:
-                 return redirect('https://uclex.cs.ucl.ac.uk/login')
 
-        print 'method', request.method
-        error=None
         if request.method == 'POST':
           username=request.form['username']
           password=request.form['password']
           if check_auth(username,password):
              return f(*args, **kwargs)
-          else:
-             if config.LOCAL:
-                 return render_template('login.html', error='Invalid Credentials. Please try again.')
-             else:
-                 return redirect('https://uclex.cs.ucl.ac.uk/login')
+
+        print 'Not Logged In - Redirect to home to login'
+        if config.LOCAL:
+           return redirect('/')
+        else:
+           return redirect('https://uclex.cs.ucl.ac.uk/')
+
     return decorated
 
 
@@ -194,27 +188,16 @@ def make_session_timeout():
     app.permanent_session_lifetime = datetime.timedelta(hours=2)
 
 # 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    print request.method
-    error = None
-    print 'login', request.method
-    if request.method == 'POST':
-       username=request.form['username']
-       password=request.form['password']
-       if not check_auth(username,password):
-          error = 'Invalid Credentials. Please try again.'
-       else:
-           print 'LOGIN SUCCESS'
-           if config.LOCAL:
-               return redirect('/search')
-           else:
-               return redirect('https://uclex.cs.ucl.ac.uk/search')
-    if config.LOCAL:
-        return jsonify(error=error), 403
+    username=request.form['username']
+    password=request.form['password']
+    if not check_auth(username,password):
+       print 'Login Failed'
+       return jsonify(error='Invalid Credentials. Please try again.'), 401, {'WWW-Authenticate': 'Basic realm="Login Required"'}
     else:
-        return redirect('https://uclex.cs.ucl.ac.uk/')
-
+        print 'LOGIN SUCCESS'
+        return jsonify(success="Authenticated"), 200
 
 # 
 @app.route('/logout')
