@@ -71,7 +71,8 @@ def load_patient(individual,auth,pubmed_key,hpo='HP:0000001',AC=10,kaviar=.05,co
     pheno=PhenotipsClient()
     patient={u'features': {u'observed': u'yes', u'type': u'phenotype', u'id': hpo}, 'clinicalStatus': {u'clinicalStatus': u'affected'}, u'ethnicity': {u'maternal_ethnicity': [], u'paternal_ethnicity': []}, u'family_history': {}, u'disorders': [], u'life_status': u'alive', u'reporter': u'', u'genes': [], u'prenatal_perinatal_phenotype': {u'prenatal_phenotype': [], u'negative_prenatal_phenotype': []}, u'prenatal_perinatal_history': {u'twinNumber': u''}, u'sex': u'U', u'solved': {u'status': u'unsolved'}}
     eid=patient_id
-    p=pheno.get_patient(auth=auth,eid=eid)
+    pheno_session = pheno.create_session_with_phenotips(auth=auth)
+    p=pheno.get_patient(session=pheno_session, eid=eid)
     if p: patient.update(p)
     else: raise 'patient not on phenotips'
     #patient_hpo_terms=','.join([f['id'] for f in patient['features'] if f['observed']=='yes'])
