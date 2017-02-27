@@ -10,7 +10,6 @@ if config.IMPORT_PYSAM_PRIMER3:
 import csv
 #hpo lookup
 import orm
-from load_individual import load_patient
 
 
 @app.route('/individual_json/<individual>')
@@ -34,8 +33,7 @@ def individual_page(individual):
     #if session['user']=='demo': individual=decrypt(str(individual))
     # make sure that individual is accessible by user
     conn=PhenotipsClient()
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=individual,auth=auth)
+    p=conn.get_patient(eid=individual,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
@@ -198,8 +196,7 @@ def individual_page(individual):
 @requires_auth
 def individual_update(individual):
     conn=PhenotipsClient()
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=individual,auth=auth,cache=False)
+    p=conn.get_patient(eid=individual,session=session,cache=False)
     print 'UPDATE'
     print p
     print get_db(app.config['DB_NAME_PATIENTS']).patients.update({'external_id':individual},{'$set':p})
@@ -213,14 +210,6 @@ def individual_update(individual):
         return redirect(referrer+'/individual/'+individual)
     else:
         return 'done'
-
-@app.route('/load_individual/<individual>')
-@requires_auth
-def load_individual(individual):
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p = Process(target=load_patient, args=(individual,auth))
-    p.start()
-    return 'Loading %s...' % individual
 
 
 '''

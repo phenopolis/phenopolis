@@ -233,10 +233,6 @@ def hpo_page(hpo_id):
             pmids=pmids,
             variants=[])
 
-
-#@auth.verify_password
-#def verify_pw(username,password): return check_auth(username, password)
-
 @app.route('/hpo_json/<hpo_id>')
 #@auth.login_required
 @requires_auth
