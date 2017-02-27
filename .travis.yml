@@ -8,10 +8,6 @@ git:
 before_install:
   - git submodule update --init --remote --recursive
   
-env:
-  - TEST_SUITE=server
-  - TEST_SUITE=offline
-
 install: 
 
 # conda - from http://conda.pydata.org/docs/travis.html#using-conda-with-travis-ci
@@ -25,35 +21,28 @@ install:
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
   # server test relevant
-  - if [[ "$TEST_SUITE" == "server" ]]; then
-        bash miniconda.sh -b -p $HOME/miniconda;
-        export PATH="$HOME/miniconda/bin:$PATH";
-        hash -r;
-        conda config --set always_yes yes --set changeps1 no;
-        conda update -q conda;
-        Useful for debugging any issues with conda;
-        conda info -a;
-        conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION scipy==0.18.1;
-        source activate test-environment;
-        pip install Cython==0.25.2 --install-option="--no-cython-compile"; 
-    fi
-  - pip install -r requirements_$TEST_SUITE.txt
-  - if [[ "$TEST_SUITE" == "server" ]]; then
-        cd varnorm;
-        python setup.py install;
-        cd ..;
-    else
-        mkdir -p offline_analysis/db;
-    fi
+  - bash miniconda.sh -b -p $HOME/miniconda;
+  - export PATH="$HOME/miniconda/bin:$PATH";
+  - hash -r;
+  - conda config --set always_yes yes --set changeps1 no;
+  - conda update -q conda;
+  - Useful for debugging any issues with conda;
+  - conda info -a;
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION scipy==0.18.1;
+  - source activate test-environment;
+  - pip install Cython==0.25.2 --install-option="--no-cython-compile"; 
+  - pip install -r requirements.txt
+  - cd varnorm;
+  - python setup.py install;
+  - cd ..;
   - pip install coveralls
 
 services:
   - mongodb
-  - sqlite3
   
 script:
 # command to run coveralls (test coverage) and run tests 
-  - coverage run --omit=*/site-packages/*,*/tests/* -m unittest discover -s tests/$TEST_SUITE
+  - coverage run --omit=*/site-packages/*,*/tests/* -m unittest discover -s tests
   
 after_success:
   coveralls
