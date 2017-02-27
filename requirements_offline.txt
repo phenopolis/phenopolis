@@ -1,5 +1,0 @@
-pymongo==3.4.0
-biopython==1.68
-pyliftover==0.3
-bs4==0.0.1
-mygene==3.0.0
