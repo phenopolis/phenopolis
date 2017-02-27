@@ -77,7 +77,6 @@ import numpy
 import subprocess
 import datetime
 
-from load_individual import load_patient 
 from Crypto.Cipher import DES
 import base64
 
@@ -133,37 +132,23 @@ def check_auth(username, password):
     Will try to connect to phenotips instance.
     """
     print username
-    if config.LOCAL:
+    if config.LOCAL: 
         print 'LOCAL'
         if username=='demo' and password=='demo123':
-            session['password2'] = password
-            password=md5.new(password).hexdigest()
             session['user'] = username
-            session['password'] = password
+            if config.LOCAL_WITH_PHENOTIPS: 
+                conn = PhenotipsClient()
+                phenotips_session = conn.request_phenotips_session(username, password)
+                session['phenotips_session'] = phenotips_session
             return True
         else:
             return False
-    conn=PhenotipsClient()
-    response=conn.get_patient(auth='%s:%s' % (username, password,),number=1)
-    if response:
-        session['password2'] = password
-        password=md5.new(password).hexdigest()
+
+    conn = PhenotipsClient()
+    phenotips_session = conn.request_phenotips_session(username, password)
+    if phenotips_session:
         session['user'] = username
-        session['password'] = password
-        return True
-    else: return False
-    # can also check that user name and hash of password exist in database
-    # if we don't use phenotips for authentication
-    db_users=get_db('users')
-    session['password2'] = password
-    password=md5.new(password).hexdigest()
-    session['user'] = username
-    session['password'] = password
-    r=db_users.users.find_one({'user':username})
-    if r is None:
-        return False
-    elif md5.new(r['password']).hexdigest() == md5.new(password).hexdigest():
-        print('LOGIN', session['user'])
+        session['phenotips_session'] = phenotips_session
         return True
     else:
         return False
@@ -177,28 +162,23 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+
         if session:
-          if 'user' in session and 'password2' in session and check_auth(session['user'],session['password2']):
+          if 'user' in session: 
              return f(*args, **kwargs)
-          else:
-             print 'login'
-             if config.LOCAL:
-                 return redirect('login')
-             else:
-                 return redirect('https://uclex.cs.ucl.ac.uk/login')
-             #return render_template('login.html', error='Invalid Credentials. Please try again.')
-        print 'method', request.method
-        error=None
+
         if request.method == 'POST':
           username=request.form['username']
           password=request.form['password']
           if check_auth(username,password):
              return f(*args, **kwargs)
-          else:
-             if config.LOCAL:
-                 return render_template('login.html', error='Invalid Credentials. Please try again.')
-             else:
-                 return redirect('https://uclex.cs.ucl.ac.uk/login')
+
+        print 'Not Logged In - Redirect to home to login'
+        if config.LOCAL:
+           return redirect('/')
+        else:
+           return redirect('https://uclex.cs.ucl.ac.uk/')
+
     return decorated
 
 
@@ -208,38 +188,28 @@ def make_session_timeout():
     app.permanent_session_lifetime = datetime.timedelta(hours=2)
 
 # 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    print request.method
-    error = None
-    print 'login', request.method
-    if request.method == 'POST':
-       username=request.form['username']
-       password=request.form['password']
-       if not check_auth(username,password):
-          error = 'Invalid Credentials. Please try again.'
-       else:
-           print 'LOGIN SUCCESS'
-           if config.LOCAL:
-               return redirect('/search')
-           else:
-               return redirect('https://uclex.cs.ucl.ac.uk/search')
-    if config.LOCAL:
-        return jsonify(error=error), 403
+    username=request.form['username']
+    password=request.form['password']
+    if not check_auth(username,password):
+       print 'Login Failed'
+       return jsonify(error='Invalid Credentials. Please try again.'), 401, {'WWW-Authenticate': 'Basic realm="Login Required"'}
     else:
-        return redirect('https://uclex.cs.ucl.ac.uk/')
+        print 'LOGIN SUCCESS'
+        return jsonify(success="Authenticated"), 200
 
 # 
 @app.route('/logout')
 def logout():
     print('DELETE SESSION')
     session.pop('user',None)
-    session.pop('password',None)
-    session.pop('password2',None)
+    session.pop('phenotips_session',None)
     if config.LOCAL:
         return redirect('/')
     else:
         return redirect('https://uclex.cs.ucl.ac.uk/')
+
 
 @app.route('/set/<query>')
 def set(query):
@@ -668,8 +638,7 @@ serve the Vincent annotated csv files
 def download_csv():
     conn=PhenotipsClient()
     p_id = request.args.get('p_id')
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=p_id,auth=auth)
+    p=conn.get_patient(eid=p_id,session=session)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
     path = DROPBOX
@@ -687,8 +656,7 @@ def download_csv():
 def download():
     conn=PhenotipsClient()
     p_id = request.args.get('p_id')
-    auth='%s:%s' % (session['user'],session['password2'],)
-    p=conn.get_patient(eid=p_id,auth=auth,number=1)
+    p=conn.get_patient(eid=p_id,session=session,number=1)
     if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     filetype = request.args.get('filetype')
     index = request.args.get('index')
