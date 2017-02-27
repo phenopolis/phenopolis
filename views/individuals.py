@@ -42,12 +42,11 @@ def individuals_page():
         #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
         return p
     conn=PhenotipsClient()
-    auth='%s:%s' % (session['user'],session['password2'],)
-    all_patients=conn.get_patient(auth=auth).get('patientSummaries',[])
+    all_patients=conn.get_patient(session=session).get('patientSummaries',[]) 
     all_eids=[p['eid'] for p in all_patients if p['eid']]
     total=len(all_eids)
     print('TOTAL NUMBER OF PATIENTS',total)
-    patients=conn.get_patient(auth=auth,start=page*number,number=number).get('patientSummaries',[])
+    patients=conn.get_patient(session=session,start=page*number,number=number).get('patientSummaries',[])
     eids=[p['eid'] for p in patients if p['eid']]
     print(eids)
     patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
