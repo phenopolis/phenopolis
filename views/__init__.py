@@ -194,7 +194,7 @@ def login():
     password=request.form['password']
     if not check_auth(username,password):
        print 'Login Failed'
-       return jsonify(error='Invalid Credentials. Please try again.'), 401, {'WWW-Authenticate': 'Basic realm="Login Required"'}
+       return jsonify(error='Invalid Credentials. Please try again.'), 401
     else:
         print 'LOGIN SUCCESS'
         return jsonify(success="Authenticated"), 200
