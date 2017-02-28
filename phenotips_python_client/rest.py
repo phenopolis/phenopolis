@@ -49,7 +49,8 @@ class PhenotipsClient():
         url='http://%s/rest/patients?start=%d&number=%d' % (self.site,0,1)
         s = requests.Session()
         response = s.get(url, headers=headers)
-        if response :
+        print (response.text)
+        if response.status_code == 200 :
             return s
         else:
             return None
