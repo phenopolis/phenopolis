@@ -15,9 +15,13 @@
         margin-right: 5px;
     }
     
+    .section .collection {
+      background-color: #fff;
+    }
     .section .collection-item.avatar {
         min-height: 118px;
         padding-left: 134px;
+        border-bottom: none;
     }
     
     .section .collection-item.avatar img.circle {
@@ -28,12 +32,27 @@
     #team .row {
         margin-bottom: initial;
     }
-    
+
     #team .collection .collection-item.avatar p {
-        height: 9rem;
         overflow-y: scroll;
         margin-bottom: 1rem !important;
+        margin-top: 0.656rem
     }
+
+    #team .collection .collection-item.avatar span {
+      font-size:0.8rem;
+      line-height: 0.8rem;
+    }
+
+    #team .collection .collection-item.avatar .material-icons {
+      font-size:inherit;
+    }
+    #team .collection .collection-item.avatar h5 {
+      margin-bottom: 0
+    }
+
+
+
     </style>
 </head>
 
@@ -172,6 +191,21 @@
                 }
             });
         };
+
+        var equalSizeDiv = function(div){
+          if ($(div).length === 0) return;
+          var maxHeight = 0;
+          $(div).each(function(){
+             if ($(this).height() > maxHeight) { maxHeight = $(this).height(); }
+          });
+          $(div).css('height', maxHeight);
+        };
+
+        equalSizeDiv('.collection');
+        $(window).resize(function() {
+          $('.collection').css('height','auto');
+          equalSizeDiv('.collection');
+        });
     });
     </script>
 </body>
