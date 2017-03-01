@@ -55,18 +55,23 @@
 <a tabindex="0" data-html="true" data-toggle="popover" data-placement="right" title="Exomiser evidence" data-trigger="focus" data-content='
  <p style="color:black;margin-bottom:0">
     {% for pe in v.exomiser.phenotypeEvidence %}
-<b>org: </b>{{pe.organism}}<br>
+<b>org: </b>{{pe.model.organism}}<br>
 <b>score: </b>{{"%0.2f" % pe.score}}<br>
 <b>model: </b>
 {% set modelId=pe.model.modelId.split('_')[0] %}
-{% if pe.organism=="HUMAN" %}
-{% set modelId=pe.model.modelId.split('_')[0] %}
+{% set website=modelId.split(':')[0] %}
 {% set modelId=modelId.split(':')[1] %}
-<a href="http://www.omim.org/{{modelId}}" target="_blank">{{pe.modelId}}</a>
-{% elif pe.organism=="MOUSE" %}
-<a href="http://www.informatics.jax.org/marker//{{modelId}}" target="_blank">{{pe.modelId}}</a>
-{% elif pe.organism=="FISH" %}
-<a href="https://zfin.org/{{modelId}}" target="_blank">{{pe.modelId}}</a>
+{% if pe.model.organism=="HUMAN" %}
+{% if website=="OMIM" %}
+<a href="http://www.omim.org/entry/{{modelId}}" target="_blank">{{pe.model.modelId}}</a>
+{% elif website=="ORPHANET" %}
+<a href="http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=EN&Expert={{modelId}}" target="_blank">{{pe.model.modelId}}</a>
+{% endif %}
+{% elif pe.model.organism=="MOUSE" %}
+<a href="http://www.informatics.jax.org/marker/MGI:{{modelId}}" target="_blank">{{pe.model.modelId}}</a>
+{% elif pe.model.organism=="FISH" %}
+{% set modelId=pe.model.modelId.split('_')[0] %}
+<a href="https://zfin.org/{{modelId}}" target="_blank">{{pe.model.modelId}}</a>
 {% endif %}
 <br>
 <hr>
