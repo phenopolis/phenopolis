@@ -34,25 +34,14 @@ def individual_page(individual):
     # make sure that individual is accessible by user
     conn=PhenotipsClient()
     p=conn.get_patient(eid=individual,session=session)
-    if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
+    print(p)
+    #if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
     patient_db=get_db(app.config['DB_NAME_PATIENTS'])
     patient = db.patients.find_one({'external_id':individual})
     patient2 = patient_db.patients.find_one({'external_id':individual})
-    if patient2 is None or 'report_id' not in patient2 or patient is None:
-        print 'no patient in mongo'
-        referrer=request.referrer
-        if referrer:
-            u = urlparse(referrer)
-            referrer='%s://%s' % (u.scheme,u.hostname,)
-            if u.port: referrer='%s:%s' % (referrer,u.port,)
-        else:
-            referrer=''
-        url=referrer+'/load_individual/'+individual
-        url=request.url_root.replace('http','https')+'/load_individual/'+individual
-        print(url)
-        return redirect(url)
+    if patient2 is None or 'report_id' not in patient2 or patient is None: return 'patient not loaded'
     patient['report_id']=patient2['report_id']
     patient['sex'] = patient2['sex']
     patient['features'] = patient2['features']
