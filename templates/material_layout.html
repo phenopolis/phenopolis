@@ -10,25 +10,29 @@
         padding-top: 5rem;
         padding-bottom: 5rem
     }
+    
     nav i.left {
-      margin-right: 5px;
+        margin-right: 5px;
     }
-
+    
     .section .collection-item.avatar {
-      min-height: 118px;padding-left: 134px;
+        min-height: 118px;
+        padding-left: 134px;
     }
-
+    
     .section .collection-item.avatar img.circle {
-      height:100px; width: 100px;
+        height: 100px;
+        width: 100px;
     }
-
+    
     #team .row {
-      margin-bottom: initial;
+        margin-bottom: initial;
     }
+    
     #team .collection .collection-item.avatar p {
-      height: 9rem;
-      overflow-y: scroll;
-      margin-bottom: 1rem !important;
+        height: 9rem;
+        overflow-y: scroll;
+        margin-bottom: 1rem !important;
     }
     </style>
 </head>
@@ -39,7 +43,6 @@
             <div class="nav-wrapper" style="padding:0 10px">
                 <a href="/" class="brand-logo"> Phenopolis</a>
                 <a href="#" data-activates="mobile-menu" class="button-collapse"><i class="material-icons" style="font-size: 2.6rem;">menu</i></a>
-
                 <ul class="right hide-on-med-and-down" style="position:absolute;top:0 !important;right:0;">
                     <li><a href="https://phenotips.cs.ucl.ac.uk" target="_blank"><i class="material-icons left">assignment_ind </i>Phenotips</a></li>
                     <li><a href="http://biorxiv.org/content/early/2016/10/31/084582" target="_blank"><i class="material-icons left">class</i>Publication</a></li>
@@ -55,7 +58,6 @@
             </div>
         </div>
     </nav>
-
     <div id="index-banner" class="parallax-container">
         <div class="section no-pad-bot">
             <div class="container">
@@ -74,12 +76,9 @@
         </div>
         <div class="parallax" style="opacity: 0.5; background-color: #849DAD;"><img src="/static/images/background_home.jpg" alt="Unsplashed background img 1"></div>
     </div>
-
     {% block body %}{% endblock %}
-
     <!-- Footer -->
     {% include "material_footer.html" %}
-
     <!-- Login Modal -->
     <div id="login_modal" class="modal">
         <div class="modal-content">
@@ -98,7 +97,8 @@
                         <input id="password" type="password" placeholder="demo123" name="password" value="{{request.form.password }}" class="validate">
                         <label for="password">Password</label>
                     </div>
-                    <p class="col s12" id="login_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">Authentication failed. Please enter your username and passsword again.<br>Contact us if you continue to have issues logging in.</p>
+                    <p class="col s12" id="login_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">Authentication failed. Please enter your username and passsword again.
+                        <br>Contact us if you continue to have issues logging in.</p>
                 </div>
             </form>
             <p>Alternatively, select the 'Demo Login' button below to login as a demo user.</p>
@@ -109,13 +109,25 @@
             <a id="demo_login_btn" href="#!" type="submit" class="waves-effect waves-green btn-flat">Demo Login</a>
         </div>
     </div>
-
+    <!-- Auth Modal -->
+    <div id="auth_modal" class="modal">
+        <div class="modal-content">
+            <div class="row">
+                <div class="col s8 offset-s2">
+                    <h4 class="center">Authenticating...</h4>
+                    <div class="progress light-blue lighten-3" style="margin-top:1.5rem;">
+                        <div class="indeterminate light-blue darken-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
         $('.parallax').parallax(); // Init parallax
-        $('.modal').modal();  // Init Modals
+        $('.modal').modal(); // Init Modals
         $(".button-collapse").sideNav(); // Init Mobile menu
 
         // Submit form upon clicking the login button in the modal
@@ -139,6 +151,10 @@
 
         var PPlogin = function() {
             // TODO: Replace with JQuery.validate
+            // show Login Model
+            $('#auth_modal').modal({dismissible: false, endingTop: '20%'});
+            $('#auth_modal').modal('open');
+
             $.ajax({
                 type: 'POST',
                 url: '/login',
@@ -149,6 +165,7 @@
                     window.location.href = '/search';
                 },
                 error: function(data, msg) {
+                    $('#auth_modal').modal('close');
                     $("#username, #password").addClass("invalid");
                     $("#username, #password").prop("aria-invalid", "true");
                     $('#login_form_error_msg').show();
