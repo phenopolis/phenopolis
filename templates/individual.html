@@ -366,7 +366,7 @@
               </div>
           </form>
           <div class="clearfix"></div>
-          <p id="edit_patient_sucess" style="color:#3c763d;">The data has been successfully updated.</p>
+          <p id="edit_patient_sucess" style="color:#3c763d; display:none;">The data has been successfully updated.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -406,6 +406,7 @@
         // Update dispalyed features using ajax
         $('#edit_patient_sucess').show()
       }
+    });
   });
 
   $(document).ready(function(){
