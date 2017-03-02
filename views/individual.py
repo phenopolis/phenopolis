@@ -24,6 +24,18 @@ def individual_json(individual):
     print(patient)
     return jsonify(result=patient)
 
+@app.route('/edit_patient_features/<individual>',methods=['POST'])
+@requires_auth
+def edit_patient_features(individual):
+    print(individual)
+    print('edit patient features')
+    print(request.form['features[]'])
+    print(request.form['consanguinity[]'])
+    print(request.form['inheritance_mode[]'])
+    print(request.form['candidate_genes[]'])
+    return 'done'
+
+
 @app.route('/individual/<individual>')
 @requires_auth
 @cache.cached(timeout=24*3600)
