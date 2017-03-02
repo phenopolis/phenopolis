@@ -399,7 +399,7 @@
   $('#edit_patient_save_btn').on('click', function(){
     $.ajax({
       type: 'POST',
-      url : '/edit_patient_features',
+      url : '/edit_patient_features/{{external_id}}',
       data: $('#editPatientForm').serialize(),
       timeout: 120000,
       success: function (data) {
