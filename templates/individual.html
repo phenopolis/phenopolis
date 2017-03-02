@@ -242,11 +242,12 @@
         <span class='consanguinity' id="consanguinity">
             <b>Consanguinity:</b> 
             {% if patient.family_history %}
-            {% if not patient.family_history.consanguinity %}
-                <span class='ind-header'> unknown </span>
-            {% else %}
-                <span class='ind-header'> {{ patient.family_history.consanguinity }}</span>
-            {% endif %}
+              {% if not patient.family_history.consanguinity %}
+                  {% set consanguinity = 'unknown' %}
+              {% else %}
+                  {% set consanguinity = patient.family_history.consanguinity %}
+              {% endif %}
+                <span class='ind-header'> {{ consanguinity }} </span>
             {% endif %}
         </span>
         </p>
@@ -274,6 +275,135 @@
     </div><!--end of col-md-6-->
 </div><!--end of row-->
 
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#edit_patient" style="margin-bottom: 2rem;">Edit Patient Data</button>
+
+<div class="clearfix"></div>
+
+<!-- Modal -->
+<div class="modal fade" id="edit_patient" tabindex="-1" role="dialog" aria-labelledby="patient_id">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="patient_id">{{external_id}}</h4>
+      </div>
+      <div class="modal-body">
+          <form class="form-horizontal" id="editPatientForm" data-features="{{features|map('last')|join(',')}}" data-consanguinity="{{consanguinity}}"
+          {% if patient.global_mode_of_inheritance %} data-inheritance_mode="{{patient.global_mode_of_inheritance|join(',', attribute='label')}}" {% endif %}
+          {% if patient.genes %} data-candidate_genes="{{patient.genes|join(',', attribute='gene')}}" {% endif %}
+          >
+              <div class="form-group">
+                  <label class="col-xs-3 control-label">Features</label>
+                  <div class="col-xs-7">
+                      <input type="text" class="edit_features form-control" name="features[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" id="edit_features_add" class="btn btn-default addButton" data-target="#featureTemplate"><i class="fa fa-plus"></i></button>
+                  </div>
+              </div>
+              <div class="form-group" id="featureTemplate" style="display:none;">
+                  <div class="col-xs-7 col-xs-offset-3">
+                      <input type="text" class="edit_features form-control" name="features[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <label class="col-xs-3 control-label">Consanguinity</label>
+                  <div class="col-xs-7">
+                      <input type="text" class="edit_consanguinity form-control" name="consanguinity[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" id="edit_consanguinity_add" class="btn btn-default addButton" data-target="#consanguinityTemplate"><i class="fa fa-plus"></i></button>
+                  </div>
+              </div>
+              <div class="form-group" id="consanguinityTemplate" style="display:none;">
+                  <div class="col-xs-7 col-xs-offset-3">
+                      <input type="text" class="edit_consanguinity form-control" name="consanguinity[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <label class="col-xs-3 control-label" style="overflow:visible;height:1em;">Global Mode of Inheritance</label>
+                  <div class="col-xs-7">
+                      <input type="text" class="edit_inheritance_mode form-control" name="inheritance_mode[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" id="edit_inheritance_mode_add" class="btn btn-default addButton" data-target="#inheritanceModeTemplate"><i class="fa fa-plus"></i></button>
+                  </div>
+              </div>
+              <div class="form-group" id="inheritanceModeTemplate" style="display:none;">
+                  <div class="col-xs-7 col-xs-offset-3">
+                      <input type="text" class="edit_inheritance_mode form-control" name="inheritance_mode[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                  <label class="col-xs-3 control-label">Candidate Genes</label>
+                  <div class="col-xs-7">
+                      <input type="text" class="edit_candidate_genes form-control" name="candidate_genes[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" id="edit_candidate_genes_add" class="btn btn-default addButton" data-target="#candidateGenesTemplate"><i class="fa fa-plus"></i></button>
+                  </div>
+              </div>
+              <div class="form-group" id="candidateGenesTemplate" style="display:none;">
+                  <div class="col-xs-7 col-xs-offset-3">
+                      <input type="text" class="edit_candidate_genes form-control" name="candidate_genes[]" />
+                  </div>
+                  <div class="col-xs-2">
+                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
+                  </div>
+              </div>
+
+
+          </form>
+          <div class="clearfix"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $('#editPatientForm').on('click', '.addButton', function(){
+    id = $(this).data('target')    
+    $(this).closest('.form-group').after(  $(id).clone().attr('id', 'copied').show()  )
+  })
+
+  $('#editPatientForm').on('click', '.removeButton', function(){
+    $(this).closest('.form-group').remove()
+  })
+
+  var initPatientEditForm = function(item_data, item_add_btn, item_edit){
+    if ($('#editPatientForm').data(item_data) === undefined) return
+    var items = $('#editPatientForm').data(item_data).split(',')
+    if (items.length === 0) return 
+    for (var i = 0; i < items.length-1; i++) { $(item_add_btn).click() }
+    for (var i = 0; i < items.length; i++) {
+      $($(item_edit)[i]).val(items[i])
+    }
+  }
+
+  $(document).ready(function(){
+    initPatientEditForm('features', '#edit_features_add', '.edit_features')
+    initPatientEditForm('consanguinity', '#edit_consanguinity_add', '.edit_consanguinity')
+    initPatientEditForm('inheritance_mode', '#edit_inheritance_mode_add', '.edit_inheritance_mode')
+    initPatientEditForm('candidate_genes', '#edit_candidate_genes_add', '.edit_candidate_genes')    
+  })
+</script>
 
 <div class="tabs">
 
@@ -367,7 +497,7 @@
         },
         {
           element: '#consanguinity',
-          intro: "Indicates whether there is known consanguinity based on family history.  If there is, we might expect the causal mutation to be homozygote. A high number of rare homozygote mutations (below) may also suggest consaguinity."
+          intro: "Indicates whether there is known consanguinity based on family history.  If there is, we might expect the causal mutation to be homozygote. A high number of rare homozygote mutations (below) may also suggest consanguinity."
         },
         {
           element: '#inheritance_mode',
