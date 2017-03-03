@@ -118,6 +118,22 @@ def hpo_individuals_json(hpo_id):
     return jsonify( result={ 'individuals':patients } )
 
 
+@app.route('/hpo_individuals_csv/<hpo_id>')
+@requires_auth
+def hpo_individuals_csv(hpo_id):
+    db=get_db()
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
+    patients=lookups.get_hpo_patients(hpo_db,patients_db,hpo_id,cached=True)
+    print('num patients', len(patients))
+    # candidate genes
+    candidate_genes = [p.get('genes',[]) for p in patients]
+    # solved genes
+    solved_genes = [p.get('solved',[]) for p in patients]
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    return '\n'.join([p['external_id']for p in patients if 'external_id' in p])
+
+
 @app.route('/phenogenon_json/<hpo_id>')
 @requires_auth
 def phenogenon_json(hpo_id):
@@ -226,6 +242,7 @@ def hpo_page(hpo_id):
         hpo_id=hpo_term['id'][0]
     print hpo_id 
     hpo_name=hpo_db.hpo.find_one({'id':hpo_id})['name'][0]
+    print hpo_name
     #print('HPO ANCESTORS')
     #hpo_ancestors=lookups.get_hpo_ancestors(hpo_db,hpo_id)
     #print(len(hpo_ancestors))
@@ -240,12 +257,7 @@ def hpo_page(hpo_id):
     return render_template('hpo.html',
             title=hpo_id,
             hpo_id=hpo_id,
-            hpo_name=hpo_name,
-            lit_genes=[],
-            recessive_genes=[],
-            dominant_genes=[],
-            skat_genes=skat(hpo_id),
-            variants=[])
+            hpo_name=hpo_name)
 
 @app.route('/hpo_json/<hpo_id>')
 #@auth.login_required
