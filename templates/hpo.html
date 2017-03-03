@@ -3,10 +3,6 @@
 
 <h1>  Phenotype: {{ hpo_name }} ({{ hpo_id }}) </h1>
 
-<script type="text/javascript">
-    window.variants = {{ variants|tojson|safe }};
-</script>
-
 <!-- jQuery UI for range slider -->
 <link rel="stylesheet"  type=text/css href="/static/css/jquery-ui.min.css">
 <script  type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
@@ -251,35 +247,9 @@ $(function() {
 {# var patients={{individuals|map(attribute='external_id')|list|tojson|safe}}; #}
 {# var individuals={{individuals|map(attribute='external_id')|list|tojson|safe}}; #}
 var hpo_id = "{{hpo_id}}" ;
-var total_length=window.variants.length;
 var variant_chunks = [];
 var chunk_size = 100;
 var i=0;
-
-
-// this groups the loaded variants by gene, sort the genes by count,
-// and loads them in tab4
-function finish() {
-        var genes=_.groupBy(window.variants,"genes");
-        var genes = $.map(genes, function(value,index) { return [value] });
-        genes=genes.sort(function(a, b){return b.length-a.length});
-        for (var j=0; j<genes.length; j++) {
-            var gene=genes[j][0].vep_annotations[0].SYMBOL;
-            var var_count=genes[j].length;
-            var row = document.createElement("tr");
-            var td = document.createElement("td");
-            var a = document.createElement("a");
-            a.href="/gene/"+gene+"?hpo="+hpo_id;
-            a.target="_blank";
-            var text = document.createTextNode(j + ":" + gene + ":" + var_count);
-            a.appendChild(text);
-            td.appendChild(a);
-            row.appendChild(td);
-            document.getElementById("variants_table2").appendChild(row);
-        }
-        var x=document.getElementById("genes_loaded");
-        x.text="Variants Grouped By Gene "+document.getElementById("variants_table2").rows.length;
-}
 
 
 // calls getData if more data left to fetch
