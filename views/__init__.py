@@ -961,7 +961,19 @@ def error_page(query):
 
 @app.route('/about')
 def about_page():
-    return render_template('about.html')
+    db=get_db()
+    patients_db=get_db(app.config['DB_NAME_PATIENTS']) 
+    total_variants=db.variants.count()
+    total_variants=db.variants.count()
+    print('total_variants',total_variants,)
+    total_patients=patients_db.patients.count()
+    print('total_patients',total_patients,)
+    male_patients=patients_db.patients.find( {'sex':'M'}).count()
+    print('male_patients',male_patients,)
+    female_patients=patients_db.patients.find( {'sex':'F'}).count()
+    print('female_patients',female_patients,)
+    unknown_patients=patients_db.patients.find( {'sex':'U'}).count()
+    return render_template('about.html',total_patients=total_patients)
 
 
 @app.route('/participants')
