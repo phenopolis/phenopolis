@@ -817,7 +817,7 @@ $('.variant_id').hover(function(){
                 content += '<a href="/individual/' + v + '">' + v + '</a><br />'
             });
             content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
-            span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a>');
+            span.attr('data-original-title', id);
             span.attr('data-content', content);
     });
 });
