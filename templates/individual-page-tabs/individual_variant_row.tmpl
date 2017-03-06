@@ -113,7 +113,7 @@
 
 <!-- variant_id cell -->
 <td class="variant-id-cell">
-    <span style='word-break: break-all;' data-placement='right' class='pop pointer variant_id'><a href='/variant/{{ v.variant_id }}'>{{ v.variant_id }}</a></span><br/>
+    <span style='word-break: break-all;' data-placement='right' class='pop pointer variant_id'><a href='/variant/{{ v.variant_id }}' target='_blank'>{{ v.variant_id }}</a></span><br/>
     {% if v.ID.startswith('rs') %}
         <a href='http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{v.ID}}'><small>{{ v.ID }}</small></a> <br/>
     {% endif %}
