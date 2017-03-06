@@ -71,9 +71,7 @@ def hpo_skat_json(hpo_id):
     skat_genes=skat(hpo_id)
     return jsonify( result={ 'individuals':skat_genes }, allow_nan=False )
 
-@app.route('/hpo_individuals_json/<hpo_id>')
-@requires_auth
-def hpo_individuals_json(hpo_id):
+def get_hpo_individuals(hpo_id):
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
     patients_db=get_db(app.config['DB_NAME_PATIENTS'])
@@ -106,32 +104,25 @@ def hpo_individuals_json(hpo_id):
         p['total_variant_count']=p2.get('total_variant_count','')
         solved_patient=db.solved_patients.find_one({'external_id':p['external_id']})
         if solved_patient and session['user']!='demo': p['solved_variants']=solved_patient.get('genes',{})
-        #p['all_variants_count']=get_db().patients.find_one({'external_id':p['external_id']},{'_id':0,'all_variants_count':1})['all_variants_count']
-        #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
         return p
-    #eids=[p['eid'] for p in patients]
-    #print(eids)
-    #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
-    #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
     patients=[f(p) for p in patients if 'external_id' in p]
     print(patients[0])
+    return patients
+
+
+
+@app.route('/hpo_individuals_json/<hpo_id>')
+@requires_auth
+def hpo_individuals_json(hpo_id):
+    patients=get_hpo_individuals(hpo_id)
     return jsonify( result={ 'individuals':patients } )
 
 
 @app.route('/hpo_individuals_csv/<hpo_id>')
 @requires_auth
 def hpo_individuals_csv(hpo_id):
-    db=get_db()
-    hpo_db=get_db(app.config['DB_NAME_HPO'])
-    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
-    patients=lookups.get_hpo_patients(hpo_db,patients_db,hpo_id,cached=True)
-    print('num patients', len(patients))
-    # candidate genes
-    candidate_genes = [p.get('genes',[]) for p in patients]
-    # solved genes
-    solved_genes = [p.get('solved',[]) for p in patients]
-    hpo_db=get_db(app.config['DB_NAME_HPO'])
-    return '\n'.join([p['external_id']for p in patients if 'external_id' in p])
+    patients=get_hpo_individuals(hpo_id)
+    return '\n'.join([','.join([p['external_id'],';'.join([str(g) for g in p['genes']])]) for p in patients if 'external_id' in p])
 
 
 @app.route('/phenogenon_json/<hpo_id>')
