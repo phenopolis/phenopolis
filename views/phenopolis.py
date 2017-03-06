@@ -203,10 +203,8 @@ serve the Vincent annotated csv files
 @app.route('/download/send_csv', methods=['GET','POST'])
 @requires_auth
 def download_csv():
-    conn=PhenotipsClient()
     p_id = request.args.get('p_id')
-    p=conn.get_patient(eid=p_id,session=session)
-    if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
+    if not lookup_patient(db=get_db(app.config['DB_NAME_USERS']),user=session['user'],external_id=p_id): return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
     path = DROPBOX+session['user']
     csv_file = os.path.join(path,folder, p_id + '.csv')
@@ -217,147 +215,6 @@ def download_csv():
                      mimetype='text/csv',
                      attachment_filename=filename,
                      as_attachment=True)
-
-@app.route('/individual/<individual>')
-@requires_auth
-def individual_page(individual):
-    # make sure that individual is accessible by user
-    conn=PhenotipsClient()
-    p=conn.get_patient(eid=individual,session=session)
-    if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
-    db=get_db()
-    hpo_db=get_db(app.config['DB_NAME_HPO'])
-    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
-    patient = db.patients.find_one({'external_id':individual})
-    patient2 = patient_db.patients.find_one({'external_id':individual})
-    if patient2 is None:
-        referrer=request.referrer
-        u = urlparse(referrer)
-        referrer='%s://%s' % (u.scheme,u.hostname,)
-        if u.port: referrer='%s:%s' % (referrer,u.port,)
-        return redirect(referrer+'/load_individual/'+individual)
-    patient['report_id']=patient2['report_id']
-    patient['features']=patient2.get('features',[])
-    patient['sex'] = patient2['sex']
-    patient['family_history'] = patient2.get('family_history',[])
-    hpo_ids=[f['id'] for f in patient['features'] if f['observed']=='yes']
-    # TODO
-    # mode of inheritance in hpo terms: HP:0000005
-    #print lookups.get_hpo_children(hpo_db, 'HP:0000005')
-    patient['global_mode_of_inheritance']=patient2.get('global_mode_of_inheritance',None)
-    # minimise it
-    hpo_ids = lookups.hpo_minimum_set(hpo_db, hpo_ids)
-    hpo_terms = [(i, hpo_db.hpo.find_one({'id':i})['name'][0]) for i in hpo_ids]
-    # this has missing HPO ids. see IRDC_batch2_OXF_3001 and #HP:0000593
-    hpo_gene=dict()
-    for hpo_id,hpo_term, in hpo_terms:
-        hpo_gene[hpo_id] = []
-        for gene_name in [x['Gene-Name'] for x in hpo_db.ALL_SOURCES_ALL_FREQUENCIES_phenotype_to_genes.find({'HPO-ID':hpo_id},{'Gene-Name':1,'_id':0})]:
-            #gene_hpo[gene_name]=gene_hpo.get(gene_name,[])+[{'hpo_id':hpo_id,'hpo_term':hpo_term}]
-            hpo_gene[hpo_id]=hpo_gene.get(hpo_id,[])+[gene_name]
-    for k in hpo_gene: hpo_gene[k]=list(frozenset(list(hpo_gene[k])))
-    print '========'
-    print hpo_gene
-    print '========'
-    # get pubmedbatch table
-    pubmedbatch = patient.get('pubmedbatch',{})
-    # candidate genes
-    patient['genes'] = patient2.get('genes',[])
-    # solved genes
-    patient['solved'] = patient2.get('solved',[])
-    genes = {}
-    # is this still updating?
-    update_status = pubmedbatch.get('status', 0);
-    # get known and retnet genes
-    known_genes = open(app.config['RETNET_KNOWN_GENES'], 'r').readline().strip().split()
-    RETNET  = json.load(open(app.config['RETNET_JSON'], 'r'))
-    # sort the table, and add known / retnet gene annotation
-    #for var_type in ['rare_homozygous', 'compound_hets', 'rare_variants']:
-    for var_type in []:
-        # mark the genes for retnet
-        for ge in pubmedbatch[var_type]['result']:
-            if ge['HUGO'] in known_genes:
-                ge['ref(pubmedID)'][0]['known'] = 1
-                # give the rest a minimal score to keep them on the list
-                ge['ref(pubmedID)'][0]['total_score'] = max(1, ge['ref(pubmedID)'][0]['total_score'])
-            else:
-                ge['ref(pubmedID)'][0]['known'] = 0
-            if ge['HUGO'] in RETNET:
-                ge['ref(pubmedID)'][0]['disease'] = RETNET[ge['HUGO']]['disease']
-                ge['ref(pubmedID)'][0]['omim'] = RETNET[ge['HUGO']]['omim']
-                ge['ref(pubmedID)'][0]['mode'] = RETNET[ge['HUGO']]['mode']
-                # reassign total score according to mode
-                if RETNET[ge['HUGO']]['mode'] == 'd' or RETNET[ge['HUGO']]['mode'] == 'x':
-                    ge['ref(pubmedID)'][1] = max(100, ge['ref(pubmedID)'][1])
-                elif var_type ==  'rare_variants':
-                    # not searching doimant, also assign others to 100
-                    ge['ref(pubmedID)'][1] = max(100, ge['ref(pubmedID)'][1])
-                else:
-                    # give the rest a minimal score to keep them on the list
-                    ge['ref(pubmedID)'][1] = max(1, ge['ref(pubmedID)'][1])
-                # add pubmed result
-                #this['ref(pubmedID)'] = [genes[gene_name], genes[gene_name]['total_score']]
-        # now sort the table on the new scores        
-        pubmedbatch[var_type]['result'] = sorted(pubmedbatch[var_type]['result'], key=lambda k: k['ref(pubmedID)'][1], reverse=True)
-        # get genes for different var_type
-        #variants = [p['variant_id'] for p in patient[var_type]]
-        genes[var_type] = [g['HUGO'] for g in pubmedbatch[var_type]['result']]
-        # delete pubmed_score column, if there is one. 
-        if 'pubmed_score' in pubmedbatch[var_type]['header']:
-            del pubmedbatch[var_type]['header'][pubmedbatch[var_type]['header'].index('pubmed_score')]
-    # get combinatorics of features to draw venn diagram
-    feature_combo = []
-    feature_venn = []
-    for i in range(len(hpo_terms)):
-        feature_combo.extend(itertools.combinations(range(len(hpo_terms)), i+1))
-    #venn_ind = -1
-    for combo in feature_combo:
-        # construct features_venn key
-        #venn_ind += 1
-        dic_key = '","'.join([hpo_terms[i][1] for i in combo])
-        dic_key = '"' + dic_key + '"'
-        for ind in range(len(combo)):
-            if ind == 0:
-                x=hpo_terms[combo[ind]][0]
-                feature_venn.append({'key': dic_key, 'value':frozenset(hpo_gene.get(x,""))})
-            else:
-                tem = feature_venn[-1]['value']
-                feature_venn[-1]['value'] = feature_venn[-1]['value'] & frozenset(hpo_gene[hpo_terms[combo[ind]][0]])
-    print feature_venn
-    gene_info=dict()
-    for v in patient['rare_variants']:
-        if 'HUGO' not in v: v['HUGO']=''
-        gene=v['HUGO'].upper() 
-        gene_info[gene]=dict()
-        if gene in known_genes: gene_info[gene]['known']=True
-        if gene not in RETNET: continue
-        gene_info[gene]['disease'] = RETNET[gene]['disease']
-        gene_info[gene]['omim'] = RETNET[gene]['omim']
-        gene_info[gene]['mode'] = RETNET[gene]['mode']
-    genes['homozygous_variants']=[v.get('HUGO','').upper() for v in patient['homozygous_variants']]
-    genes['compound_hets']=[v.get('HUGO','').upper() for v in patient['compound_hets']]
-    genes['rare_variants']=[v.get('HUGO','').upper() for v in patient['rare_variants']]
-    genes_pubmed=dict()
-    for v in patient['rare_variants']:
-        hugo=v['HUGO']
-        genes_pubmed[hugo]=get_db('pubmedbatch').cache.find_one( {'key':re.compile(hugo+'[_ ].*')} )
-    # figure out the order of columns from the variant row
-    table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?>",file('templates/variant_row.tmpl','r').read())
-    print table_headers
-    return render_template('individual.html', 
-            external_id = individual,
-            patient=patient,
-            table_headers=table_headers,
-            pubmedbatch=pubmedbatch,
-            pubmed_db=get_db('pubmed_cache'),
-            features = hpo_terms,
-            genes = genes,
-            hpo_gene = hpo_gene,
-            gene_info=gene_info,
-            genes_pubmed = genes_pubmed,
-            update_status = update_status,
-            feature_venn = feature_venn)
-
 
 @app.route('/individual_update/<individual>')
 def individual_update(individual):
