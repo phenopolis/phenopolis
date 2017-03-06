@@ -31,9 +31,6 @@ import md5
 from scipy.stats import chisquare
 import math 
 from Bio import Entrez
-import phenotips_python_client 
-from phenotips_python_client import PhenotipsClient
-print phenotips_python_client 
 from bson.json_util import loads
 from mongodb import *
 # fizz: hpo lookup
@@ -134,7 +131,7 @@ def check_auth(username, password):
     """
     db_users=get_db(app.config['DB_NAME_USERS'])
     r=db_users.users.find_one({'user':username})
-    print r
+    #print r
     if not r: return False
     session['user']=username
     auth='%s:%s' % (username, password,)
@@ -620,10 +617,8 @@ serve the Vincent annotated csv files
 @app.route('/download/send_csv', methods=['GET','POST'])
 @requires_auth
 def download_csv():
-    conn=PhenotipsClient()
     p_id = request.args.get('p_id')
-    p=conn.get_patient(eid=p_id,session=session)
-    if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
+    if not lookup_patient(session['user'],p_id): return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     folder = request.args.get('folder')
     path = DROPBOX
     csv_file = os.path.join(path,folder, p_id + '.csv')
@@ -638,10 +633,8 @@ def download_csv():
 @app.route('/download', methods=['GET','POST'])
 @requires_auth
 def download():
-    conn=PhenotipsClient()
     p_id = request.args.get('p_id')
-    p=conn.get_patient(eid=p_id,session=session,number=1)
-    if not p: return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
+    if not lookup_patient(session['user'],p_id): return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     filetype = request.args.get('filetype')
     index = request.args.get('index')
     path=app.config[str(filetype)]
@@ -670,10 +663,7 @@ def download():
     elif filetype=='IRDC_CNV_FILES':
         filename=os.path.join(path)
         attachment_filename='IRDC_CNV.zip'
-    return send_file(filename,
-                     mimetype='*/*',
-                     attachment_filename=attachment_filename,
-                     as_attachment=True)
+    return send_file(filename, mimetype='*/*', attachment_filename=attachment_filename, as_attachment=True)
 
 
 def encrypt(s):
