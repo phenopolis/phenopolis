@@ -79,6 +79,7 @@ import datetime
 
 from Crypto.Cipher import DES
 import base64
+from binascii import b2a_base64, a2b_base64
 
 import orm
 from lookups import *
@@ -131,27 +132,14 @@ def check_auth(username, password):
     This function is called to check if a username / password combination is valid.
     Will try to connect to phenotips instance.
     """
-    print username
-    if config.LOCAL: 
-        print 'LOCAL'
-        if username=='demo' and password=='demo123':
-            session['user'] = username
-            if config.LOCAL_WITH_PHENOTIPS: 
-                conn = PhenotipsClient()
-                phenotips_session = conn.request_phenotips_session(username, password)
-                session['phenotips_session'] = phenotips_session
-            return True
-        else:
-            return False
-
-    conn = PhenotipsClient()
-    phenotips_session = conn.request_phenotips_session(username, password)
-    if phenotips_session:
-        session['user'] = username
-        session['phenotips_session'] = phenotips_session
-        return True
-    else:
-        return False
+    db_users=get_db(app.config['DB_NAME_USERS'])
+    r=db_users.users.find_one({'user':username})
+    print r
+    if not r: return False
+    session['user']=username
+    auth='%s:%s' % (username, password,)
+    password=md5.new(password).hexdigest()
+    return r['password']==password
 
 
 def authenticate():
@@ -162,23 +150,19 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-
         if session:
           if 'user' in session: 
              return f(*args, **kwargs)
-
         if request.method == 'POST':
           username=request.form['username']
           password=request.form['password']
           if check_auth(username,password):
              return f(*args, **kwargs)
-
         print 'Not Logged In - Redirect to home to login'
         if config.LOCAL:
            return redirect('/')
         else:
            return redirect('https://uclex.cs.ucl.ac.uk/')
-
     return decorated
 
 
