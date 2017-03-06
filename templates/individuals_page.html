@@ -23,28 +23,11 @@
 
 <div class="tabs">
 
-    {% if page>0 %}
-        <a href='/individuals?number={{number}}&page={{page-1}}'>previous {{(page-1)*number}}-{{(page)*number}}</a>
-        <br>
-    {% endif %}
-    {% if (page+2)*number>total %}
-    {% set max=total %}
-    {% else %}
-    {% set max=(page+2)*number %}
-    {% endif %}
-    {% if (page+1)*number>total %}
-    {% set max2=total %}
-    {% else %}
-    {% set max2=(page+1)*number %}
-    {% endif %}
-    {% if max!=max2 %}
-    <a href='/individuals?number={{number}}&page={{page+1}}'>next {{max2}}-{{max}}</a>
-    {% endif %}
     <div id="tab3" class="tab-pane">
     <table id="individuals_table" class="tablesorter">
         <thead>
               <tr>
-                  <th>Individual ({{page*number}}-{{max2}}) / {{total}}</th>
+                  <th>Individual </th>
                   <th>Gender</th>
                   <th>Phenotype</th>
                   <th tooltip='scaled score from Monarch'>Phenotype Score</th>
