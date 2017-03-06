@@ -1,136 +1,124 @@
-{% extends "layout.html" %}
-{% block body %}
-
-<h1>  My Patients (Total: {{total}})  </h1>
-
-<!-- jQuery UI for range slider -->
-<link rel="stylesheet"  type=text/css href="/static/css/jquery-ui.min.css">
-<script  type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
-<!-- <link rel="stylesheet"  type=text/css href="/static/css/theme.blue.css"> -->
+{% extends "layout.html" %} {% block body %}
 <!-- tablesorter plugin -->
 <link rel=stylesheet type=text/css href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<script  type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
-<script  type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
+<script type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
 <!-- filter formatter code -->
-<link rel="stylesheet"  type=text/css href="/static/css/filter.formatter.css">
-<link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
+<link rel="stylesheet" type=text/css href="/static/css/filter.formatter.css">
+<link rel="stylesheet" type=text/css href="/static/css/theme.bootstrap.css">
 <style>
-    #individuals_table {
-        margin-top: 20px;
-    }
+#individuals_table {
+    margin-top: 20px;
+}
+
+.label {
+    font-size: 0.9em;
+    line-height: 2.3em;
+    font-weight: 500;
+}
 </style>
+<h1>My Patients<span id="total-patients"></span></h1>
+<img id="patients_loading_image" src='/static/Loading_icon.gif' style="width:60px;height:60px;" >
 
-
-<div class="tabs">
-
-    <div id="tab3" class="tab-pane">
-    <table id="individuals_table" class="tablesorter">
-        <thead>
-              <tr>
-                  <th>Individual </th>
-                  <th>Gender</th>
-                  <th>Phenotype</th>
-                  <th tooltip='scaled score from Monarch'>Phenotype Score</th>
-                  <th>Rare Hom</th>
-                  <th>Rare Comp Het</th>
-                  <th>Rare</th>
-                  <th>Candidate Genes</th>
-              </tr>
-        </thead>
-        <tbody id="individuals_table_body">
-        {% for ind in individuals %}
+<table id="individuals_table" class="tablesorter" style="display:none;">
+    <thead>
         <tr>
-            <td><a href="/individual/{{ ind.external_id }}">{{ ind.external_id }}</a></td>
-            <td>{{ind.sex}}</td>
-            <td>{{ ind.features|map('get_attributes','id','label')|map('map_format', '<a href="/hpo/{0}">{1}</a>')|join(', ')|safe }}</td>
-            <td>{{ind.specificity.score|round(2,'floor')}}</td>
-            <td id="{{ind.external_id}}_variant_count">{{ind.rare_homozygous_variants_count}}</td>
-            <td> {{ind.rare_compound_hets_count}} </td>
-            <td>{{ ind.rare_variants_count}}</td>
-            <td>
-            {% for g in ind.genes %}
-                {{ '<a href="/gene/%s">%s</a>'|format(g,g)|safe  }}
-            {% endfor %}
-            </td>
+            <th>Individual </th>
+            <th>Gender</th>
+            <th>Phenotype</th>
+            <th tooltip="scaled score from Monarch">Phenotype Score</th>
+            <th>Rare Hom</th>
+            <th>Rare Comp Het</th>
+            <th>Rare</th>
+            <th>Candidate Genes</th>
         </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    </div>
-
-</div>
-
-</div>
-
-
-
+    </thead>
+    <tbody id="individuals_table_body"></tbody>
+</table>
 <script type=text/javascript>
+var fetchPatients = function() {
+    $.ajax({
+        type: 'GET',
+        url: '/individuals_json',
+        dataType: 'json',
+        timeout: 120000,
+        success: function(data) {
+            var patients = data.result;
+            for (var i = 0; i < patients.length; i++) {
+                // generate tr
+                $('<tr>').append(
+                    $('<td>').html(create_url('/individual', patients[i].external_id)),
+                    $('<td>').text(patients[i].sex),
+                    $('<td>').html(generateFeaturesHtml(patients[i].features)),
+                    $('<td>').text(patients[i].specificity.score.toFixed(2)),
+                    $('<td>').text(patients[i].rare_homozygous_variants_count),
+                    $('<td>').text(patients[i].rare_compound_hets_count),
+                    $('<td>').text(patients[i].rare_variants_count),
+                    $('<td>').html(generateGeneHtml(patients[i].genes))
+                ).appendTo('#individuals_table_body');
+            }
+            $('#total-patients').text(' (Total: '+patients.length+')');
+            $('#patients_loading_image').remove();
+            $('#individuals_table').show();
+            initTableSorter('#individuals_table');
+            $('#individuals_table').on('filterEnd', function(){
+              $('#total-patients').text(' (Total: '+patients.length+')');
+            });
+        },
+        error: function(error, msg) {
+            console.log(error);
+            console.log(msg);
+        }
+    });
+};
 
-var individuals={{individuals|map(attribute='external_id')|list|tojson|safe}};
-var i=0;
-
-
-render_table();
-// calls getData if more data left to fetch
-// otherwise calls finish to group downloaded variants
-// by gene
-function handleData(data) {
-    r=data.result;
-    //console.log(i);
-    //console.log(r);
-    //console.log(r.external_id+"_variant_count");
-    document.getElementById(r.external_id+"_variant_count").appendChild(document.createTextNode(r.variant_count));
-    if ((i+1)<individuals.length) {
-        getData(++i);
-        //$(individuals_table).trigger('update');
+var generateFeaturesHtml = function(features) {
+    var features_html = '';
+    for (var i = 0; i < features.length; i++) {
+        features_html = features_html + ' ' + create_url('/hpo', features[i].label, features[i].id, 'label label-primary');
     }
-    else {
-        $(individuals_table).trigger('update');
+    return (features_html);
+};
+
+var generateGeneHtml = function(genes) {
+    var genes_html = '';
+    for (var i = 0; i < genes.length; i++) {
+        genes_html = genes_html + ' ' + create_url('/gene', genes[i], genes[i], 'label label-primary');
     }
-}
+    return (genes_html);
+};
 
+var create_url = function(base_url, text, url_end, a_class) {
+    if (url_end === undefined) {
+        return '<a href=' + base_url + '/' + text + ' target="_blank">' + text + '</a>';
+    } else if (a_class === undefined) {
+        return '<a href=' + base_url + '/' + url_end + ' target="_blank">' + text + '</a>';
+    } else {
+        return '<a class="' + a_class + '" href=' + base_url + '/' + url_end + ' target="_blank">' + text + '</a>';
+    }
+};
 
-
-// fetches the chunk specified by i
-function getData(i) {
-    $.ajax( {
-                type : 'GET',
-                url : '/private_variant_count', 
-                data : {external_id: individuals[i]},
-                success : handleData,
-                dataType :  "json"
-        } );
-}
-
-
-function render_table() {
-    // call the tablesorter plugin
-    $(individuals_table).tablesorter({
-        theme : 'bootstrap',
-        headerTemplate : '{content}{icon}',
+var initTableSorter = function(table) {
+    $(table).tablesorter({
+        theme: 'bootstrap',
+        headerTemplate: '{content}{icon}',
         // hidden filter input/selects will resize the columns, so try to minimize the change
-        widthFixed : true,
+        widthFixed: true,
         // initialize zebra striping and filter widgets
-        widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
-        widgetOptions : {
-            zebra : ["even", "odd"],
+        widgets: ['zebra', 'filter', 'stickyHeaders'],
+        widgetOptions: {
+            zebra: ['even', 'odd'],
             // Use the $.tablesorter.storage utility to save the most recent filters
             //filter_saveFilters : true,
             // jQuery selector string of an element used to reset the filters
-            filter_reset : 'button.reset',
-            filter_columnFilters : true
-            // add custom selector elements to the filter row
+            filter_reset: 'button.reset',
+            filter_columnFilters: true,
         }
     });
-}
+};
 
-//render_table();
-//$(individuals_table).tablesorter();
-
-//getData(0);
-
+$(document).ready(function() {
+    fetchPatients();
+});
 </script>
-
-
-
 {% endblock %}
