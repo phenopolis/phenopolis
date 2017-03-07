@@ -12,13 +12,7 @@ import csv
 import orm
 
 
-# shows each individual, 
-# all_individuals
-@app.route('/individuals')
-@requires_auth
-def individuals_page():
-    page=int(request.args.get('page',0))
-    number=int(request.args.get('number',200))
+def get_individuals():
     hpo_db=get_db(app.config['DB_NAME_HPO'])
     def f(p):
         print p['external_id']
@@ -40,20 +34,35 @@ def individuals_page():
         p['total_variant_count']=p2.get('total_variant_count','')
         #p['all_variants_count']=get_db().patients.find_one({'external_id':p['external_id']},{'_id':0,'all_variants_count':1})['all_variants_count']
         #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
+        if '_id' in p: del p['_id']
         return p
-    conn=PhenotipsClient()
-    all_patients=conn.get_patient(session=session).get('patientSummaries',[]) 
-    all_eids=[p['eid'] for p in all_patients if p['eid']]
-    total=len(all_eids)
-    print('TOTAL NUMBER OF PATIENTS',total)
-    patients=conn.get_patient(session=session,start=page*number,number=number).get('patientSummaries',[])
-    eids=[p['eid'] for p in patients if p['eid']]
-    print(eids)
-    patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':{'$in':eids}})
-    #patients=get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':re.compile('^IRDC')},{'pubmedBatch':0})
+    users_db=get_db(app.config['DB_NAME_USERS'])
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
+    user=users_db.users.find_one({'user':session['user']})
+    if 'individuals' in user:
+        individuals=user['individuals']
+        individuals=[{k:ind.get(k,'') for k in ['external_id','sex','specificity','features','solved','genes','rare_homozygous_variants_count','rare_compound_hets_count','rare_variants_count','total_variant_count']} for ind in individuals]
+        return individuals
+    eids=user['external_ids']
+    patients=patients_db.patients.find({'external_id':{'$in':eids}},{'_id':False})
     individuals=[f(p) for p in patients if 'external_id' in p]
-    # family_history":{"consanguinity":true}
-    #if session['user']=='demo': for ind in individuals: ind['external_id']=encrypt(ind['external_id'])
-    return render_template('individuals_page.html',individuals=individuals,page=page,number=number,total=total)
+    users_db.users.update_one({'user':session['user']},{'$set':{'individuals':individuals}})
+    return individuals
+
+
+@app.route('/individuals_json')
+@requires_auth
+def individuals_json():
+    individuals=get_individuals()
+    return(jsonify(result=individuals))
+
+
+# shows each individual, 
+# all_individuals
+@app.route('/individuals')
+@requires_auth
+def individuals_page():
+    individuals=get_individuals()
+    return render_template('individuals_page.html',individuals=individuals)
 
 
