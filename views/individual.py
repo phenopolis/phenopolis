@@ -29,7 +29,7 @@ def individual_json(individual):
 def edit_patient_features(individual):
     print(individual)
     print('edit patient features')
-    print(request.form['features[]'])
+    features=request.form.getlist('features[]')
     print(request.form['consanguinity[]'])
     print(request.form['inheritance_mode[]'])
     print(request.form['candidate_genes[]'])
