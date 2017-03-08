@@ -28,11 +28,36 @@ def individual_json(individual):
 @requires_auth
 def edit_patient_features(individual):
     print(individual)
+    external_id=individual
+    individual=get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':external_id})
     print('edit patient features')
     features=request.form.getlist('features[]')
-    print(request.form['consanguinity[]'])
+    print(features)
+    individual['features']=[]
+    for f in features:
+        hpo=get_db(app.config['DB_NAME_HPO']).hpo.find_one({'name':re.compile('^'+f+'$',re.IGNORECASE)})
+        if not hpo: continue
+        individual['features'].append({'id':hpo['id'][0], 'label':hpo['name'][0], 'observed':'yes'})
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'features':individual['features']}}))
+    genes=request.form.getlist('candidate_genes[]')
+    individual['genes']=[]
+    for g in genes:
+        gene=get_db(app.config['DB_NAME_HPO']).genes.find_one({'name':g})
+        if not gene: continue
+        individual['genes'].append({'gene':g, 'status':'candidate'})
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'genes':individual['genes']}}))
+    consanguinity=str(request.form['consanguinity[]'])
+    individual['family_history']=individual.get('family_history',{})
+    if (consanguinity)=='unknown':
+        individual['family_history']['consanguinity']=None
+    elif consanguinity.lower()=='true':
+        individual['family_history']['consanguinity']=True
+    elif consanguinity.lower()=='false':
+        individual['family_history']['consanguinity']=False
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
     print(request.form['inheritance_mode[]'])
-    print(request.form['candidate_genes[]'])
+    # also trigger refresh of that individual for individuals summary page
+    views.individuals.individuals_update([external_id])
     return 'done'
 
 
