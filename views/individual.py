@@ -63,7 +63,7 @@ def edit_patient_features(individual):
 
 @app.route('/individual/<individual>')
 @requires_auth
-@cache.cached(timeout=24*3600)
+#@cache.cached(timeout=24*3600)
 def individual_page(individual):
     #print 'full_path', request.full_path
     #print  'url_root', request.url_root
