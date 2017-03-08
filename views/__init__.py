@@ -1557,12 +1557,12 @@ jinja2.filters.FILTERS['highlight2'] = highlight2
 
 
 
+import views.individuals
 import views.gene
 import views.transcript
 import views.uclex_irdc
 import views.variant
 import views.individual
-import views.individuals
 import views.igv
 import views.hpo
 import views.search
