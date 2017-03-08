@@ -11,10 +11,11 @@ import csv
 #hpo lookup
 import orm
 
-
-def get_individuals():
-    hpo_db=get_db(app.config['DB_NAME_HPO'])
-    def f(p):
+def individuals_update(external_ids):
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
+    users_db=get_db(app.config['DB_NAME_USERS'])
+    def f(eid):
+        p=patients_db.patients.find_one({'external_id':eid},{'_id':False})
         print p['external_id']
         p['features']=[f for f in p.get('features',[]) if f['observed']=='yes']
         if 'solved' in p:
@@ -36,24 +37,32 @@ def get_individuals():
         #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
         if '_id' in p: del p['_id']
         return p
+    new_individuals=[f(eid) for eid in external_ids]
+    old_individuals=users_db.users.find_one({'user':session['user']}).get('individuals',[])
+    old_individuals=[ind for ind in old_individuals if ind['external_id'] not in external_ids]
+    individuals=new_individuals+old_individuals
+    users_db.users.update_one({'user':session['user']},{'$set':{'individuals':individuals}})
+    return individuals
+
+
+def get_individuals(build_cache=False):
+    #hpo_db=get_db(app.config['DB_NAME_HPO'])
     users_db=get_db(app.config['DB_NAME_USERS'])
-    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     user=users_db.users.find_one({'user':session['user']})
-    if 'individuals' in user:
+    if not build_cache and 'individuals' in user:
         individuals=user['individuals']
         individuals=[{k:ind.get(k,'') for k in ['external_id','sex','specificity','features','solved','genes','rare_homozygous_variants_count','rare_compound_hets_count','rare_variants_count','total_variant_count']} for ind in individuals]
         return individuals
     eids=user['external_ids']
-    patients=patients_db.patients.find({'external_id':{'$in':eids}},{'_id':False})
-    individuals=[f(p) for p in patients if 'external_id' in p]
-    users_db.users.update_one({'user':session['user']},{'$set':{'individuals':individuals}})
+    individuals=individuals_update(eids)
     return individuals
 
 
 @app.route('/individuals_json')
 @requires_auth
 def individuals_json():
-    individuals=get_individuals()
+    build_cache=str(request.args.get('build_cache')).lower()=='true'
+    individuals=get_individuals(build_cache)
     return(jsonify(result=individuals))
 
 
@@ -62,7 +71,6 @@ def individuals_json():
 @app.route('/individuals')
 @requires_auth
 def individuals_page():
-    individuals=get_individuals()
-    return render_template('individuals_page.html',individuals=individuals)
+    return render_template('individuals_page.html')
 
 
