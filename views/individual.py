@@ -42,7 +42,8 @@ def edit_patient_features(individual):
     genes=request.form.getlist('candidate_genes[]')
     individual['genes']=[]
     for g in genes:
-        gene=get_db(app.config['DB_NAME_HPO']).genes.find_one({'name':g})
+        gene=get_db(app.config['DB_NAME']).genes.find_one({'gene_name_upper':g})
+        print(gene)
         if not gene: continue
         individual['genes'].append({'gene':g, 'status':'candidate'})
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'genes':individual['genes']}}))
