@@ -27,6 +27,7 @@ def individual_json(individual):
 @app.route('/edit_patient_features/<individual>',methods=['POST'])
 @requires_auth
 def edit_patient_features(individual):
+    if session['user']=='demo': return 'not permitted'
     print(individual)
     external_id=individual
     individual=get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':external_id})
