@@ -138,7 +138,6 @@ def check_auth(username, password):
     auth='%s:%s' % (username, password,)
     return check_password_hash(r['password'],password)
 
-
 def authenticate():
     """Sends a 401 response that enables basic auth"""
     return Response( 'Could not verify your access level for that URL.\n' 'You have to login with proper credentials', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
