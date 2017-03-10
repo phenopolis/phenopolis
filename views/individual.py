@@ -251,7 +251,8 @@ get pubmedbatch cache results based on pubmedkey
 def pubmedbatch_getcache(pubmedkey):
     db = get_db('pubmedbatch') 
     result = db.cache.find_one({'key':pubmedkey},{'_id':False})
-    return jsonify(result)
+    if result: return jsonify(result)
+    else: return jsonify('')
 
 
 
