@@ -333,8 +333,7 @@ requirejs.config({
         renderer: '/static/bower_components/graph-viz-d3-js/dist/renderer'
     }
 });
-var unrelated_flag = false,
-    patients_status = {{ patients_status|safe }},
+var patients_status = {{ patients_status|safe }},
     options = {
         mode: 'r', // r for recessive, d for dominant
         exclude_hom: false,
@@ -351,17 +350,16 @@ var unrelated_flag = false,
 draw_hpo(phenogenon, options);
 $('#data-nav').on('click','.tab-li',function(){
     var tabID = $(this).attr('href');
-    var remove_bad_vars = false;
+    options.remove_bad_vars = false;
     if ($('#remove-bad-variants').is(':checked')){
-        remove_bad_vars = true;
+        options.remove_bad_vars = true;
     }
     $('svg').remove();
     if (tabID == '#gene-tab_r'){
         // get exac and cadd values
-        var exac = $('#r_exac_graph_slider').val();
-        var cadd = $('#r_cadd_graph_slider').val();
+        options.cutoffs.exac = $('#r_exac_graph_slider').val();
+        options.cutoffs.cadd = $('#r_cadd_graph_slider').val();
         options.mode = 'r';
-        draw_hpo(phenogenon, options); 
     } else if (tabID == '#gene-tab_d'){
         // get remove_hom
         options.remove_hom = false;
@@ -372,18 +370,18 @@ $('#data-nav').on('click','.tab-li',function(){
         options.cutoffs.exac = $('#d_exac_graph_slider').val();
         options.cutoffs.cadd = $('#d_cadd_graph_slider').val();
         options.mode = 'd';
-        draw_hpo(phenogenon, options);
     }
+    draw_hpo(phenogenon, options); 
 });
 // draw table
 var columns = ['id','phi','p_value','pat_h','pat_gh'];
 $.each(['r','d'],function(i,v){
     if (v == 'r'){
         options.mode = 'r';
-        options.exac = 5;
+        options.cutoffs.exac = 5;
     }else{
         options.mode = 'd';
-        options.exac = 0.0001;
+        options.cutoffs.exac = 0.0001;
     }
     getTable(phenogenon,options);
 });
@@ -443,6 +441,10 @@ $('body').on('click','.remove',function(){
     if ($('#remove-bad-variants').is(':checked')){
         options.remove_bad_vars = true;
     }
+    options.unrelated_flag = false;
+    if ($('#remove-related').is(':checked')){
+        options.unrelated_flag = true;
+    }
     options.remove_hom = false;
     // which li is active?
     var tab = $('#data-nav').children('.active').children('a').attr('id');
@@ -450,7 +452,6 @@ $('body').on('click','.remove',function(){
         options.cutoffs.exac = $('#r_exac_graph_slider').val();
         options.cutoffs.cadd = $('#r_cadd_graph_slider').val();
         options.mode = 'r';
-        draw_hpo(phenogenon, options);
     } else if (tab == 'd-tab'){
         if ($('#graph-remove-hom').is(':checked')){
             options.remove_hom = true;
@@ -458,20 +459,9 @@ $('body').on('click','.remove',function(){
         options.cutoffs.exac = $('#d_exac_graph_slider').val();
         options.cutoffs.cadd = $('#d_cadd_graph_slider').val();
         options.mode = 'd';
-        draw_hpo(phenogenon, options);
-    } else if (tab == 'table-tab'){
-        if ($('#table-remove-hom').is(':checked')){
-            options.remove_hom = true;
-        }
-        options.mode = 'r';
-        options.cutoffs.exac = $('#r_exac_table_slider').val();
-        options.cutoffs.cadd = $('#r_cadd_table_slider').val();
-        getTable(phenogenon, options);
-        options.mode = 'd';
-        options.cutoffs.exac = $('#d_exac_table_slider').val();
-        options.cutoffs.cadd = $('#d_cadd_table_slider').val();
-        getTable(phenogenon, options);
     }
+    draw_hpo(phenogenon, options);
+    getTable(phenogenon, options);
 });
 
 function mark_arm(hpo, mydata, seen, bad_hpos){
@@ -533,7 +523,6 @@ function draw_hpo(my_data, options){
         var hpos = Object.keys(result).sort(function(a,b){
             return ((result[a].pat_gh < result[b].pat_gh) ? -1 : ((result[a].pat_gh > result[b].pat_gh) ? 1 : 0));
         });
-        //console.log(hpos);
         // start looking from the smallest pat_gh (bottomest)
         $.each(hpos,function(i,h){
             // skip if h was already deleted
@@ -545,9 +534,7 @@ function draw_hpo(my_data, options){
         var trim=[];
         simplify_graph(result,"HP:0000001",trim);
         $.each(result,function(k,v){
-                //console.log(v.is_a)
                 v.is_a=v.is_a.filter(function(x) { return (!trim.includes(x)) });
-                //console.log(v.is_a)
         });
         $.each(trim,function(k,v){
                 delete result[v];
@@ -562,7 +549,6 @@ function draw_hpo(my_data, options){
         var mode = options.mode,
             svg = d3.select('svg'),
             all_g = svg.select('g').select('g').selectAll('g.node');
-        console.log(data);
         all_g
             .on('mouseover', showTooltip)
             .on('mouseout', removeTooltip);
@@ -575,7 +561,7 @@ function draw_hpo(my_data, options){
             var modal_content = '<ul>';
             // get patients in order
 
-            var patients = $.map(my_data.data[id].p[mode], function(v){console.log(v);if (my_data.patients[v].qualified){return v;}});
+            var patients = $.map(my_data.data[id].p[mode], function(v){if (my_data.patients[v].qualified){return v;}});
             $.each(patients, function(i,p){
                 if (p.match("^hidden")){
                     modal_content += '<li><span class="tip" title="';
@@ -592,8 +578,6 @@ function draw_hpo(my_data, options){
                     modal_content += '</a><ul>';
                 }
                 $.each(my_data.patients[p].variants, function(i,v){
-                    console.log(i);
-                    console.log(v);
                     var this_v = my_data.variants[v];
                     if (!this_v.qualified){
                         return true;
@@ -718,7 +702,6 @@ function draw_hpo(my_data, options){
         });
         $(this).popover('show');
         $('#dot-'+options.mode).find('.popover').each(function () {
-            console.log($(this).offset());
             var offset = $(this).offset();
             $(this).offset({
                 left:offset.left,
