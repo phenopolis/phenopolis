@@ -37,6 +37,7 @@ def load_data():
 
         indexes = ['external_id', 'report_id', 'features.id', 'sex', 'genes.gene', 'solved', 'clinicalStatus.clinicalStatus', 'specificity.score']
         import_data('test_patients', 'patients', "./tests/data/patients-patients-hidden.json", indexes)
+        import_data('users', 'users', "./tests/data/users.json")
 
 
 # Create a collection in the db, drop any existing data, add data from file.
