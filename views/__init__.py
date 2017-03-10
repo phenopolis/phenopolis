@@ -77,6 +77,7 @@ import datetime
 from Crypto.Cipher import DES
 import base64
 from binascii import b2a_base64, a2b_base64
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import orm
 from lookups import *
@@ -135,8 +136,7 @@ def check_auth(username, password):
     if not r: return False
     session['user']=username
     auth='%s:%s' % (username, password,)
-    password=md5.new(password).hexdigest()
-    return r['password']==password
+    return check_password_hash(r['password'],password)
 
 
 def authenticate():
