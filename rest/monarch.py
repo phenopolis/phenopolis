@@ -2,11 +2,8 @@
 import requests
 import json
 import pymongo
-from phenotips_python_client import PhenotipsClient 
 import sys
 
-
-conn=PhenotipsClient()
 client = pymongo.MongoClient(port=27017)
 patients_db = client['patients']
 
