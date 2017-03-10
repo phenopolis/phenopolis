@@ -39,37 +39,53 @@ var d3color = d3.scale.linear()
     .domain([-0.2,0,0.2])
     .range(['steelblue','lightgrey','red']);
 
-function transform(input_data, mode, exac_cutoff, cadd_cutoff, exclude_hom, unrelated_flag,hpo_terms,remove_bad_vars){
+function transform(input_data, options){
     // remove_bad_vars determine if dubious variants getting removed.
     // since ppl with the variants marked as dubious have better changes to have the rare variants than average ppl, it's better to remove the patients out of the system. 
     // For dominant cases, if one patient has two qualified variants, but one of them is dubious, when calculating for dominant mode, shall we include this patient?
     // For now, remove the patient completely from the system.
-    // collect qualified patients/vars from HP:0000001
+
+    // what kind of cutoff i'm looking at?
+    var exac = options.mode == 'd' ? 'exac_af' : 'exac_hom';
+
     var qualified_patients = {},
         qualified_vars = {},
+        dubious_vars = {},
         dubious_patients = {};
-    $.each(input_data['HP:0000001'].data, function(k1,v1){
+    //$.each(input_data.data.['HP:0000001'].data, function(k1,v1){
+    // get qualified and dubious vars
+    $.each(input_data.variants, function(k1,v1){
+        v1.qualified = false;
+        if (v1[exac] <= options.cutoffs.exac && (!v1.cadd || v1.cadd >= options.cutoffs.cadd)){
+            if (!options.remove_bad_vars || v1.filter == 'PASS'){
+                qualified_vars[k1] = 1;
+                v1.qualified = true;
+            } else {
+                dubious_vars[k1] = 1;
+            }
+        }
+    });
+        
+    $.each(input_data.patients, function(k1,v1){
         // related?
-        if (unrelated_flag && !v1.unrelated){
+        if (options.unrelated_flag && !v1.unrelated){
             return true;
         }
+        v1.qualified = false;
         // count good vars
         var count = 0;
         var subcount = 0;
         var dubious = 0; // dubious patient?
-        $.each(v1.var, function(k2,v2){
-            if (v2.exac <= exac_cutoff && (!v2.cadd || v2.cadd >= cadd_cutoff)){
-                if (!remove_bad_vars || !('filter' in v2) || v2.filter == 'PASS'){
-                    count += 1;
-                    qualified_vars[v2.variant_id] = 1;
-                } else {
-                    subcount += 1;
-                }
+        $.each(v1.variants, function(k2,v2){
+            if (qualified_vars.hasOwnProperty(v2)){
+                count += 1;
+            } else if (dubious_vars.hasOwnProperty(v2)){
+                subcount += 1;
             }
         });
         // qualified?
-        if (subcount && ( (mode == 'het' && !(exclude_hom) && count == 0 ) 
-                        || (mode == 'het' && exclude_hom && count <= 1)
+        if (subcount && ( (options.mode == 'd' && !(options.exclude_hom) && count == 0 ) 
+                        || (options.mode == 'd' && options.exclude_hom && count <= 1)
                         || count < 2)
             ){
             // need to remove this patient out of the equation
@@ -77,57 +93,56 @@ function transform(input_data, mode, exac_cutoff, cadd_cutoff, exclude_hom, unre
             dubious_patients[k1] = 1
         }
         if (dubious){ return true; }
-        if ( (mode == 'hom_comp' && count > 1) ||
-             (mode == 'het' && !(exclude_hom) && count) ||
-             (mode == 'het' && exclude_hom && count == 1) ){
+        if ( (options.mode == 'r' && count > 1) ||
+             (options.mode == 'd' && !(options.exclude_hom) && count) ||
+             (options.mode == 'd' && options.exclude_hom && count == 1) ){
                  qualified_patients[k1] = 1;
+                 v1.qualified = true;
         }
     });
-    // re-calcluate input_data according to exac_cutoff
-    var output = {};
-    var num_of_vars = Object.keys(qualified_vars).length;
-    var pat_g = Object.keys(qualified_patients).length;
-    $.each(input_data, function(k1,v1){
-        // k1:hpo, k2:patient
-        output[k1] = v1;
+    // re-calcluate input_data according to cutoffs
+    var output = { },
+        num_of_vars = Object.keys(qualified_vars).length,
+        pat_g = Object.keys(qualified_patients).length;
+    $.each(input_data.data, function(k1,v1){
+        // k1:hpo, v2:patient
+        output[k1] = {
+            'id':k1,
+            'name':v1.name,
+            'is_a':v1.is_a,
+            'unrelated_pat_h':v1['unrelated_pat_h'],
+            'related_pat_h':v1['related_pat_h'],
+        };
         output[k1].bad_gh = 0;
-        var newData = {};
-        $.each(v1.data, function(k2,v2){
-            if (k2 in dubious_patients){
+        output[k1].pat_gh = 0;
+        $.each(v1.p[options.mode], function(k2,v2){
+            if (dubious_patients.hasOwnProperty(v2)){
                 output[k1].bad_gh += 1;
             }
-            if (!(k2 in qualified_patients)){
+            if (!(qualified_patients.hasOwnProperty(v2))){
                 return true;
             }
-            var newVars = $.grep(v2.var, function(v3,i){
-                return v3.variant_id in qualified_vars;
-            });
-            newData[k2]={'hpo':v2.hpo,'var':newVars,'unrelated':v2.unrelated};
+            output[k1].pat_gh += 1;
         });
-        output[k1].pat_gh = Object.keys(newData).length;
         if (output[k1].pat_gh==0){
             // empty node
             delete output[k1];
             return true;
         }
                 
-        output[k1].data = newData;
     });
     var num_of_hpos = Object.keys(output).length;
     // after filtering, recalculate the p-value and q-value
-    var pat_a = 0;
+    var pat_a = (options.unrelated_flag ? input_data.unrelated_pat_a : input_data.related_pat_a) - Object.keys(dubious_patients).length;
     $.each(output, function(key, value){
         var pat_h = value['unrelated_pat_h']-value.bad_gh;
-        if (!(unrelated_flag)){
+        if (!(options.unrelated_flag)){
             pat_h = value['related_pat_h']-value.bad_gh;
         }
         value['pat_h'] = pat_h;
-        pat_a = (unrelated_flag ? value['unrelated_pat_a'] : value['related_pat_a']) - Object.keys(dubious_patients).length;
         var r_ga = pat_g/pat_a;
         value['pat_a'] = pat_a;
         //value['pat_h'] = pat_h;
-        value['p_hg'] = 1-binomial_cdf(value['pat_gh']-1,pat_g,pat_h/pat_a);
-        value['p_gh'] = 1-binomial_cdf(value['pat_gh']-1,pat_h,r_ga);
         value['phi'] = phi([pat_a-pat_g-pat_h+value['pat_gh'],pat_h-value['pat_gh'],pat_g-value['pat_gh'],value['pat_gh']]);
         value['p_fisher'] = exact22(pat_a-pat_g-pat_h+value['pat_gh'],pat_h-value['pat_gh'],pat_g-value['pat_gh'],value['pat_gh']);
         value['p_value'] = value['p_fisher']['right'];
@@ -143,7 +158,7 @@ function transform(input_data, mode, exac_cutoff, cadd_cutoff, exclude_hom, unre
             value['fillcolor'] = 'green';
         }else{ 
             value['fillcolor'] = '#44ccff';
-            if (hpo_terms.indexOf(value.id) != -1){
+            if (options.hpo_terms.indexOf(value.id) != -1){
                 value['fillcolor'] = 'red';
             }
         }
