@@ -1,0 +1,38 @@
+<!--recessive-->
+<div id="gene-tab_r" class="tab-pane active">
+    <div class="row">
+        <div class="col-md-7">
+            <h3 class='grey'>Recessive <small id='r_small'></small></h3>
+            <h4>Number of affected patients: <span id='dot-r-pNum'></span>
+            <br>Number of matching variants: <span id='dot-r-vNum'></span></h4>
+
+            <div class='col-md-11 col-md-offset-1'>
+                <div class='row'>
+                    <input id="r_exac_table_slider" class='slider' type="text" data-slider-min="0" data-slider-max="10" data-slider-step="1" data-slider-value="5"/> &nbsp;&nbsp;
+                    <span id="r_exac_tableCurrentSliderValLabel">ExAC_hom count cutoff: <span id="r_exac_tableSliderVal">5</span></span>
+                </div>
+                <div class='row'>
+                    <input id="r_cadd_table_slider" class='slider' type="text" data-slider-min="0" data-slider-max="50" data-slider-step="1" data-slider-value="15" /> &nbsp;&nbsp;
+                    <span id="r_cadd_tableCurrentSliderValLabel">CADD Phred cutoff: <span id="r_cadd_tableSliderVal">15</span></span>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-12' id="gene-hpo-r-tableDiv">
+                    <table id="gene-hpo-r-table" class="table-sorter"> </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <h3 class='grey'>Phenogenon Recessive</h3>
+            <input id="r_exac_graph_slider" type="hidden"  value="0.01"/>
+            <input id="r_cadd_graph_slider" type="hidden" value="15"/>
+            <br>
+            <button class='btn btn-success' id='copy-r'>Convert to png</button>
+            <br>
+            <br>
+            <div class='hpo' id='dot-r'> </div>
+            <div class="clearfix"></div>
+            <div class='copy' id='copy-r-div'></div>
+        </div>
+    </div>
+</div>
