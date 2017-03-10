@@ -557,11 +557,12 @@ function draw_hpo(my_data, options){
     $('#dot-'+options.mode+'-pNum').text(num_of_patients);
     $('#dot-'+options.mode+'-vNum').text(num_of_vars);
     var dot = convert_to_dot(result,'filled');
+
     var callback = function (data){
-        var patients = my_data.patients,
-            variants = my_data.variants,
+        var mode = options.mode,
             svg = d3.select('svg'),
             all_g = svg.select('g').select('g').selectAll('g.node');
+        console.log(data);
         all_g
             .on('mouseover', showTooltip)
             .on('mouseout', removeTooltip);
@@ -570,19 +571,18 @@ function draw_hpo(my_data, options){
             var this_node = $(this);
             var id = this_node.find('title').text();
             // populate modal
-            console.log(id);
             $('#myModalLabel').html("<a href='/hpo/"+id+"'>"+id+', '+data[id].name+"</a>");
             var modal_content = '<ul>';
             // get patients in order
 
-            var patients = $.map(data[id]['data'], function(v,k){return k;});
+            var patients = $.map(my_data.data[id].p[mode], function(v){console.log(v);if (my_data.patients[v].qualified){return v;}});
             $.each(patients, function(i,p){
                 if (p.match("^hidden")){
                     modal_content += '<li><span class="tip" title="';
                 } else {
                     modal_content += '<li><a data-placement="left" class="tip modal-patient" id='+p+' href="/individual/'+p+'" target="_blank"  title="';
                 }
-                $.each(data[id]['data'][p].hpo, function(i,v){
+                $.each(my_data.patients[p].hpo, function(i,v){
                     modal_content += v + "<br/>";
                 });
                 modal_content += '">'+p;
@@ -591,20 +591,26 @@ function draw_hpo(my_data, options){
                 } else {
                     modal_content += '</a><ul>';
                 }
-                $.each(data[id]['data'][p]['var'], function(k,v){
+                $.each(my_data.patients[p].variants, function(i,v){
+                    console.log(i);
+                    console.log(v);
+                    var this_v = my_data.variants[v];
+                    if (!this_v.qualified){
+                        return true;
+                    }
                     var cl = '',
                         vqsr = '';
-                    if ('filter' in v && v.filter != 'PASS'){
+                    if (this_v.hasOwnProperty('filter') && this_v.filter != 'PASS'){
                         cl = 'bad';
                         vqsr = '<span class="vqsr">vqsr</span>';
-                    } else if (!('filter' in v)){
+                    } else if (!(this_v.hasOwnProperty('filter'))){
                         cl = 'warning';
                     }
-                    modal_content += '<li><span class="tip" title="<b>ExAF:</b> ' + Fixed(v.exac,8,5) + '<br/><b>CADD_phred:</b> ' + v.cadd; 
-                    if (v.variant_id.match("hidden")){
-                        modal_content += '"><span class="'+cl+'">' + v.variant_id + '</span>';
+                    modal_content += '<li><span class="tip" title="<b>ExAF:</b> ' + Fixed(this_v.exac,8,5) + '<br/><b>CADD_phred:</b> ' + this_v.cadd; 
+                    if (v.match("hidden")){
+                        modal_content += '"><span class="'+cl+'">' + v + '</span>';
                     } else {
-                        modal_content += '"><a href="/variant/' + v.variant_id + '" class="' + cl +'">'+ v.variant_id + '</a>';
+                        modal_content += '"><a href="/variant/' + v + '" class="' + cl +'">'+ v + '</a>';
 
                     }
                     modal_content += vqsr+'</span></li>';
