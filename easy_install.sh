@@ -77,6 +77,11 @@ mongo patients --eval "db.patients.createIndex({'solved' : 1})"
 mongo patients --eval "db.patients.createIndex({'clinicalStatus.clinicalStatus' : 1})"
 mongo patients --eval "db.patients.createIndex({'specificity.score' : 1})"
 
+mongoimport --db users --collection users --file tests/data/users.json --drop
+mongo users --eval "db.genes_pheno.createIndex({'gene' : 1})"
+mongo users --eval "db.genes_pheno.createIndex({'hpo' : 1})"
+
+
 # Run server
 cd phenopolis 
 python runserver.py
