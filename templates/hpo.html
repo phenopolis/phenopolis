@@ -1,676 +1,146 @@
-{% extends "layout.html" %}
-{% block body %}
-
-<h1>  Phenotype: {{ hpo_name }} ({{ hpo_id }}) </h1>
-
-<!-- jQuery UI for range slider -->
-<link rel="stylesheet"  type=text/css href="/static/css/jquery-ui.min.css">
-<script  type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
-<script  type="text/javascript" src="/static/js/main.js"></script>
-<!-- <link rel="stylesheet"  type=text/css href="/static/css/theme.blue.css"> -->
-<!-- tablesorter plugin -->
-<link rel=stylesheet type=text/css href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<script  type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
-<script  type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
-<!-- filter formatter code -->
-<link rel="stylesheet"  type=text/css href="/static/css/filter.formatter.css">
-<link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
-<style>
-    #individuals_table {
-        margin-top: 20px;
-    }
-    .grey {
-        color: grey;
-    }
-    svg path {
-        -webkit-transition: fill 0.8s; /* Safari */
-        transition: fill 0.8s;
-    }
-    .popover {
-        text-align: center;
-    }
-    .node:hover {
-        cursor:pointer;
-    }
-    div.copy {
-        height: 200px;
-        width: 300px;
-    }
-    img {
-        max-width: 100%;
-        max-height: 100%;
-    }
-    div.hpo {
-        height: 700px;
-    }
-    h3.grey {
-        color: grey;
-    }
-    div.panel-like {
-        border: 1px grey solid;
-        border-radius: 20px;
-    }
-    span.pointer {
-        color: #3366BB;
-    }
-    span.pointer:hover {
-        cursor: pointer;
-    }
-    tr.highlight {
-       background-color: #ffa !important;
-    }
-    a.bad,span.bad {
-        color:orange;
-    }
-    a.warning,span.warning {
-        color: #6E6E6E;
-    }
-    span.candidate-tag,span.solved-tag {
-        color:white;
-        display:inline-block;
-        font-size:70%;
-        margin-left:5px;
-        margin-right:5px;
-        margin-bottom:3px;
-        vertical-align:top;
-        padding-right:2px;
-        padding-top:1px;
-        padding-left:2px;
-        border-radius:3px;
-    }
-    span.candidate-tag {
-        background-color:blue;
-    }
-    span.solved-tag {
-        background-color:green;
-    }
-    span.candidate-gene {
-        background-color:#999;
-        color:white;
-        display:inline-block;
-        padding-right:2px;
-        padding-top:1px;
-        padding-left:2px;
-        border-radius:3px;
-    }
-    span.vqsr {
-        background-color:orange;
-        display:inline-block;
-        font-size:70%;
-        margin-left:5px;
-        padding-right:2px;
-        padding-left:2px;
-        color:white;
-        border-radius:3px;
-    }
-    a.modal-patient {
-        color:#3c3c3d;
-    }
-    a.modal-patient.candidate {
-        color:steelblue;
-    }
-    a.modal-patient.solved {
-        color:green;
-    }
-    .known_gene {
-      font-weight: bold;
-    }
-</style>
-
-
-<div class="tabs">
-
-<ul class="nav nav-tabs" role="tablist">
-    <li class="active"><a href="#tab1" role="tab" data-toggle="tab" id="individuals_loaded">Individuals</a></li> 
-    <li><a href="#tab2" role="tab" data-toggle="tab">Literature genes </a></li>
-    {# <li><a href="#tab3" role="tab" data-toggle="tab" id="variants_loaded">All Shared LOF Genes ({{obs_genes|length}})</a></li> #}
-   <li><a href="#tab4" role="tab" data-toggle="tab" id="genes_loaded">Phenogenon </a></li>
-   <li><a href="#tab5" role="tab" data-toggle="tab" >SKAT</a></li>
-</ul>
-
-<div class="tab-content">
-
-    <div id="tab1" class="tab-pane active">
-      <div class='col-md-12' id="individuals-div">
-        <img id="individual_loading_image" src='/static/Loading_icon.gif' style="width:60px;height:60px;" >
-      </div>
-    </div>
-
-    <div id="tab2" class="tab-pane">
-      <div class='col-md-12' id="phenogenon_lit_genes-div">
-        <img src='/static/Loading_icon.gif' style="width:60px;height:60px;" >
-      </div>
-    </div>
-
-    {#
-    <div id="tab3" class="tab-pane">
-    <table id="gene_table" class="tablesorter">
-        <tbody>
-        {% for g in obs_genes %}
-            <tr>
-                <td class="omit_csv">
-                    <a href="/gene/{{ g[0] }}" target="_blank"> {{ g }} </a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    </div>
-    #}
-
-
-    <!--
-    <div id="tab3" class="tab-pane">
-    <table id="gene_table" class="tablesorter">
-        <tbody id="variants_table">
-        </tbody>
-    </table>
-    </div>
-    -->
-
-    <div id="tab4" class="tab-pane">
-    <div class='row'>
-        <div class='col-md-6 panel-like'>
-            <div class='row'>
-                <div class='col-md-11 col-md-offset-1'>
-                    <h3 class='grey'>Recessive Test</h3>
-                    <div class='row'>
-                        <b>Genotype: </b>With at least two variants on a given gene that have ExAC home count not higher than <span class='grey'>2</span>, and CADD phred score not lower than <span class='grey'>15</span>
+{% extends "material_app_layout.html" %} {% block body %}
+<div class="container">
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <h3 class="truncate" style="font-weight: 300">Phenotype: {{ hpo_name }} ({{ hpo_id }}) </h3>
+        </div>
+        <div class="card-tabs" style="padding-top: 2rem;">
+            <ul class="tabs tabs-fixed-width ">
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#individual_tab">Individuals</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#literature_genes_tab">Literature Genes</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#phenogenon_tab">Phenogenon</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#skat_tab">SKAT</a></li>
+                <div class="indicator light-blue darken-2" style="z-index:1"></div>
+            </ul>
+        </div>
+        <div class="card-content grey lighten-5">
+            <div id="individual_tab">
+                <h4 style="font-weight:300;">Individuals</h4>
+                <p>Below is a list of the... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <div class="col m12" id="individual" style="padding-top:2rem;">
+                    {% include "components/loading_from_server.html" %}
+                    <table id='individuals_table' class='table-sorter striped centered' style="display:none;">
+                        <thead>
+                            {% include "components/table-pager.html" %}
+                            <tr>
+                                <th>Individual</th>
+                                <th>Gender</th>
+                                <th>Phenotype</th>
+                                <th tooltip='scaled score from Monarch'>Phenotype Score</th>
+                                <th>Rare Hom</th>
+                                <th>Rare Comp Het</th>
+                                <th>Rare</th>
+                                <th>Candidate Genes</th>
+                                <th>Candidate Variants</th>
+                            </tr>
+                        </thead>
+                        <tbody id='individuals_table_body'>
+                        </tbody>
+                        <tfoot>
+                            {% include "components/table-pager.html" %}
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div id="literature_genes_tab">
+                <h4 style="font-weight:300;">Literature Genes</h4>
+                <p>Below is a list of the... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <div class="col m12" id="literature_genes" style="padding-top:2rem;">
+                    {% include "components/loading_from_server.html" %}
+                    <table id="phenogenon_lit_genes_table" class="table-sorter striped centered" style="display:none;">
+                        <thead>
+                            {% include "components/table-pager.html" %}
+                            <tr>
+                                <th>Gene</th>
+                                <th>Phenogenon Dominant p-value</th>
+                                <th>Phenogenon Recessive p-value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="phenogenon_lit_genes_body"> </tbody>
+                        <tfoot>
+                            {% include "components/table-pager.html" %}
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div id="phenogenon_tab">
+                <h4 style="font-weight:300;">Phenogenon</h4>
+                <p>Below is a list of the... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <div class="card-tabs" style="padding-top: 2rem; margin-right: -24px; margin-left: -24px">
+                    <ul class="tabs tabs-fixed-width" id="phenogenon_tabs">
+                        <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#phenogenon_recessive_tab">Recessive</a></li>
+                        <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#phenogenon_dominant_tab">Dominant</a></li>
+                        <div class="indicator light-blue darken-2" style="z-index:1"></div>
+                    </ul>
+                </div>
+                <div id="phenogenon_recessive_tab">
+                    <h4 style="font-weight:100;">Recessive</h4>
+                    <p><strong>Genotype: </strong>With at least two variants on a given gene that have ExAC home count not higher than <span class='blue-text'>2</span>, and CADD phred score not lower than <span class='blue-text'>15</span></p>
+                    <div class="col m12" id="phenogenon_recessive" style="padding-top:2rem;">
+                        {% include "components/loading_from_server.html" %}
+                        <table id="gene_recessive_table" class="table-sorter striped centered" style="display:none;">
+                            <thead>
+                                {% include "components/table-pager.html" %}
+                                <tr>
+                                    <th>Recessive Genes</th>
+                                    <th title='fisher test'>p value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recessive_table_body"> </tbody>
+                            <tfoot>
+                                {% include "components/table-pager.html" %}
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div id="phenogenon_dominant_tab">
+                    <h4 style="font-weight:100;">Dominant</h4>
+                    <p><strong>Genotype: </strong>With at least two variants on a given gene that have ExAC home count not higher than <span class='blue-text'>0.0001</span>, and CADD phred score not lower than <span class='blue-text'>15</span></p>
+                    <div class="col m12" id="phenogenon_dominant" style="padding-top:2rem;">
+                        {% include "components/loading_from_server.html" %}
+                        <table id="gene_dominant_table" class="table-sorter striped centered" style="display:none;">
+                            <thead>
+                                {% include "components/table-pager.html" %}
+                                <tr>
+                                    <th>Dominant Genes</th>
+                                    <th title='fisher test'>p value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dominant_table_body"> </tbody>
+                            <tfoot>
+                                {% include "components/table-pager.html" %}
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
             </div>
-            <div class='row'>
-                <div class='col-md-12' id="gene-hpo-hom_comp-table-div"> <img src='/static/Loading_icon.gif' style="width:60px;height:60px;" > </div>
-            </div><!--table row-->
-        </div><!--hom table col-->
-        <div class='col-md-6 panel-like'>
-            <div class='row'>
-                <div class='col-md-11 col-md-offset-1'>
-                    <h3 class='grey'>Dominant test</h3>
-                    <div class='row'>
-                        <b>Genotype: </b>With exactly one variant on a given gene that have ExAC allele frequencies not higher than <span class='grey'>0.0001</span>, and CADD phred score not lower than <span class='grey'>15</span>
-                    </div>
+            <div id="skat_tab">
+                <h4 style="font-weight:300;">SKAT</h4>
+                <p>Below is a list of the... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <div class="col m12" id="skats" style="padding-top:2rem;">
+                    {% include "components/loading_from_server.html" %}
+                    <table id='skats_table' class='table-sorter striped centered' style="display:none;">
+                        <thead>
+                            {% include "components/table-pager.html" %}
+                            <tr>
+                                <th>Gene</th>
+                                <th>pLI</th>
+                                <th>Mode</th>
+                                <th>FisherPvalue</th>
+                                <th>SKATO</th>
+                                <th>OddsRatio</th>
+                                <th>Variants</th>
+                            </tr>
+                        </thead>
+                        <tbody id='skats_table_body'>
+                        </tbody>
+                        <tfoot>
+                            {% include "components/table-pager.html" %}
+                        </tfoot>
+                    </table>
                 </div>
             </div>
-            <div class='row'>
-                <div class='col-md-12' id="gene-hpo-dominant-table-div"> <img src='/static/Loading_icon.gif' style="width:60px;height:60px;" > </div>
-            </div><!--table row-->
-        </div><!--het table col-->
-    </div>
-</div>
-
-
-    <div id="tab5" class="tab-pane">
-        <div class='col-md-12' id="skats-div">
-          <img id="skat_loading_image" src='/static/Loading_icon.gif' style="width:60px;height:60px;" >
         </div>
     </div>
-
 </div>
-
-</div>
-
-
-<script type=text/javascript>
-
-var session_user= "{{session['user']}}" ;
-
-$('.pop').popover({html:true});
-
-// get variant_id in real time
-$('.variant_id').hover(function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    $.get('/variant_json/' + id,
-        function(data){
-            var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
-            $.each(data.result.hom_samples.sort(), function(i,v){
-                if (session_user=='demo') { var v='hidden'; }
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
-            $.each(data.result.het_samples.sort(), function(i,v){
-                if (session_user=='demo') { var v='hidden'; }
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
-            span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a>');
-            span.attr('data-content', content);
-    });
-});
-
-
-
-$(function() {
-
-{# var patients={{individuals|map(attribute='external_id')|list|tojson|safe}}; #}
-{# var individuals={{individuals|map(attribute='external_id')|list|tojson|safe}}; #}
-var hpo_id = "{{hpo_id}}" ;
-var variant_chunks = [];
-var chunk_size = 100;
-var i=0;
-
-
-// calls getData if more data left to fetch
-// otherwise calls finish to group downloaded variants
-// by gene
-function handleData(data) {
-    console.log(i);
-     //console.log("request "+variant_chunks[i].length);
-     //console.log("response "+ data.result.length);
-     $.each(data.result,function(ind,r){
-            // display all variants and let user filter
-            if (r!=null) { //&& r.vep_annotations[0].Consequence != "synonymous_variant") {
-                var row = document.createElement("tr");
-                var td = document.createElement("td");
-                var text = document.createTextNode(ind + ":" + r.variant_id +" "+r.genes[0]+' '+r.vep_annotations[0].Consequence);
-                td.appendChild(text);
-                row.appendChild(td);
-                document.getElementById("variants_table").appendChild(row);
-                var x=document.getElementById("variants_loaded");
-                x.text="Variants "+document.getElementById("variants_table").rows.length+"/"+total_length;
-                // append to window variants as it was emptied previously
-                window.variants.push(r);
-            } else {
-                console.log('empty response!');
-            }
-     });
-    if ((i+1)<variant_chunks.length) {
-        getData(i++);
-    } else {
-        finish();
-    }
-}
-
-
-
-// fetches the chunk specified by i
-function getData(i) {
-    $.ajax( {
-                type : 'POST',
-                url : '/fetch_variant', 
-                data : {variants: variant_chunks[i].join(',')},
-                success : handleData,
-                dataType :  "json"
-        } );
-}
-
-// start fetching the variants
-// enter recursive calling getData - fetchVariants until i reaches
-// variant_chunks.length
-function fetchVariants() {
-    // split variants into chunks of 100
-    // window.variants gets emptied  in the process
-    total_length=window.variants.length;
-    variant_chunks = [];
-    while (window.variants.length > 0) variant_chunks.push(window.variants.splice(0, chunk_size));
-    i=0;
-    getData(i);
-}
-
-// fetch private variants to patients
-// calls fetchVariants on complection
-function fetchPrivateVariants(patients) {
-    console.log(patients);
-    $.ajax( {
-                type : 'POST',
-                url : '/fetch_private_variants', 
-                data : {patients: patients.join(',')},
-                success : function(data) {
-                    window.variants=data.result;
-                    fetchVariants();
-                },
-                dataType :  "json"
-        } );
-}
-
-// fetch common variants to patients
-// calls fetchVariants on complection
-function fetchCommonVariants(patients) {
-    console.log(patients);
-    $.ajax( {
-                type : 'POST',
-                url : '/fetch_common_variants', 
-                data : {patients: patients.join(',')},
-                success : function(data) {
-                    window.variants=data.result;
-                    fetchVariants();
-                },
-                dataType :  "json"
-        } );
-}
-
-
-
-// fetches patients with hpo term
-// calls fetchPrivateVariants on completion
-function fetchPatients(hpo_id) {
-    $.ajax( {
-                type : 'POST',
-                url : '/fetch_hpo', 
-                data : {hpo_ids: hpo_id},
-                success : function(data) {
-                    console.log(data);
-                    patients=data.result;
-                    $.each(data.result,function(i,r){
-                        // display all variants and let user filter
-                            var row = document.createElement("tr");
-                            var td = document.createElement("td");
-                            var a = document.createElement("a");
-                            a.href="/individual/"+r;
-                            a.target="_blank";
-                            var text = document.createTextNode(i + ":" + r );
-                            a.appendChild(text);
-                            td.innerHTML = a;
-                            row.appendChild(td);
-                            document.getElementById("individuals").appendChild(row);
-                            var x=document.getElementById("individuals_loaded");
-                            x.text="Individuals: "+document.getElementById("individuals").rows.length;
-                            patients.push(r);
-                    })
-                    //fetchPrivateVariants(patients);
-                    fetchCommonVariants(patients);
-                },
-                dataType :  "json"
-        } );
-}
-// this start the fetching of the data
-//var patients=fetchPatients(hpo_id);
-//fetchCommonVariants(patients);
-
-
-function create_url(base_url, text, url_end, a_class) {
-  if (url_end === undefined) {
-    return '<a href=' + base_url + '/' + text + ' target="_blank">' + text + '</a>';
-  } else if (a_class === undefined) {
-    return '<a href=' + base_url + '/' + url_end + ' target="_blank">' + text + '</a>';
-  } else {
-    return '<a class="'+ a_class +'" href=' + base_url + '/' + url_end + ' target="_blank">' + text + '</a>';
-  }
-}
-
-function initTableSorter(table) {
-    $(table).tablesorter({
-    theme: 'bootstrap',
-    headerTemplate: '{content}{icon}',
-    // hidden filter input/selects will resize the columns, so try to minimize the change
-    widthFixed: true,
-    // initialize zebra striping and filter widgets
-    widgets: ['zebra','filter','stickyHeaders','uitheme'],
-    widgetOptions: {
-      zebra: ['even','odd'],
-      // Use the $.tablesorter.storage utility to save the most recent filters
-      //filter_saveFilters : true,
-      // jQuery selector string of an element used to reset the filters
-      filter_reset: 'button.reset',
-      filter_columnFilters: true,
-      textSorter: {
-        3: $.tablesorter.sortNatural,
-      }
-    }
-  });
-}
-
-// fetches patients with hpo term
-function fetchIndividuals() {
-  $.ajax({
-    type: 'GET', 
-    url : '/hpo_individuals_json/{{hpo_id}}', 
-    dataType: 'json',
-    timeout: 120000,
-    success: function (data) {
-      var individuals = data.result['individuals'];
-      $('#individuals-div').html('<table id=individuals_table class=tablesorter> <thead> <tr> <th>Individual (<span id="number_of_individuals">'+individuals.length+'</span>) </th> <th>Gender</th> <th>Phenotype</th> <th tooltip=scaled score from Monarch>Phenotype Score</th> <th>Rare Hom</th> <th>Rare Comp Het</th> <th>Rare</th> <th>Candidate Genes</th> <th>Candidate Variants</th>  </tr> </thead> <tbody id=individuals_table_body> </tbody> </table>');
-      for (var i = 0; i < individuals.length; i++) {
-        // individual cell HTML
-        var individual_cell_html = create_url('/individual', individuals[i]['external_id']);
-        // iterate over features to phenotypes HTML
-        var phenotype_html = '';
-        var features = individuals[i]['features']
-        for (var j = 0; j < features.length; j++) {
-          phenotype_html = phenotype_html + ' ' + create_url('/hpo', features[j]['label'], features[j]['id'], 'label label-default');
-        }
-
-        // iterate over genes for Genes variants HTML
-        var genes_html = '';
-        var solved_variants_html = '';
-        var genes = individuals[i]['genes']
-        var solved_variants = individuals[i]['solved_variants']
-        for (var k = 0; k < genes.length; k++) {
-          genes_html = genes_html + ' ' + create_url('/gene', genes[k]);
-          if (solved_variants !== undefined) {
-            if (solved_variants[genes[k]] !== undefined) {
-              if (solved_variants[genes[k]]['hom'] === undefined) {
-                solved_variants_html = solved_variants_html + ' [ , ' + create_url('/variant', solved_variants[genes[k]]['hom']) + '] '
-              } else if (solved_variants[genes[k]]['het'] === undefined) {
-                solved_variants_html = solved_variants_html + ' [' + create_url('/variant', solved_variants[genes[k]]['het']) + ', ] '
-              } else {
-                solved_variants_html = solved_variants_html + ' [' + create_url('/variant', solved_variants[genes[k]]['het']) + ', ' + create_url('/variant', solved_variants[genes[k]]['hom']) + '] '
-              }            
-            } 
-          }
-        }
-
-        // generate tr
-        $('<tr>').append(
-          $('<td>').html(individual_cell_html),
-          $('<td>').text(individuals[i]['sex']), //gender_cell
-          $('<td>').html(phenotype_html), //phenotype_cell
-          $('<td>').text(individuals[i]['specificity']['score']), // phenotype_score_cell          
-          $('<td>').text(individuals[i]['rare_homozygous_variants_count']), // rare_hom_cell
-          $('<td>').text(individuals[i]['rare_compound_hets_count']), // rare_comp_cell
-          $('<td>').text(individuals[i]['rare_variants_count']), // rare_cell
-          $('<td>').html(genes_html), // candidate_genes_cell
-          $('<td>').html(solved_variants_html) // candidate_variants_cell
-        ).appendTo('#individuals_table_body')
-      }
-      initTableSorter('#individuals_table');
-      $('#individuals_table').on('filterEnd', function(){
-        $('#number_of_individuals').text($('#individuals_table_body tr:visible').size())
-      })
-      $('#individual_loading_image').remove();
-    }
-  });
-}
-
-// fetches patients with hpo term
-function fetchSkats() {
-  $.ajax({
-    type: 'GET', 
-    url: '/hpo_skat_json/{{hpo_id}}', 
-    dataType: 'json',
-    timeout: 120000,
-    success: function (data) {
-      var skats = data.result['individuals'];
-      $('#skats-div').html('<table id=skats_table class=tablesorter> <thead><tr><th>Gene</th><th>pLI</th><th>Mode</th><th>FisherPvalue</th><th>SKATO</th><th>OddsRatio</th><th>Variants</th></tr></thead> <tbody id=skats_table_body> </tbody> </table>');
-      for (var i = 0; i < skats.length; i++) {
-        // iterate over variants to produce variant HTML
-        var variant_html = '';
-        var variants = skats[i]['variants']
-        for (var j = 0; j < variants.length; j++) {
-          variant_html = variant_html + ' ' + create_url('/variant', variants[j], variants[j],'label label-default pop pointer variant_id');
-        }
-        // generate tr
-        $('<tr>').append(
-          $('<td>').text(skats[i]['Symbol']),
-          $('<td>').text(skats[i]['pli'].toFixed(1)),
-          $('<td>').text(skats[i]['mode']),
-          $('<td>').text(skats[i]['FisherPvalue']),
-          $('<td>').text(skats[i]['SKATO']),
-          $('<td>').text(skats[i]['OddsRatio']),
-          $('<td>').html(variant_html)
-        ).appendTo('#skats_table_body')
-      }
-      initTableSorter('#skats_table');
-      $('#skat_loading_image').remove();
-    },
-    error: function (error, msg){
-      console.log(error)
-      console.log(msg)
-    }
-  });
-}
-
-
-// fetches patients with hpo term
-// calls fetchPrivateVariants on completion
-function fetchPhenoGenon() {
-    $.ajax( {
-      type: 'GET',
-      url: '/phenogenon_json/{{hpo_id}}', 
-      dataType: "json",
-      timeout: 120000,
-      success: function(data) {
-        //lit_genes
-        $('phenogenon_lit_genes-div').empty();
-        $('#phenogenon_lit_genes-div').html(" <table class=tablesorter> <thead> <tr> <th>Gene</th> <th>Phenogenon Dominant pvalue</th> <th>Phenogenon Recessive pvalue</th> </tr> </thead> <tbody id=phenogenon_lit_genes> </tbody> </table> ");
-        var lit_genes=data.result['lit_genes'];
-        for (var i=0; i<lit_genes.length; i++) {
-          // generate tr
-          $('<tr>').append(
-            $('<td>').html(create_url('/gene', lit_genes[i].gene_name)), // Gene
-            $('<td>').text(lit_genes[i]['phenogenon']['het'].unrelated_dominant_all_p_val), // dominant pvalue
-            $('<td>').text(lit_genes[i]['phenogenon']['hom_comp'].unrelated_recessive_p_val) // recessive p value
-          ).appendTo('#phenogenon_lit_genes')
-        }
-        //dominant_genes
-        $('#gene-hpo-dominant-table-div').empty();
-        $('#gene-hpo-dominant-table-div').html(" <table id=gene-dominant-table class=tablesorter> <thead> <tr> <th>Dominant Genes</th> <th title='fisher test'>p value</th> </tr> </thead> <tbody id=dominant_table_body> </tbody> </table> ");
-        var dominant_genes=data.result['dominant_genes'];
-        for (var i=0; i<dominant_genes.length; i++) {
-          var gene_name;
-          if (dominant_genes[i].known) {
-            gene_name = create_url('/gene', dominant_genes[i].gene_name, dominant_genes[i].gene_name, 'known_gene')
-          } else {
-            gene_name = create_url('/gene', dominant_genes[i].gene_name)
-          }
-          // generate tr
-          $('<tr>').append(
-            $('<td>').html(gene_name),
-            $('<td>').text(dominant_genes[i].p_val)
-          ).appendTo('#dominant_table_body')
-        }
-        //recessive_genes
-        $('#gene-hpo-hom_comp-table-div').empty();
-        $('#gene-hpo-hom_comp-table-div').html(" <table id=gene-hpo-hom_comp-table class=tablesorter> <thead> <tr> <th>Recessive Genes</th> <th title='fisher test'>p value</th> </tr> </thead> <tbody id=hom_comp_table_body> </tbody> </table> ");
-        var recessive_genes=data.result['recessive_genes'];
-        for (var i=0; i<recessive_genes.length; i++) {
-          var gene_name;
-          if (recessive_genes[i].known) {
-            gene_name = create_url('/gene', recessive_genes[i].gene_name, recessive_genes[i].gene_name, 'known_gene')
-          } else {
-            gene_name = create_url('/gene', recessive_genes[i].gene_name)
-          }
-          // generate tr
-          $('<tr>').append(
-            $('<td>').html(gene_name),
-            $('<td>').text(recessive_genes[i].p_val)
-          ).appendTo('#hom_comp_table_body')
-        }
-        initTableSorter('.tablesorter')
-      }
-  });
-}
-
-
-//render_table();
-// calls getData if more data left to fetch
-// otherwise calls finish to group downloaded variants
-// by gene
-function handleData(data) {
-    r=data.result;
-    //console.log(i);
-    //console.log(r);
-    //console.log(r.external_id+"_variant_count");
-    document.getElementById(r.external_id+"_variant_count").appendChild(document.createTextNode(r.variant_count));
-    if ((i+1)<individuals.length) {
-        getData(++i);
-        //$(individuals_table).trigger('update');
-    }
-    else {
-        $(individuals_table).trigger('update');
-    }
-}
-
-
-// get individual_id in real time
-$('.individual_id').on('click',function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    $.get('/phenogenon_json/' + id,
-        function(data){
-            if ($('h3.popover-title').text() == 'loading...'){
-                $('div.popover.in').remove();
-                span.trigger('click');
-                span.trigger('click');
-            }
-            if (!data.result) {
-                span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-                span.attr('data-content', 'no data available');
-            }
-            var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
-            content += '<p><b>Features:</b><br/>'
-            $.each(data.result.features.sort(), function(i,v){
-                content += '<a href="/hpo/'+v.label+'">'+v.label+'</a><br/>';
-            });
-            content += '</p>';
-            span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-            span.attr('data-content', content);
-    });
-});
-
-
-// fetches the chunk specified by i
-function getData(i) {
-    $.ajax( {
-                type : 'GET',
-                url : '/private_variant_count', 
-                data : {external_id: individuals[i]},
-                success : handleData,
-                dataType :  "json"
-        } );
-}
-
-
-function render_table() {
-    // call the tablesorter plugin
-    $(individuals_table).tablesorter({
-        theme : 'bootstrap',
-        headerTemplate : '{content}{icon}',
-        // hidden filter input/selects will resize the columns, so try to minimize the change
-        widthFixed : true,
-        // initialize zebra striping and filter widgets
-        widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
-        widgetOptions : {
-            zebra : ["even", "odd"],
-            // Use the $.tablesorter.storage utility to save the most recent filters
-            //filter_saveFilters : true,
-            // jQuery selector string of an element used to reset the filters
-            filter_reset : 'button.reset',
-            filter_columnFilters : true
-            // add custom selector elements to the filter row
-        }
-    });
-}
-
-initTableSorter('.table-sorter')
-
-//render_table();
-//$(individuals_table).tablesorter();
-//getData(0);
-
-fetchIndividuals(hpo_id);
-fetchPhenoGenon(hpo_id);
-fetchSkats(hpo_id)
-});
-
-</script>
-
-
-
-
-
-
 {% endblock %}

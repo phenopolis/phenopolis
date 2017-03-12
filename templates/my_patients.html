@@ -1,0 +1,31 @@
+{% extends "material_app_layout.html" %} {% block body %}
+<div class="container">
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <h3 class="truncate" style="font-weight: 300">My Patients <span id="total-patients" style="font-size:0.7em;"></span></h3>
+            <div class="col m12" id="my_patients" style="padding-top:2rem;">
+                {% include "components/loading_from_server.html" %}
+                <table id="my_patients_table" class="table-sorter striped centered" style="display:none;">
+                    <thead>
+                        {% include "components/table-pager.html" %}
+                        <tr>
+                            <th>Individual </th>
+                            <th>Gender</th>
+                            <th>Phenotype</th>
+                            <th tooltip="scaled score from Monarch">Phenotype Score</th>
+                            <th>Rare Hom</th>
+                            <th>Rare Comp Het</th>
+                            <th>Rare</th>
+                            <th>Candidate Genes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="my_patients_table_body"></tbody>
+                    <tfoot>
+                        {% include "components/table-pager.html" %}
+                    </tfoot>
+                </table>              
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
