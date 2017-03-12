@@ -8,7 +8,7 @@ cd ../..
 
 # python packages required
 pip install Cython==0.25.2 --install-option="--no-cython-compile" --user 
-pip install -r phenopolis/requirements_server.txt --user
+pip install -r phenopolis/requirements.txt --user
 
 # Make sure mongodb is running
 DBPATH=db
