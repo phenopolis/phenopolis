@@ -14,16 +14,25 @@ from bson.json_util import dumps
 '''
 defs
 '''
-def hide_hpo_for_demo(data):
+def hide_id_for_demo(data):
     if not data: return
-    for mode in ['hom_comp','het']:
-        for k1,v1 in data[mode].iteritems():
-            # hide hpo
-            for k2,v2 in v1['data'].iteritems():
-                v2['hpo'] = ['hidden']
-            # hide p_id
-            for k2 in v1['data'].keys():
-                v1['data']['hidden_'+hashlib.sha224(k2).hexdigest()[:6]] = v1['data'].pop(k2)
+    for k,v in data['patients'].items():
+        # hide hpo
+        v['hpo'] = ['hidden']
+        # hide variants
+        v['variants'] = ['hidden_'+hashlib.sha224(i).hexdigest()[:6] for i in v['variants']]
+        # hide p_id
+        new_p = 'hidden_'+hashlib.sha224(k).hexdigest()[:6]
+        data['patients'][new_p] = data['patients'].pop(k)
+
+    for k1,v1 in data['data'].items():
+        for k2,v2 in v1['p'].items():
+            v1['p'][k2] = ['hidden_'+hashlib.sha224(i).hexdigest()[:6] for i in v2]
+
+    for k,v in data['variants'].items():
+        new_v = 'hidden_'+hashlib.sha224(k).hexdigest()[:6]
+        data['variants'][new_v] = data['variants'].pop(k)
+
 '''
 routes
 '''
@@ -67,12 +76,12 @@ def gene_page(gene_id):
     hpo_terms_dict=dict()
     for hpo_id in hpo_terms:
         hpo_terms_dict[hpo_id]=hpo_db.hpo.find_one({'id':hpo_id})
-    gene_hpo = db.gene_hpo.find_one({'gene_id':gene_id})
+    gene_hpo = db.gene_hpo.find_one({'gene_id':gene_id},{'_id':0})
     patients_status = {}
-    if session['user'] == 'demo': hide_hpo_for_demo(gene_hpo) 
+    if session['user'] == 'demo': hide_id_for_demo(gene_hpo) 
     else:
     # get patients status, solved? candidate genes? Only work when user is not demo for the time-being. Will probably change data struture later on to make it work for demo too
-        all_patients = frozenset(gene_hpo['het'].get('HP:0000001',{'data':{}})['data'].keys()) | frozenset(gene_hpo['hom_comp'].get('HP:0000001',{'data':{}})['data'].keys())
+        all_patients = gene_hpo['patients'].keys()
         patients_status = dict([(i['external_id'],i) for i in patient_db.patients.find({'external_id':{'$in':list(all_patients)}},{'external_id':1,'solved':1,'genes':1})])
     table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?>",file('templates/gene-page-tabs/gene_variant_row.tmpl','r').read())
     # get simreg
@@ -86,19 +95,17 @@ def gene_page(gene_id):
         simreg[mode]['data'] = temp[0]['phi'].values()
         # sort desc
         simreg[mode]['data'] = sorted(simreg[mode]['data'], key=lambda x: x['prob'], reverse=True)
-    pli=get_db('exac').pli.find_one({'gene':gene['gene_name_upper']})
+    pli=get_db('exac').pli.find_one({'gene':gene['gene_name']})
     if pli:
         pli=pli['pLI']
     else:
         pli=-1
-    print hpo_terms_dict
     return render_template('gene.html', 
-            title=gene['gene_name_upper'],
+            title=gene['gene_name'],
             gene=gene,
             pli=pli,
             table_headers=table_headers,
-            dot_hom_comp = json.dumps(gene_hpo['hom_comp']) if gene_hpo else {},
-            dot_het = json.dumps(gene_hpo['het']) if gene_hpo else {},
+            phenogenon = json.dumps(gene_hpo) if gene_hpo else {},
             simreg = simreg,
             individuals=individuals,
             hpo_terms_json = json.dumps(hpo_terms),
