@@ -58,22 +58,20 @@ def get_individuals(build_cache=False):
     return individuals
 
 
-@app.route('/individuals_json')
+@app.route('/my_patients_json')
 @requires_auth
-def individuals_json():
+def my_patients_json():
     build_cache=str(request.args.get('build_cache')).lower()=='true'
     individuals=get_individuals(build_cache)
     return(jsonify(result=individuals))
 
 
-# shows each individual, 
+# shows each patients, 
 # all_individuals
-@app.route('/individuals')
+@app.route('/my_patients')
 @requires_auth
-def individuals_page():
-    return render_template('individuals_page.html')
-
-
+def my_patients():
+    return render_template('my_patients.html')
 
 # shows each individual, 
 # all_individuals
@@ -119,6 +117,3 @@ def individuals_csv():
     #if session['user']=='demo': for ind in individuals: ind['external_id']=encrypt(ind['external_id'])
     #return render_template('individuals_page.html',individuals=individuals,page=page,number=number,total=total)
     return '\n'.join([','.join([ind['external_id'],ind['total_variant_count'],ind['rare_variants_count']]) for ind in individuals])
-
-
-

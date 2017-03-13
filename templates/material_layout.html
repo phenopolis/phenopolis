@@ -4,56 +4,8 @@
 <head>
     <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/phenopolis.min.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style type="text/css">
-    .home .section {
-        padding-top: 5rem;
-        padding-bottom: 5rem
-    }
-    
-    nav i.left {
-        margin-right: 5px;
-    }
-    
-    .section .collection {
-      background-color: #fff;
-    }
-    .section .collection-item.avatar {
-        min-height: 118px;
-        padding-left: 134px;
-        border-bottom: none;
-    }
-    
-    .section .collection-item.avatar img.circle {
-        height: 100px;
-        width: 100px;
-    }
-    
-    #team .row {
-        margin-bottom: initial;
-    }
-
-    #team .collection .collection-item.avatar p {
-        overflow-y: scroll;
-        margin-bottom: 1rem !important;
-        margin-top: 0.656rem
-    }
-
-    #team .collection .collection-item.avatar span {
-      font-size:0.8rem;
-      line-height: 0.8rem;
-    }
-
-    #team .collection .collection-item.avatar .material-icons {
-      font-size:inherit;
-    }
-    #team .collection .collection-item.avatar h5 {
-      margin-bottom: 0
-    }
-
-
-
-    </style>
 </head>
 
 <body class="home">
@@ -63,7 +15,6 @@
                 <a href="/" class="brand-logo"> Phenopolis</a>
                 <a href="#" data-activates="mobile-menu" class="button-collapse"><i class="material-icons" style="font-size: 2.6rem;">menu</i></a>
                 <ul class="right hide-on-med-and-down" style="position:absolute;top:0 !important;right:0;">
-                    <li><a href="https://phenotips.cs.ucl.ac.uk" target="_blank"><i class="material-icons left">assignment_ind </i>Phenotips</a></li>
                     <li><a href="http://biorxiv.org/content/early/2016/10/31/084582" target="_blank"><i class="material-icons left">class</i>Publication</a></li>
                     <li><a href="/about"><i class="material-icons left">info_outline</i>About</a></li>
                     <li><a class="modal-trigger" href="#login_modal"><i class="material-icons left">perm_identity</i>Login</a></li>
@@ -93,279 +44,24 @@
                 <br>
             </div>
         </div>
-        <div class="parallax" style="opacity: 0.5; background-color: #849DAD;"><img src="/static/images/background_home.jpg" alt="Unsplashed background img 1"></div>
+        <div class="parallax" style="opacity: 0.5; background-color: #849DAD;"><img src="{{ url_for('static', filename='images/background_home.jpg')}}" alt="Unsplashed background img 1"></div>
     </div>
-    {% block body %}{% endblock %}
+    {% block body %} {% endblock %}
     <!-- Footer -->
-    {% include "material_footer.html" %}
-    <!-- Login Modal -->
-    <div id="login_modal" class="modal">
-        <div class="modal-content" id="login_content">
-            <i class="material-icons right modal-close">close</i>
-            <h4>Login</h4>
-            <p>Please enter your credentials in order to login.</p>
-            <form id="login_form" class="col s12" action="/login" method="POST">
-                <div class="row">
-                    <div class="input-field col s6">
-                        <i class="material-icons prefix">account_circle</i>
-                        <input id="username" type="text" placeholder="demo" name="username" value="{{request.form.username }}" class="validate">
-                        <label for="username">Username:</label>
-                    </div>
-                    <div class="input-field col s6">
-                        <i class="material-icons prefix">lock</i>
-                        <input id="password" type="password" placeholder="demo123" name="password" value="{{request.form.password }}" class="validate">
-                        <label for="password">Password</label>
-                    </div>
-                    <p class="col s12" id="login_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">Authentication failed. Please enter your username and passsword again.
-                        <br>Contact us if you continue to have issues logging in.</p>
-                </div>
-            </form>
-            <p>Alternatively, select the 'Demo Login' button below to login as a demo user.</p>
-        </div>
-        <div class="modal-content" id="register_content" style="display:none;">
-            <i class="material-icons right modal-close">close</i>
-            <h4>Register</h4>
-            <p>Please enter your details below and press submit. Once we have </p>
-            <form id="register_form" class="col s12" action="/register" method="POST">
-                <div class="input-field col s12">
-                    <i class="material-icons prefix">account_circle</i>
-                    <input id="name" type="text" name="name" class="validate">
-                    <label for="name">Full Name:</label>
-                </div>
-                <div class="input-field col s12">
-                    <i class="material-icons prefix">email</i>
-                    <input id="email" type="email" name="email" class="validate">
-                    <label for="email">Email Address:</label>
-                </div>
-                <div class="input-field col s12">
-                    <i class="material-icons prefix">school</i>
-                    <input id="affliation" type="text" name="affliation" class="validate">
-                    <label for="affliation">Affliation:</label>
-                </div>
-                <div class="row">
-                  <p>Please select any Groups that you are part of:</p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="black" id="black">
-                    <label for="black">Black</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="brogan" id="brogan">
-                    <label for="brogan">Brogan</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="elliott" id="elliott">
-                    <label for="elliott">Elliott</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="gosgene" id="gosgene">
-                    <label for="gosgene">Gosgene</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="hardcastle" id="hardcastle">
-                    <label for="hardcastle">Hardcastle</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="humphries" id="humphries">
-                    <label for="humphries">Humphries</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="kelsell" id="kelsell">
-                    <label for="kelsell">Kelsell</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="lachmann" id="lachmann">
-                    <label for="lachmann">Lachmann</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="marks" id="marks">
-                    <label for="marks">Marks</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="mead" id="mead">
-                    <label for="mead">Mead</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="moosajee" id="moosajee">
-                    <label for="moosajee">Moosajee</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="nejentsev" id="nejentsev">
-                    <label for="nejentsev">Nejentsev</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="rahman" id="rahman">
-                    <label for="rahman">Rahman</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="segal" id="segal">
-                    <label for="segal">Segal</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="sisodiya" id="sisodiya">
-                    <label for="sisodiya">Sisodiya</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="arvc" id="arvc">
-                    <label for="arvc">Arvc</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="syrris" id="syrris">
-                    <label for="syrris">Syrris</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="ukirdc" id="ukirdc">
-                    <label for="ukirdc">Ukirdc</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="vulliamy" id="vulliamy">
-                    <label for="vulliamy">Vulliamy</label>
-                  </p>
-                  <p class="col s6 m3 l2">
-                    <input type="checkbox" name="group[]" value="webster" id="webster">
-                    <label for="webster">Webster</label>
-                  </p>
-                </div>
-            </form>
-            <p id="registration_successful" style="color:#4CAF50; display: none;">Registration successful. We will review your application and will email you with login details if your application is successful.</p>
-        </div>
-        <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
-            <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Close</a>
-            <a id="register_btn" href="#!" class="left waves-effect waves-green btn-flat">Register</a>
-            <a id="enter_login_btn" href="#!" class="left waves-effect waves-green btn-flat" style="display:none;">Login</a>
-            <!-- Right side of fotter -->
-            <a id="submit_register_btn" href="#!" class="waves-effect waves-green btn-flat" style="display: none;">Submit</a>
-            <a id="login_btn" href="#!" class="waves-effect waves-green btn-flat">Login</a>
-            <a id="demo_login_btn" href="#!" class="waves-effect waves-green btn-flat">Demo Login</a>
-        </div>
-    </div>
-    <!-- Auth Modal -->
-    <div id="auth_modal" class="modal">
-        <div class="modal-content">
-            <div class="row">
-                <div class="col s8 offset-s2">
-                    <h4 class="center">Authenticating...</h4>
-                    <div class="progress light-blue lighten-3" style="margin-top:1.5rem;">
-                        <div class="indeterminate light-blue darken-3"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include "components/material_footer.html" %} {% include "components/login_modal.html" %}
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='assets/js/home.js') }}"></script>
     <script type="text/javascript">
-    var PPlogin = function() {
-        // TODO: Replace with JQuery.validate
-        // show Login Model
-        $('#auth_modal').modal({dismissible: false, endingTop: '20%'});
-        $('#auth_modal').modal('open');
-
-        $.ajax({
-            type: 'POST',
-            url: '/login',
-            data: $('#login_form').serialize(),
-            dataType: 'json',
-            timeout: 120000,
-            success: function(data) {
-                window.location.href = '/search';
-            },
-            error: function(data, msg) {
-                $('#auth_modal').modal('close');
-                $("#username, #password").addClass("invalid");
-                $("#username, #password").prop("aria-invalid", "true");
-                $('#login_form_error_msg').show();
-            }
-        });
-    };
-
-    var equalSizeDiv = function(div){
-      if ($(div).length === 0) return;
-      var maxHeight = 0;
-      $(div).each(function(){
-         if ($(this).height() > maxHeight) { maxHeight = $(this).height(); }
-      });
-      $(div).css('height', maxHeight);
-    };
-
-    var showRegistrationForm = function() {
-      $('#login_content').hide();
-      $('#register_btn').hide();
-      $('#login_btn').hide();
-      $('#demo_login_btn').hide();
-
-      $('#register_content').show();
-      $('#enter_login_btn').show();
-      $('#submit_register_btn').show();
-    };
-
-    var showLoginForm = function() {
-      $('#login_content').show();
-      $('#register_btn').show();
-      $('#login_btn').show();
-      $('#demo_login_btn').show();
-
-      $('#register_content').hide();
-      $('#enter_login_btn').hide();
-      $('#submit_register_btn').hide();
-    };
-
-    $(window).resize(function() {
-      $('.collection').css('height','auto');
-      equalSizeDiv('.collection');
-    });
-
-    $(document).ready(function() {
-        $('.parallax').parallax(); // Init parallax
-        $('.modal').modal({complete: showLoginForm()}); // Init Modals
-        $(".button-collapse").sideNav(); // Init Mobile menu
-
-        // Submit form upon clicking the login button in the modal
-        $('#login_btn').on('click', function() {
-            PPlogin();
-        });
-
-        // Automatically login when selecting the demo login button
-        $('#demo_login_btn, #parallax_demo_login_btn').on('click', function() {
-            $('#username').val('demo');
-            $('#password').val('demo123');
-            PPlogin();
-        });
-
-        // submit form upon pressing enter in the login form
-        $('#login_form input').keydown(function(e) {
-            if (e.keyCode == 13) PPlogin();
-        });
-
-        equalSizeDiv('.collection');
-
-        $('#register_btn').on('click', function(){
-          showRegistrationForm();
-        });
-
-
-        $('#enter_login_btn').on('click', function(){
-          showLoginForm();
-        });
-
-        $('#submit_register_btn').on('click', function(){
-          $.ajax({
-              type: 'POST',
-              url: '/register',
-              data: $('#login_form').serialize(),
-              dataType: 'json',
-              timeout: 120000,
-              success: function(data) {
-                $('#registration_successful').show();
-              },
-              error: function(data, msg) {
-                console.log(data);
-                console.log(msg);
-              }
+      (function($) {
+          $(function() {
+            PP.equalizeAboutBoxes();
+            $('.parallax').parallax(); // Init parallax
+            $('.modal').modal({ complete: PP.showLoginForm() }); // Init Modals
+            $(".button-collapse").sideNav(); // Init Mobile menu
+            PP.initLogin();
           });
-
-        });
-
-    });
+      })(jQuery);
     </script>
 </body>
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/phenopolis.min.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body class="app">
+    <nav class="light-blue darken-2" role="navigation">
+        <div class="nav-wrapper" style="padding:0 10px">
+            <a href="/" class="brand-logo left"> Phenopolis</a>
+            <div id="nav_search_bar_wrapper" class="valign-wrapper hide-on-med-and-down">
+                <form id="navbar_search_form" action="/awesome">
+                    <div class="input-field">
+                        <input id="search_navbar" class="typeahead" name='query' type="search" required placeholder="Search for a phenotype, patient, gene, variant or region">
+                        <label id="search_navbar_label" class="label-icon active" for="search_navbar"><i class="material-icons">search</i></label>
+                        <i id="search_navbar_cross" class="material-icons">close</i>
+                    </div>
+                </form>
+            </div>
+
+            <ul class="right" style="position:absolute;top:0 !important;right:0;">
+              {% if session['user'] %}
+                <li>
+                  <a class="white-text" href="/my_patients" style="display: flex;">
+                    <span style="padding-right:10px;">My Patients</span>
+                    <i class="material-icons">wc</i>
+                  </a>
+                </li>
+                <li class="user">
+                    <a class="white-text dropdown-button" data-activates="navbar_side_dropdown" data-beloworigin="true" href="#!" style="display: flex;">
+                        <span class="truncate" style="max-width: 150px; padding-right:10px;">{{session['user'].title() }}</span>
+                        <i class="material-icons">perm_identity</i>
+                    </a>
+                </li>
+              {% else %}
+                <li><a class="modal-trigger" href="#login_modal"><i class="material-icons left">perm_identity</i>Login</a></li>
+              {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="app-wrapper">
+        {% block body %}{% endblock %}
+    </div>
+    <!-- NAVBAR DROPDOWN -->
+    <ul class="dropdown-content collection" id="navbar_side_dropdown" style="z-index:5;">
+        <li class="collection-item avatar" onclick="location.href='/faq';">
+            <i class="material-icons circle light-blue accent-2"> live_help</i><span class="title">FAQs</span>
+        </li>
+        <li class="collection-item avatar" onclick="location.href='/feedback';">
+            <i class="material-icons circle light-blue accent-2"> feedback</i><span class="title">Feedback</span>
+        </li>
+        <li class="collection-item avatar" onclick="location.href='/logout';" style="cursor: pointer;">
+            <i class="material-icons circle light-blue accent-2"> power_settings_new</i><span class="title">Log Out</span>
+        </li>
+    </ul>
+
+    {% include "components/login_modal.html" %}
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/typeahead.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/tablesorter.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='assets/js/phenopolis.js') }}"></script>
+    <script type="text/javascript">
+    (function($) {
+        $(function() {
+            PP.addUserDropDown();
+            PP.setUpSearchField();
+        });
+    })(jQuery);
+    </script>
+    <span style="display: none;">{{request.endpoint}}</span>
+    {% if request.endpoint == "gene_page" %}
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/PP.bionomial.js') }}"></script>
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/PP.fisher.js') }}"></script>
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/gene.js') }}"></script>
+      <script type="text/javascript">
+      (function($) {
+          $(function() {
+              // var hpo_terms = {{ hpo_terms_json|safe }};
+              // var patients_status = {{ patients_status|safe }};
+              // var hom = {{ dot_hom_comp|safe }};
+              // var het = {{ dot_het|safe }};
+              PP.generateGenePageTable(hom, hpo_terms, 'hom');
+              PP.generateGenePageTable(het, hpo_terms, 'het');
+          });
+      })(jQuery);
+      </script>
+    {% elif request.endpoint == "hpo_page" %}
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/hover-intent.js') }}"></script>
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/hpo.js') }}"></script>
+      <script type="text/javascript">
+      (function($) {
+          $(function() {
+              PP.initIndividualsTable('{{hpo_id}}');
+              PP.initLitGenesAndPhenogenonTables('{{hpo_id}}');
+              PP.initSkatsTable('{{hpo_id}}');
+              PP.initPhenogenonTabs();
+          });
+      })(jQuery);
+      </script>
+    {% elif request.endpoint == "my_patients" %}
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/my_patients.js') }}"></script>
+      <script type="text/javascript">
+      (function($) {
+          $(function() {
+              PP.fetchPatients();
+          });
+      })(jQuery);
+      </script>
+    {% endif %}
+</body>
+
+</html>

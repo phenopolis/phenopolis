@@ -12,6 +12,7 @@ class GenePageTestCase(unittest.TestCase):
         runserver.app.config['DB_NAME'] = 'test_uclex'
         runserver.app.config['DB_NAME_HPO'] = 'test_hpo'
         runserver.app.config['DB_NAME_PATIENTS'] = 'test_patients'
+        runserver.app.config['DB_NAME_USERS'] = 'test_users'
         self.app = runserver.app.test_client()
         helper.login(self.app)
         load_data.load_data()
