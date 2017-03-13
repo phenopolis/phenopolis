@@ -9,6 +9,7 @@ class LoginTestCase(unittest.TestCase):
     def setUp(self):
         runserver.app.config['TESTING'] = True
         self.app = runserver.app.test_client()
+        load_data.load_data()
 
     def tearDown(self):
         pass
