@@ -75,7 +75,7 @@
                 </div>
                 <div id="phenogenon_recessive_tab">
                     <h4 style="font-weight:100;">Recessive</h4>
-                    <p><strong>Genotype: </strong>With at least two variants on a given gene that have ExAC home count not higher than <span class='blue-text'>2</span>, and CADD phred score not lower than <span class='blue-text'>15</span></p>
+                    <p><strong>Genotype: </strong>With at least two variants on a given gene that have ExAC homozygous count not higher than <span class='blue-text'>2</span>, and CADD phred score not lower than <span class='blue-text'>15</span></p>
                     <div class="col m12" id="phenogenon_recessive" style="padding-top:2rem;">
                         {% include "components/loading_from_server.html" %}
                         <table id="gene_recessive_table" class="table-sorter striped centered" style="display:none;">
@@ -95,7 +95,7 @@
                 </div>
                 <div id="phenogenon_dominant_tab">
                     <h4 style="font-weight:100;">Dominant</h4>
-                    <p><strong>Genotype: </strong>With at least two variants on a given gene that have ExAC home count not higher than <span class='blue-text'>0.0001</span>, and CADD phred score not lower than <span class='blue-text'>15</span></p>
+                    <p><strong>Genotype: </strong>With at least one variant on a given gene that has an ExAC heterozygous count not higher than <span class='blue-text'>0.0001</span>, and CADD phred score not lower than <span class='blue-text'>15</span></p>
                     <div class="col m12" id="phenogenon_dominant" style="padding-top:2rem;">
                         {% include "components/loading_from_server.html" %}
                         <table id="gene_dominant_table" class="table-sorter striped centered" style="display:none;">
