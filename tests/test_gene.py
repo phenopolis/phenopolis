@@ -12,6 +12,7 @@ class GenePageTestCase(unittest.TestCase):
         runserver.app.config['DB_NAME'] = 'test_uclex'
         runserver.app.config['DB_NAME_HPO'] = 'test_hpo'
         runserver.app.config['DB_NAME_PATIENTS'] = 'test_patients'
+        runserver.app.config['DB_NAME_USERS'] = 'test_users'
         self.app = runserver.app.test_client()
         helper.login(self.app)
         load_data.load_data()
@@ -24,6 +25,8 @@ class GenePageTestCase(unittest.TestCase):
 
     def test_gene_page(self):
         page = self.gene_page('TTLL5')
+        print 'WTF'
+        print page
         assert page.status_code == 200
         assert 'TTLL5' in page.data 
         assert 'ENSG00000119685' in page.data
