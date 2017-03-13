@@ -8,6 +8,7 @@ import helper
 class GenePageTestCase(unittest.TestCase):
 
     def setUp(self):
+        load_data.load_data()
         runserver.app.config['TESTING'] = True
         runserver.app.config['DB_NAME'] = 'test_uclex'
         runserver.app.config['DB_NAME_HPO'] = 'test_hpo'
@@ -15,7 +16,6 @@ class GenePageTestCase(unittest.TestCase):
         runserver.app.config['DB_NAME_USERS'] = 'test_users'
         self.app = runserver.app.test_client()
         helper.login(self.app)
-        load_data.load_data()
 
     def tearDown(self):
         self.app.get('/logout', follow_redirects=True)
@@ -26,6 +26,7 @@ class GenePageTestCase(unittest.TestCase):
     def test_gene_page(self):
         page = self.gene_page('TTLL5')
         assert page.status_code == 200
+        print page.data
         assert 'TTLL5' in page.data 
         assert 'ENSG00000119685' in page.data
         assert 'Macular dystrophy' in page.data 
