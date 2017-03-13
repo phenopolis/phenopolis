@@ -18,7 +18,7 @@ class LoginTestCase(unittest.TestCase):
 
     def login(self, username, password):
         return self.app.post('/login', data=dict(
-            username=username,
+            name=username,
             password=password
         ), follow_redirects=True)
 
@@ -29,15 +29,12 @@ class LoginTestCase(unittest.TestCase):
         rv = self.login('demox', 'demo123')
         assert rv.status_code == 401
         assert 'Invalid Credentials. Please try again.' in rv.data
-        
         rv = self.login('demo', 'demo123x')
         assert rv.status_code == 401
-        assert 'Invalid Credentials. Please try again.' in rv.data
-        
+        assert 'Invalid Credentials. Please try again' in rv.data
         rv = self.login('demo', 'demo123')
         assert rv.status_code == 200
         assert 'Authenticated' in rv.data
-        
         rv = self.logout()
         assert rv.status_code == 200
         assert 'Please login' and 'username' and 'password' in rv.data

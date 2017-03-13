@@ -150,7 +150,7 @@ def requires_auth(f):
           if 'user' in session: 
              return f(*args, **kwargs)
         if request.method == 'POST':
-          username=request.form['username']
+          username=request.form['user']
           password=request.form['password']
           if check_auth(username,password):
              return f(*args, **kwargs)
@@ -170,7 +170,7 @@ def make_session_timeout():
 # 
 @app.route('/login', methods=['POST'])
 def login():
-    username=request.form['username']
+    username=request.form['name']
     password=request.form['password']
     if not check_auth(username,password):
        print 'Login Failed'
@@ -1556,7 +1556,7 @@ jinja2.filters.FILTERS['highlight2'] = highlight2
 
 
 
-import views.individuals
+import views.my_patients
 import views.gene
 import views.transcript
 import views.uclex_irdc

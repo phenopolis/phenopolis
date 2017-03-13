@@ -1,0 +1,79 @@
+<!-- Login Modal -->
+<div id="login_modal" class="modal">
+    <div class="modal-content" id="login_content">
+        <i class="material-icons right modal-close">close</i>
+        <h4>Login</h4>
+        <p>Please enter your credentials in order to login.</p>
+        <form id="login_form" class="col s12" action="/login" method="POST">
+            <div class="row">
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">account_circle</i>
+                    <input id="name" type="text" placeholder="demo" name="name" autocomplete="name" class="validate">
+                    <label for="name">Username:</label>
+                </div>
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">lock</i>
+                    <input id="password" type="password" placeholder="demo123" name="password" class="validate">
+                    <label for="password">Password</label>
+                </div>
+                <p class="col s12" id="login_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">Authentication failed. Please enter your username and passsword again.
+                    <br>Contact us if you continue to have issues logging in.</p>
+            </div>
+        </form>
+        <p>Alternatively, select the 'Demo Login' button below to login as a demo user.</p>
+    </div>
+    <div class="modal-content" id="register_content" style="display:none;">
+        <i class="material-icons right modal-close">close</i>
+        <h4>Register</h4>
+        <p>Please enter your details below and press submit. Once we have </p>
+        <form id="register_form" class="col s12" action="/register" method="POST">
+            <div class="input-field col s12">
+                <i class="material-icons prefix">account_circle</i>
+                <input id="name" type="text" name="name" class="validate">
+                <label for="name">Full Name:</label>
+            </div>
+            <div class="input-field col s12">
+                <i class="material-icons prefix">email</i>
+                <input id="email" type="email" name="email" class="validate">
+                <label for="email">Email Address:</label>
+            </div>
+            <div class="input-field col s12">
+                <i class="material-icons prefix">school</i>
+                <input id="affliation" type="text" name="affliation" class="validate">
+                <label for="affliation">Affliation:</label>
+            </div>
+            <div class="row">
+                <p>Please select any Groups that you are part of:</p>
+                {% for lab in labnames %}
+                <p class="col s6 m3 l2">
+                    <input type="checkbox" name="group[]" value="{{lab}}" id="{{lab}}">
+                    <label for="{{lab}}">{{lab|capitalize()}}</label>
+                </p>
+                {% endfor %}
+            </div>
+        </form>
+        <p id="registration_successful" style="color:#4CAF50; display: none;">Registration successful. We will review your application and will email you with login details if your application is successful.</p>
+    </div>
+    <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
+        <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Close</a>
+        <a id="register_btn" href="#!" class="left waves-effect waves-green btn-flat">Register</a>
+        <a id="enter_login_btn" href="#!" class="left waves-effect waves-green btn-flat" style="display:none;">Login</a>
+        <!-- Right side of fotter -->
+        <a id="submit_register_btn" href="#!" class="waves-effect waves-green btn-flat" style="display: none;">Submit</a>
+        <a id="login_btn" href="#!" class="waves-effect waves-green btn-flat">Login</a>
+        <a id="demo_login_btn" href="#!" class="waves-effect waves-green btn-flat">Demo Login</a>
+    </div>
+</div>
+<!-- Auth Modal -->
+<div id="auth_modal" class="modal">
+    <div class="modal-content">
+        <div class="row">
+            <div class="col s8 offset-s2">
+                <h4 class="center">Authenticating...</h4>
+                <div class="progress light-blue lighten-3" style="margin-top:1.5rem;">
+                    <div class="indeterminate light-blue darken-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
