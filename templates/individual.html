@@ -2,7 +2,7 @@
 {% block body %}
 
 <h1 id="individual_header"> 
-    Individual: {{external_id}} <span class='sex' id="sex">[{{ patient.sex }}]</span> 
+    Individual: {{patient.external_id}} <span class='sex' id="sex">[{{ patient.sex }}]</span> 
 </h1>
 
 <!-- jQuery UI for range slider -->
@@ -232,9 +232,9 @@
         <p>
         <span class='clinical_features' id="clinical_features">
             <b>Features:</b>
-            {% for f in features %}
+            {% for f in patient.observed_features %}
                   <span class='ind-header'>
-                      <a href='/hpo/{{ f[0] }}'>{{ f[1] }}</a>
+                      <a href='/hpo/{{ f }}'>{{ f }}</a>
                   </span>
             {% endfor %}
         </span>
@@ -286,7 +286,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="patient_id">{{external_id}}</h4>
+        <h4 class="modal-title" id="patient_id">{{patient.external_id}}</h4>
       </div>
       <div class="modal-body">
           <form class="form-horizontal" id="editPatientForm" data-features="{{features|map('last')|join(',')}}" data-consanguinity="{{consanguinity}}"
@@ -733,7 +733,8 @@ venDiv.selectAll("g")
                         console.log($(this));
                         p += $(this).find('.p-change').text() + ' ';
                     });
-                    result = '<b>Rare compound heterozygote: </b><br />' + p; //$('#compound_het-' + d).find('.p-change').text();
+                    result = '<b>Rare compound heterozygote: </b><br />' + p;
+                    //$('#compound_het-' + d).find('.p-change').text();
                 } else if ($.inArray(d, rare_genes) != -1){
                     result = '<b> Rare heterozygote variant: </b>' + $('#rare-' + d).find('.p-change').text();
                 }
