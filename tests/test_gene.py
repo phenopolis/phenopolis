@@ -26,7 +26,6 @@ class GenePageTestCase(unittest.TestCase):
     def test_gene_page(self):
         page = self.gene_page('TTLL5')
         assert page.status_code == 200
-        print page.data
         assert 'TTLL5' in page.data 
         assert 'ENSG00000119685' in page.data
         assert 'Macular dystrophy' in page.data 
