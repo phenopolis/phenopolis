@@ -966,7 +966,9 @@ def contact_page():
 
 @app.route('/faq')
 def faq_page():
-    return render_template('faq.html')
+    patients_db=get_db(app.config['DB_NAME_PATIENTS']) 
+    total_patients=patients_db.patients.count()
+    return render_template('faq.html',total_patients=total_patients)
 
 @app.route('/samples')
 def samples_page():
