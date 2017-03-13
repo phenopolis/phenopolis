@@ -1,10 +1,7 @@
-
 import json
 import pymongo
 from pymongo import MongoClient
-
 from flask import Flask, current_app
-
 import views
 
 # Load the test data set.
