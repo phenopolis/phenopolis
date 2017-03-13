@@ -140,6 +140,9 @@ if (!PP) {
       output: '{startRow}-{endRow} of {filteredRows}  ({totalRows})'
     });
     $('td:has(.chip)').css('text-align', 'left');
+    $(table).bind('pagerComplete', function() {
+      $('td:has(.chip)').css('text-align', 'left');
+    });
   };
 }());
 // End of PP module
