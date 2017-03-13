@@ -1,4 +1,5 @@
 
+from flask import jsonify
 import lookups
 from os import listdir, chdir
 from os.path import isfile, join
@@ -14,6 +15,8 @@ class Patient(object):
         v = object.__getattribute__(self, key)
         if hasattr(v, '__get__'): return v.__get__(None, self)
         return v
+    def json(self):
+        return jsonify(result=self.__dict__)
     def save(self):
         print('writing', self.external_id, 'to database')
         return Patient.db.patients.update({'external_id':self.external_id},self.__dict__,upsert=True)
