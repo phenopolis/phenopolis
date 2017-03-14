@@ -21,6 +21,58 @@ if (!PP) {
     // Cry & scream...
   };
 
+  // init the table directly under the header
+  PP.initPatientFeatureTable = function (patient_id) {
+    $.ajax({
+      type: 'GET',
+      url: 'individual_json/' + patient_id, // TODO - Parse error
+      dataType: 'json',
+      timeout: 120000,
+      success: function(data) { PP.PatientFeatureSuccess(data); },
+      error: function(data, msg) { PP.ajaxError(data, msg); }
+    });
+  };
+
+  //
+  PP.PatientFeatureSuccess = function(data) {
+    PP.addPatientFeaturesInfo(data.result.features); // Or observed_features
+    PP.addPatientConsanguinityInfo(data.result.family_history);
+    PP.addPatientInheritanceModeInfo(data.reult); //todo
+    PP.addPatientGenesInfo(data.result.genes);
+    $('#info_table').show();
+  };
+
+  //
+  PP.addPatientFeaturesInfo = function(features) {
+    var features_html = '';
+    for (var i = 0; i < features.length; i++) {
+      features_html = features_html + ' ' + PP.create_url('/hpo', features[i].label, features[i].id, 'chip');
+    }
+    $('#patient_features').html(features_html);
+  };
+
+  //
+  PP.addPatientConsanguinityInfo = function(family_history) {
+    if (family_history === undefined ) return;
+    if (family_history.consanguinity === undefined || family_history.consanguinity === null ) return;
+    $('#patient_consanguinity').text(family_history.consanguinity);
+  };
+
+  //
+  PP.addPatientInheritanceModeInfo = function() {
+    $('#patient_inheritance_mode').text('TODO');
+  };
+
+  //
+  PP.addPatientGenesInfo = function(genes) {
+    var gene_html = '';
+    for (var i = 0; i < genes.length; i++) {
+      gene_html = gene_html + ' ' + PP.create_url('/gene', genes[i].gene, genes[i].gene, 'chip');
+    }
+    $('#patient_genes').html(gene_html);
+  };
+
+
   PP.initOmimPlot = function () {
 
   };
