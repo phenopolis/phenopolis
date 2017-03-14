@@ -36,7 +36,7 @@ import requests
 @requires_auth
 def individual_json(individual):
     patient=Patient(individual,db=get_db(app.config['DB_NAME_PATIENTS']))
-    return jsonify(result=patient)
+    return patient.json()
 
 @app.route('/edit_patient_features/<individual>',methods=['POST'])
 @requires_auth
@@ -123,7 +123,7 @@ def venn_json(individual):
 
 def patient_variants():
     # add known gene and retnet gene labels, and re-calculate pubmed_score
-    for mm in ['rare_variants','homozygous_variants','compound_hets']:
+    for mm in ['rare_variants','homozygous_variants','compound_het_variants']:
         for v in patient.__dict__[mm]:
             if 'canonical_gene_name_upper' not in v: v['canonical_gene_name_upper']=v['Gene']
             gene=v['canonical_gene_name_upper']
@@ -216,11 +216,23 @@ def exomiser(individual):
     x['exomiser']=x['exomiser'][i]
 
 
-@app.route('/get_variants_json/<individual>')
+@app.route('/homozygous_variants_json/<individual>')
 @requires_auth
-def get_variants_json(individual):
-    return jsonify(result= get_variants(individual))
+def homozgous_variants(individual):
+    patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
+    return jsonify(result=patient.homozygous_variants)
 
+@app.route('/compound_het_variants_json/<individual>')
+@requires_auth
+def compound_het_variants(individual):
+    patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
+    return jsonify(result=patient.compound_het_variants)
+
+@app.route('/rare_variants_json/<individual>')
+@requires_auth
+def rare_variants2(individual):
+    patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
+    return jsonify(result=patient.rare_variants)
 
 def load_patient(individual,auth,pubmed_key,hpo='HP:0000001'):
     hpo_db=get_db(app.config['DB_NAME_HPO'])
@@ -259,7 +271,7 @@ def individual_page(individual):
     # get pubmedbatch scores
     pubmedbatch = {}
     if patient.pubmed_key:
-        genes = [v.get('canonical_gene_name_upper',None) for v in patient.rare_variants+patient.homozygous_variants+patient.compound_hets]
+        genes = [v.get('canonical_gene_name_upper',None) for v in patient.rare_variants+patient.homozygous_variants+patient.compound_het_variants]
         pubmed_keys = ['_'.join([g,patient.pubmed_key]) for g in set(genes)]
         pubmedbatch = list(get_db('pubmedbatch').cache.find({'key':{'$in':pubmed_keys}},{'key':1,'score':1,'_id':0}))
         if pubmedbatch: pubmedbatch = dict([(i['key'],i.get('score',None)) for i in pubmedbatch])
@@ -277,10 +289,10 @@ def individual_page(individual):
     individuals=dict()
     #
     genes['homozygous_variants']=[v['canonical_gene_name_upper'] for v in patient.homozygous_variants]
-    genes['compound_hets']=[v['canonical_gene_name_upper'] for v in patient.compound_hets]
+    genes['compound_hets']=[v['canonical_gene_name_upper'] for v in patient.compound_het_variants]
     genes['rare_variants']=[v['canonical_gene_name_upper'] for v in patient.rare_variants]
     print 'get annotation'
-    for v in patient.rare_variants+patient.homozygous_variants+patient.compound_hets:
+    for v in patient.rare_variants+patient.homozygous_variants+patient.compound_het_variants:
         g=v['canonical_gene_name_upper']
         # gene_id is used to get gene-hpo analysis result
         temp = lookups.get_gene_by_name(get_db(), g)

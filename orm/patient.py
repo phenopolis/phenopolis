@@ -4,10 +4,14 @@ import lookups
 from os import listdir, chdir
 from os.path import isfile, join
 import pymongo
+from collections import defaultdict, Counter
 
 class Patient(object):
-    def __init__(self, patient_id, db=None):
-        Patient.db=db
+    def __init__(self, patient_id, patient_db=None,variant_db=None,hpo_db=None):
+        Patient.db=patient_db
+        Patient.patient_db=patient_db
+        Patient.variant_db=variant_db
+        Patient.hpo_db=hpo_db
         data=Patient.db.patients.find_one({'external_id':patient_id},{'_id':False})
         self.__dict__.update(data)
     def __getattribute__(self, key):
@@ -34,28 +38,33 @@ class Patient(object):
         self.save()
         return self.__dict__['hpo_ids']
     @property
+    def hpo_terms(self):
+        if 'hpo_terms' in self.__dict__: return self.__dict__['hpo_terms']
+        hpo_terms=lookups.get_patient_hpo(Patient.hpo_db, Patient.patient_db, self.external_id, ancestors=False)
+        hpo_terms = dict([(hpo['id'][0],{'id':hpo['id'][0],'name':hpo['name'][0], 'is_a':hpo.get('is_a',[])}) for hpo in hpo_terms])
+        self.__dict__.update({'hpo_terms':hpo_terms})
+        self.save()
+        return self.__dict__['hpo_terms']
+    @property
     def pubmed_key(self):
         if 'pubmed_key' in self.__dict__: return self.__dict__['pubmed_key']
         return None
     @property
     def family_history(self):
         return ''
-    def process(x):
+    def process(self,x):
         if type(x['canonical_gene_name_upper']) is list: x['canonical_gene_name_upper']=x['canonical_gene_name_upper'][0]
-        gene_hpo_terms=lookups.get_gene_hpo(hpo_db,x['canonical_gene_name_upper'],False)
+        gene_hpo_terms=lookups.get_gene_hpo(Patient.hpo_db,x['canonical_gene_name_upper'],False)
         gene_hpo_terms = dict([(hpo['id'][0],{'id':hpo['id'][0],'name':hpo['name'][0], 'is_a':hpo.get('is_a',[])}) for hpo in gene_hpo_terms])
         gene_hpo_ids=gene_hpo_terms.keys()
-        #lookups.get_gene_hpo(hpo_db,gene_name,dot=False)
-        #print 'gene', gene_hpo_ids
-        #print 'patient', patient_hpo_ids
-        common_hpo_ids=list(set(gene_hpo_ids) & set(patient_hpo_ids))
+        common_hpo_ids=list(set(gene_hpo_ids) & set(self.hpo_ids))
         # simplify hpo terms
-        common_hpo_ids=lookups.hpo_minimum_set(hpo_db, common_hpo_ids)
-        common_hpo_ids=[{'hpo_id':k,'hpo_term':patient_hpo_terms[k]['name']} for k in common_hpo_ids]
+        common_hpo_ids=lookups.hpo_minimum_set(Patient.hpo_db, common_hpo_ids)
+        common_hpo_ids=[{'hpo_id':k,'hpo_term':self.hpo_terms[k]['name']} for k in common_hpo_ids]
         x['HPO']=common_hpo_ids
         print x['canonical_gene_name_upper'],common_hpo_ids
         return x
-    def conditions(x, AC=10,kaviar=.05,consequence_exclude=['intron_variant','non_coding_transcript','5_prime_UTR_variant','3_prime_UTR_variant','upstream_gene_variant','downstream_gene_variant','synonymous_variant','non_coding_transcript_exon_variant'],consequence_include=[ 'transcript_ablation', 'splice_acceptor_variant', 'splice_donor_variant', 'stop_gained', 'frameshift_variant', 'stop_lost', 'start_lost', 'transcript_amplification', 'inframe_insertion', 'inframe_deletion', 'missense_variant', 'protein_altering_variant', 'splice_region_variant', 'regulatory_region_ablation']):
+    def conditions(self, x, AC=10,kaviar=.05,consequence_exclude=['intron_variant','non_coding_transcript','5_prime_UTR_variant','3_prime_UTR_variant','upstream_gene_variant','downstream_gene_variant','synonymous_variant','non_coding_transcript_exon_variant'],consequence_include=[ 'transcript_ablation', 'splice_acceptor_variant', 'splice_donor_variant', 'stop_gained', 'frameshift_variant', 'stop_lost', 'start_lost', 'transcript_amplification', 'inframe_insertion', 'inframe_deletion', 'missense_variant', 'protein_altering_variant', 'splice_region_variant', 'regulatory_region_ablation']):
         if 'AC' not in x or x['AC'] > AC: return False
         if x['EXAC'] and x['EXAC']['AC_POPMAX']>=AC: return False
         if 'kaviar' in x and x['kaviar']>kaviar: return False
@@ -66,32 +75,26 @@ class Patient(object):
     @property
     def rare_variants(self):
         if 'rare_variants' in self.__dict__: return self.__dict__['rare_variants']
-        return []
+        rare_variants=[ self.process(x) for x in Patient.variant_db.variants.find({'het_samples':self.external_id},{'_id':False}) if self.conditions(x) ]
+        gene_counter=Counter([var['canonical_gene_name_upper'] for var in rare_variants])
+        for var in rare_variants: var['gene_count']=gene_counter[var['canonical_gene_name_upper']]
+        self.__dict__.update({'rare_variants':rare_variants})
+        self.save()
+        return self.__dict__['rare_variants']
     @property
     def homozygous_variants(self):
         if 'homozygous_variants' in self.__dict__: return self.__dict__['homozygous_variants']
-        #self.__dict['rare_homozygous_variants_count']=len(patient['homozygous_variants'])
-        #homozygous_variants=[ x for x in db.variants.find({'hom_samples':individual}) if conditions(x) ]
-        #self.__dict__.update({'homozygous_variants':homozygous_variants})
-        #self.save()
-        #return self.__dict__['homozygous_variants']
-        return []
+        homozygous_variants=[ self.process(x) for x in Patient.variant_db.variants.find({'hom_samples':self.external_id},{'_id':False}) if self.conditions(x) ]
+        self.__dict__.update({'homozygous_variants':homozygous_variants})
+        self.save()
+        return self.__dict__['homozygous_variants']
     @property
-    def compound_hets(self):
-        if 'compound_hets' in self.__dict__: return self.__dict__['compound_hets']
-        #patient['compound_hets']=[process(x) for x in patient['rare_variants'] if x['gene_count']>1]
-        #patient['rare_compound_hets_count']=len(patient['compound_hets'])
-        return []
-    @property
-    def total_variant_count(self):
-        if 'total_variant_count' in self.__dict__: return self.__dict__['total_variant_count']
-        #total_variant_count=db.variants.find({'hom_samples':individual}).count()+db.variants.find({'het_samples':individual}).count()
-        return 0
-    @property
-    def rare_variants(self):
-        return []
-        patient['rare_variants']=[ process(x) for x in db.variants.find({'het_samples':individual}) if conditions(x) ]
-        patient['rare_variants_count']=len(patient['rare_variants'])
+    def compound_het_variants(self):
+        #if 'compound_hets' in self.__dict__: return self.__dict__['compound_hets']
+        compound_hets=[process(x) for x in self.rare_variants if x['gene_count']>1]
+        self.__dict__.update({'compound_hets':compound_hets})
+        self.save()
+        return self.__dict__['compound_hets']
     @property
     def variants(self):
         patient_db=get_db(app.config['DB_NAME_PATIENTS'])
