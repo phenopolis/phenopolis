@@ -103,6 +103,15 @@
           });
       })(jQuery);
       </script>
+    {% elif request.endpoint == "individual_page" %}
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/individual.js') }}"></script>
+      <script type="text/javascript">
+      (function($) {
+          $(function() {
+              PP.initPatientFeatureTable('{{patient.external_id}}');
+          });
+      })(jQuery);
+      </script>
     {% endif %}
 </body>
 
