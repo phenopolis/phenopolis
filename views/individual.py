@@ -76,7 +76,6 @@ def edit_patient_features(individual):
     views.my_patients.individuals_update([external_id])
     return 'done'
 
-
 def get_feature_venn(patient):
     hpo_ids=[feature['id'] for feature in patient.observed_features]
     hpo_db=get_db(app.config['DB_NAME_HPO'])
@@ -254,8 +253,7 @@ def load_patient(individual,auth,pubmed_key,hpo='HP:0000001'):
 @requires_auth
 #@cache.cached(timeout=24*3600)
 def individual_page(individual):
-    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
-    patient=Patient(individual,patient_db)
+    patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
     #if session['user']=='demo': individual=decrypt(str(individual))
     # make sure that individual is accessible by user
     if not lookup_patient(db=get_db(app.config['DB_NAME_USERS']),user=session['user'],external_id=individual): return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
@@ -288,20 +286,11 @@ def individual_page(individual):
     gene_info=dict()
     individuals=dict()
     #
-    genes['homozygous_variants']=[v['canonical_gene_name_upper'] for v in patient.homozygous_variants]
-    genes['compound_hets']=[v['canonical_gene_name_upper'] for v in patient.compound_het_variants]
-    genes['rare_variants']=[v['canonical_gene_name_upper'] for v in patient.rare_variants]
-    print 'get annotation'
-    for v in patient.rare_variants+patient.homozygous_variants+patient.compound_het_variants:
-        g=v['canonical_gene_name_upper']
-        # gene_id is used to get gene-hpo analysis result
-        temp = lookups.get_gene_by_name(get_db(), g)
-        v['gene_id'] = temp['gene_id'] if temp else None
-        v['canonical_hgvs']=dict(zip( v.get('canonical_hgvsp',''), v.get('canonical_hgvsc','')))
-        v['protein_mutations']=dict([(p,p.split(':')[1],) for p in v.get('canonical_hgvsp','') if ':' in p])
-        if 'FILTER' not in v: v['FILTER']=v['filter']
-        if 'ID' not in v: v['ID']=''
-        # print(g, genes_pubmed[g])
+    genes=[]
+    #genes['homozygous_variants']=[v['canonical_gene_name_upper'] for v in patient.homozygous_variants]
+    #genes['compound_hets']=[v['canonical_gene_name_upper'] for v in patient.compound_het_variants]
+    #genes['rare_variants']=[v['canonical_gene_name_upper'] for v in patient.rare_variants]
+            # print(g, genes_pubmed[g])
     # figure out the order of columns from the variant row
     table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?.*>",file('templates/individual-page-tabs/individual_variant_row.tmpl','r').read())
     if session['user']=='demo': table_headers=table_headers[:-1]
