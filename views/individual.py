@@ -35,7 +35,7 @@ import requests
 @app.route('/individual_json/<individual>')
 @requires_auth
 def individual_json(individual):
-    patient=Patient(individual,db=get_db(app.config['DB_NAME_PATIENTS']))
+    patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
     return patient.json()
 
 @app.route('/edit_patient_features/<individual>',methods=['POST'])
