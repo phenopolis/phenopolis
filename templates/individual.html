@@ -2,42 +2,25 @@
 <div class="container">
     <div class="card z-depth-3">
         <div class="card-content">
-            <h3 class="truncate" style="font-weight: 300">Individual: <a href='https://phenotips.cs.ucl.ac.uk/bin/{{patient.report_id}}' target='_blank'>{{external_id}}</a> <span class="grey-text" id="sex" style="font-size:0.7em;">[{{ patient.sex }}]</span></h3>
-            <table class="info_table">
+            <h3 class="truncate" style="font-weight: 300">Individual: <a href='https://phenotips.cs.ucl.ac.uk/bin/{{patient.report_id}}' target='_blank'>{{patient.external_id}}</a> <span class="grey-text" id="sex" style="font-size:0.7em;">[{{ patient.sex }}]</span></h3>
+            <table class="info_table" style="display:none">
                 <tbody>
                     <tr>
                         <td>Features</td>
-                        <td>
-                            {% for f in features %}
-                            <a class="chip" href='/hpo/{{ f[0] }}'>{{ f[1] }}</a> {% endfor %}
-                        </td>
+                        <td id="patient_features"></td>
                     </tr>
-                    {% if patient.family_history %}
                     <tr>
                         <td>Consanguinity</td>
-                        <td>
-                            {% if not patient.family_history.consanguinity %}
-                            <span class='chip'> unknown </span> {% else %}
-                            <span class='chip'> {{ patient.family_history.consanguinity }}</span> {% endif %}
-                        </td>
+                        <td id="patient_consanguinity"></td>
                     </tr>
-                    {% endif %} {% if patient.global_mode_of_inheritance %}
                     <tr>
                         <td>Global Mode of Inheritance</td>
-                        <td>
-                            {% for inh in patient.global_mode_of_inheritance %}
-                            <span class='ind-header'>{{inh.label}}</span> {% endfor %}
-                        </td>
+                        <td id="patient_inheritance_mode"></td>
                     </tr>
-                    {% endif %} {% if patient.genes %}
                     <tr>
                         <td>Candidate Genes</td>
-                        <td>
-                            {% set candidate_genes=patient.genes|map(attribute='gene')|list %} {% for g in patient.genes %}
-                            <a class="chip" href="/gene/{{g.gene}}">{{g.gene}}</a> {% endfor %}
-                        </td>
+                        <td id="patient_genes"></td>
                     </tr>
-                    {% endif %}
                 </tbody>
             </table>
         </div>
