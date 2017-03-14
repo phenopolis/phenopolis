@@ -1,1001 +1,149 @@
-{% extends "layout.html" %}
-{% block body %}
-
-<h1 id="individual_header"> 
-    Individual: {{patient.external_id}} <span class='sex' id="sex">[{{ patient.sex }}]</span> 
-</h1>
-
-<!-- jQuery UI for range slider -->
-<!--link rel="stylesheet"  type=text/css href="/static/jquery-ui.min.css"-->
-<!-- <link rel="stylesheet"  type=text/css href="/static/css/theme.blue.css"> -->
-<!-- tablesorter plugin -->
-<!-- filter formatter code -->
-<link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
-<link rel="stylesheet"  type=text/css href="/static/css/introjs.min.css">
-
-<!--<script  type="text/javascript" src="/static/widgets/widget-filter-formatter-jui.js"></script>-->
-
-<!-- jQuery UI for range slider -->
-<!-- <link rel="stylesheet"  type=text/css href="/static/jquery-ui.min.css"> -->
-<!-- <script  type="text/javascript" src="/static/jquery-ui.min.js"></script> -->
-<!-- <link rel="stylesheet"  type=text/css href="/static/css/theme.blue.css"> -->
-<!-- tablesorter plugin -->
-<!-- <script  type="text/javascript" src="/static/jquery.tablesorter.js"></script> -->
-<!-- <script  type="text/javascript" src="/static/jquery.tablesorter.widgets.js"></script> -->
-<!-- filter formatter code -->
-<!-- <link rel="stylesheet"  type=text/css href="/static/css/filter.formatter.css"> -->
-<!-- <script  type="text/javascript" src="/static/widgets/widget-filter-formatter-jui.js"></script> -->
-<style>
-    #gene_table {
-        margin-top: 20px;
-    }
-    .export-row {
-        margin-top: 20px;
-        margin-bottom: 20px;
-        margin-left: 10px;
-    }
-    th {
-        font-size: 20%;
-    }
-    .retnet-mode {
-        color: red;
-        font-family: "Comic Sans MS", cursive, sans-serif;
-        background-color: #F0F0F0;
-    }
-    .export {
-        margin: 10px;
-        margin-left: 20px;
-    }
-    .known {
-        color: green;
-        font-family: "Comic Sans MS", cursive, sans-serif;
-        background-color: #F0F0F0;
-    }
-    span.pointer {
-        color: #3366BB;
-    }
-    span.pointer:hover {
-        cursor: pointer;
-    }
-    .fail {
-        /* background-color: red; */
-        text-decoration:line-through;
-        opacity: 0.4; /* Real browsers */
-        filter: alpha(opacity = 40); /* MSIE */
-    }
-    tr.error {
-        background-color: red;
-        text-decoration:line-through;
-        opacity: 0.4; /* Real browsers */
-        filter: alpha(opacity = 40); /* MSIE */
-    }
-    .warn {
-        /* background-color: yellow; */
-        opacity: 0.4; /* Real browsers */
-        filter: alpha(opacity = 40); /* MSIE */
-    }
-    .hpo-th {
-        font-size: 100%;
-        text-align: center;
-    }
-    .success {
-        font-size: 200%;
-        color: green;
-    }
-    span.hide {
-        display: none;
-    }
-    .venn.hide {
-        display: none;
-    }
-    .button-more{
-        padding-left: 30px;
-        padding-right: 30px;
-        transition:0.5s;
-    }
-    .button-more:hover {
-        color:#D0D0D0;
-        cursor: pointer;
-    }
-    .pop:hover {
-        cursor: pointer;
-    }
-    td {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    hr {
-        line-height: 2px;
-        margin: 4px;
-    }
-    div.search-term {
-        margin-top: 10px;
-    }
-    span.sex {
-        font-size: 70%;
-        color: #AAAAAA;
-    }
-    span.gene-emphasis {
-        background-color: #C8FE2E; 
-    }
-    span.OR-emphasis {
-        background-color: yellow;
-    }
-    span.ind-header {
-        background-color:#EEEEEE;
-        display:inline-block;
-        border: 1px solid;
-        border-radius: 7px;
-        padding-left:5px;
-        padding-right:5px;
-        border-color:#DDDDDD;
-        margin-bottom: 4px;
-    }
-    span.ind-header.venn {
-        margin: 3px;
-        font-size: 70%;
-    }
-    .venntooltip {
-      position: absolute;
-      text-align: center;
-      width: 128px;
-      height: 25px;
-      background: #333;
-      color: #ddd;
-      padding: 2px;
-      border: 0px;
-      border-radius: 8px;
-      opacity: 0;
-    }
-    span.solved {
-        background-color: #99ff66;
-    }
-    span.solved a {
-        color: #2CA02C;
-    }
-    span.candidate {
-        background-color: #99ccff;
-    }
-    span.candidate a {
-        color: #1F77B4;
-    }
-    span.hom {
-        background-color: #ff9999;
-    }
-    span.hom a {
-        color: #C12324;
-    }
-    span.compound_het {
-        background-color: #ffb380;
-    }
-    span.compound_het a {
-        color: #FF7F0E;
-    }
-    span.rare {
-        background-color: #f0b3ff;
-    }
-    span.rare a {
-        color: #d11aff;
-    }
-    tr.highlight {
-       background-color: #ffa !important;
-    }
-    .gene-highlight {
-        background-color: #90EE90;
-    }
-    .term-highlight {
-        background-color: yellow;
-    }
-    #update-form {
-       border-style: solid;
-       border-width: 2px;
-       border-color: #DDD;
-    }
-    span.hidden {
-        width:0;
-    }
-    span.updating {
-        {% if not update_status %}
-            display: none;
-        {% endif %}
-        border-radius: 8px;
-        padding: 3px;
-        padding-left: 3px;
-        -webkit-animation-name: example; /* Chrome, Safari, Opera */
-        -webkit-animation-duration: 4s; /* Chrome, Safari, Opera */
-        -webkit-animation-iteration-count: 3; /* Chrome, Safari, Opera */
-        animation-name: updating;
-        animation-duration: 4s;
-        animation-iteration-count: infinite; 
-    }
-    .abstract {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    }
-    /* Chrome, Safari, Opera */
-    @-webkit-keyframes updating {
-        0%   {background-color:#ddd; color:#999}
-        50%  {background-color:#999; color:#ddd}
-        100% {background-color:#ddd; color:#999}
-    }
-
-    /* Standard syntax */
-    @keyframes updating {
-        0%   {background-color:#ddd; color:#999}
-        50%  {background-color:#999; color:#ddd}
-        100% {background-color:#ddd; color:#999}
-    }
-   </style>
-
-
-<div class='row'>
-    <div class='col-md-6'>
-        <p>
-        <span class='clinical_features' id="clinical_features">
-            <b>Features:</b>
-            {% for f in patient.observed_features %}
-                  <span class='ind-header'>
-                      <a href='/hpo/{{ f }}'>{{ f }}</a>
-                  </span>
-            {% endfor %}
-        </span>
-        </p>
-        <span class='consanguinity' id="consanguinity">
-            <b>Consanguinity:</b> 
-            {% if patient.family_history %}
-              {% if not patient.family_history.consanguinity %}
-                  {% set consanguinity = 'unknown' %}
-              {% else %}
-                  {% set consanguinity = patient.family_history.consanguinity %}
-              {% endif %}
-                <span class='ind-header'> {{ consanguinity }} </span>
-            {% endif %}
-        </span>
-        </p>
-        <p>
-        <span class='inheritance_mode' id="inheritance_mode">
-            <b>Global Mode of Inheritance:</b> 
-            {% if patient.global_mode_of_inheritance %}
-                {% for inh in patient.global_mode_of_inheritance %}
-                    <span class='ind-header'>{{inh.label}}</span>
-                {% endfor %}
-            {% endif %}
-        </span>
-        </p>
-        <p>
-        <span class='candidate_gene' id="candidate_gene">
-            <b> Candidate Genes: </b>
-            {% if patient.genes %}
-                {% set candidate_genes=patient.genes|map(attribute='gene')|list %}
-                {% for g in patient.genes %}
-                    <a href="/gene/{{g.gene}}">{{g.gene}}</a> 
-                {% endfor %}
-            {% endif %}
-        </span>
-        </p>
-    </div><!--end of col-md-6-->
-</div><!--end of row-->
-
-
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#edit_patient" style="margin-bottom: 2rem;">Edit Patient Data</button>
-
-<div class="clearfix"></div>
-
-<!-- Modal -->
-<div class="modal fade" id="edit_patient" tabindex="-1" role="dialog" aria-labelledby="patient_id">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="patient_id">{{patient.external_id}}</h4>
-      </div>
-      <div class="modal-body">
-          <form class="form-horizontal" id="editPatientForm" data-features="{{features|map('last')|join(',')}}" data-consanguinity="{{consanguinity}}"
-          {% if patient.global_mode_of_inheritance %} data-inheritance_mode="{{patient.global_mode_of_inheritance|join(',', attribute='label')}}" {% endif %}
-          {% if patient.genes %} data-candidate_genes="{{patient.genes|join(',', attribute='gene')}}" {% endif %}
-          >
-              <div class="form-group">
-                  <label class="col-xs-3 control-label">Features</label>
-                  <div class="col-xs-7">
-                      <input type="text" class="edit_features form-control" name="features[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" id="edit_features_add" class="btn btn-default addButton" data-target="#featureTemplate"><i class="fa fa-plus"></i></button>
-                  </div>
-              </div>
-              <div class="form-group" id="featureTemplate" style="display:none;">
-                  <div class="col-xs-7 col-xs-offset-3">
-                      <input type="text" class="edit_features form-control" name="features[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
-                  </div>
-              </div>
-
-              <div class="form-group">
-                  <label class="col-xs-3 control-label">Consanguinity</label>
-                  <div class="col-xs-7">
-                      <input type="text" class="edit_consanguinity form-control" name="consanguinity[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" id="edit_consanguinity_add" class="btn btn-default addButton" data-target="#consanguinityTemplate"><i class="fa fa-plus"></i></button>
-                  </div>
-              </div>
-              <div class="form-group" id="consanguinityTemplate" style="display:none;">
-                  <div class="col-xs-7 col-xs-offset-3">
-                      <input type="text" class="edit_consanguinity form-control" name="consanguinity[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
-                  </div>
-              </div>
-
-              <div class="form-group">
-                  <label class="col-xs-3 control-label" style="overflow:visible;height:1em;">Global Mode of Inheritance</label>
-                  <div class="col-xs-7">
-                      <input type="text" class="edit_inheritance_mode form-control" name="inheritance_mode[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" id="edit_inheritance_mode_add" class="btn btn-default addButton" data-target="#inheritanceModeTemplate"><i class="fa fa-plus"></i></button>
-                  </div>
-              </div>
-              <div class="form-group" id="inheritanceModeTemplate" style="display:none;">
-                  <div class="col-xs-7 col-xs-offset-3">
-                      <input type="text" class="edit_inheritance_mode form-control" name="inheritance_mode[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
-                  </div>
-              </div>
-
-              <div class="form-group">
-                  <label class="col-xs-3 control-label">Candidate Genes</label>
-                  <div class="col-xs-7">
-                      <input type="text" class="edit_candidate_genes form-control" name="candidate_genes[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" id="edit_candidate_genes_add" class="btn btn-default addButton" data-target="#candidateGenesTemplate"><i class="fa fa-plus"></i></button>
-                  </div>
-              </div>
-              <div class="form-group" id="candidateGenesTemplate" style="display:none;">
-                  <div class="col-xs-7 col-xs-offset-3">
-                      <input type="text" class="edit_candidate_genes form-control" name="candidate_genes[]" />
-                  </div>
-                  <div class="col-xs-2">
-                      <button type="button" class="btn btn-default removeButton"><i class="fa fa-minus"></i></button>
-                  </div>
-              </div>
-          </form>
-          <div class="clearfix"></div>
-          <p id="edit_patient_sucess" style="color:#3c763d; display:none;">The data has been successfully updated.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" id="edit_patient_save_btn" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script type="text/javascript">
-  $('#editPatientForm').on('click', '.addButton', function(){
-    id = $(this).data('target')    
-    $(this).closest('.form-group').after(  $(id).clone().attr('id', 'copied').show()  )
-  })
-
-  $('#editPatientForm').on('click', '.removeButton', function(){
-    $(this).closest('.form-group').remove()
-  })
-
-  var initPatientEditForm = function(item_data, item_add_btn, item_edit){
-    if ($('#editPatientForm').data(item_data) === undefined) return
-    var items = $('#editPatientForm').data(item_data).split(',')
-    if (items.length === 0) return 
-    for (var i = 0; i < items.length-1; i++) { $(item_add_btn).click() }
-    for (var i = 0; i < items.length; i++) {
-      $($(item_edit)[i]).val(items[i])
-    }
-  }
-
-  $('#edit_patient_save_btn').on('click', function(){
-    $.ajax({
-      type: 'POST',
-      url : '/edit_patient_features/{{external_id}}',
-      data: $('#editPatientForm').serialize(),
-      timeout: 120000,
-      success: function (data) {
-        // Update dispalyed features using ajax
-        $('#edit_patient_sucess').show()
-      }
-    });
-  });
-
-  $(document).ready(function(){
-    initPatientEditForm('features', '#edit_features_add', '.edit_features')
-    initPatientEditForm('consanguinity', '#edit_consanguinity_add', '.edit_consanguinity')
-    initPatientEditForm('inheritance_mode', '#edit_inheritance_mode_add', '.edit_inheritance_mode')
-    initPatientEditForm('candidate_genes', '#edit_candidate_genes_add', '.edit_candidate_genes')    
-  })
-</script>
-
-<div class="tabs">
-
-<ul class="nav nav-tabs" role="tablist">
-    <li class="active"><a id="individual-tab_hpo_omim_tab" href="#individual-tab_hpo_omim" role="tab" data-toggle="tab" id="individuals_loaded">OMIM genes</a></li> 
-    <li><a id="individual-tab_hom_variants_tab" href="#individual-tab_hom_variants" role="tab" data-toggle="tab" id="hom-loaded">Rare Hom ({{patient.homozygous_variants|length}})</a></li>
-    <li><a id="individual-tab_comp_variants_tab" href="#individual-tab_comp_variants" role="tab" data-toggle="tab" id="comp-hets_loaded">Rare Comp Hets ({{patient.compound_hets|length}})</a></li>
-    <li><a id="individual-tab_rare_variants_tab" href="#individual-tab_rare_variants" role="tab" data-toggle="tab" id="variants_loaded">Rare Var ({{patient.rare_variants|length}})</a></li>
-    {% if session['user']!='demo' %}
-    <li><a href="#individual-tab_downloads" role="tab" data-toggle="tab" id="csv">Download files</a></li>
-    {% endif %}
-    <li><a id="individual-tab_Exomiser_tab" href="#individual-tab_Exomiser" role="tab" data-toggle="tab" id="exomiser">Exomiser</a></li>
-</ul>
-
-<div class="tab-content">
-    <!-- tab1 -->
-    {% include "individual-page-tabs/individual-tab_hpo_omim.html" %}
-    <!-- tab2 -->
-    {% include "individual-page-tabs/individual-tab_hom_variants.html" %}
-    <!-- tab3 -->
-    {% include "individual-page-tabs/individual-tab_comp_variants.html" %}
-    <!-- tab4 -->
-    {% include "individual-page-tabs/individual-tab_rare_variants.html" %}
-    {% if session['user']!='demo' %}
-    <!-- tab5 -->
-    {% include "individual-page-tabs/individual-tab_downloads.html" %}
-    {% endif %}
-    <!-- tab6 -->
-    {% include "individual-page-tabs/individual-tab_Exomiser.html" %}
-</div>
-
-</div>
-
-<!--modal to show genes on omim page-->
-<div class="modal fade" id="omim-genes-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="myModalLabel"></h4>
+{% extends "material_app_layout.html" %} {% block body %}
+<div class="container">
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <h3 class="truncate" style="font-weight: 300">Individual: <a href='https://phenotips.cs.ucl.ac.uk/bin/{{patient.report_id}}' target='_blank'>{{external_id}}</a> <span class="grey-text" id="sex" style="font-size:0.7em;">[{{ patient.sex }}]</span></h3>
+            <table class="info_table">
+                <tbody>
+                    <tr>
+                        <td>Features</td>
+                        <td>
+                            {% for f in features %}
+                            <a class="chip" href='/hpo/{{ f[0] }}'>{{ f[1] }}</a> {% endfor %}
+                        </td>
+                    </tr>
+                    {% if patient.family_history %}
+                    <tr>
+                        <td>Consanguinity</td>
+                        <td>
+                            {% if not patient.family_history.consanguinity %}
+                            <span class='chip'> unknown </span> {% else %}
+                            <span class='chip'> {{ patient.family_history.consanguinity }}</span> {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %} {% if patient.global_mode_of_inheritance %}
+                    <tr>
+                        <td>Global Mode of Inheritance</td>
+                        <td>
+                            {% for inh in patient.global_mode_of_inheritance %}
+                            <span class='ind-header'>{{inh.label}}</span> {% endfor %}
+                        </td>
+                    </tr>
+                    {% endif %} {% if patient.genes %}
+                    <tr>
+                        <td>Candidate Genes</td>
+                        <td>
+                            {% set candidate_genes=patient.genes|map(attribute='gene')|list %} {% for g in patient.genes %}
+                            <a class="chip" href="/gene/{{g.gene}}">{{g.gene}}</a> {% endfor %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-tabs" style="padding-top: 2rem;">
+            <ul class="tabs tabs-fixed-width ">
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#omim_tab">OMIM Genes</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#homs_tab">Rare Homs</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#comp_hets_tab">Rare Comp Hets</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#variants_tab">Rare Variants</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#exomiser_tab">Exomiser</a></li>
+                <div class="indicator light-blue darken-2" style="z-index:1"></div>
+            </ul>
+        </div>
+        <div class="card-content grey lighten-5">
+            <div id="omim_tab">
+                <h4 style="font-weight:300;">OMIM Genes</h4>
+                <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                {% include "components/loading_from_server.html" %}
+                <table id='omin_table' class='table-sorter striped centered' style="display:none;">
+                    <thead>
+                        {% include "components/table-pager.html" %}
+                        <tr>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id='omin_table_body'>
+                    </tbody>
+                    <tfoot>
+                        {% include "components/table-pager.html" %}
+                    </tfoot>
+                </table>
             </div>
-            <div class="modal-body">
-                <p id='omim-genes-modal-p'>
-                        
-                </p>
+            <div id="homs_tab">
+                <h4 style="font-weight:300;">Rare HOMs</h4>
+                <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                {% include "components/loading_from_server.html" %}
+                <table id='homs_table' class='table-sorter striped centered' style="display:none;">
+                    <thead>
+                        {% include "components/table-pager.html" %}
+                        <tr>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id='homs_table_body'>
+                    </tbody>
+                    <tfoot>
+                        {% include "components/table-pager.html" %}
+                    </tfoot>
+                </table>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="modal-gene-button">Toggle All</button>
-                <button type="button" class="btn btn-default refresh" data-dismiss="modal">Close</button>
+            <div id="comp_hets_tab">
+                <h4 style="font-weight:300;">Rare Comp Hets</h4>
+                <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                {% include "components/loading_from_server.html" %}
+                <table id='comp_hets_table' class='table-sorter striped centered' style="display:none;">
+                    <thead>
+                        {% include "components/table-pager.html" %}
+                        <tr>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id='comp_hets_table_body'>
+                    </tbody>
+                    <tfoot>
+                        {% include "components/table-pager.html" %}
+                    </tfoot>
+                </table>
+
+            </div>
+            <div id="variants_tab">
+                <h4 style="font-weight:300;">Rare Variants</h4>
+                <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                {% include "components/loading_from_server.html" %}
+                <table id='variants_table' class='table-sorter striped centered' style="display:none;">
+                    <thead>
+                        {% include "components/table-pager.html" %}
+                        <tr>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id='variants_table_body'>
+                    </tbody>
+                    <tfoot>
+                        {% include "components/table-pager.html" %}
+                    </tfoot>
+                </table>
+            </div>
+            <div id="exomiser_tab">
+                <h4 style="font-weight:300;">Exomiser</h4>
+                <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                {% include "components/loading_from_server.html" %}
+                <table id='exomiser_table' class='table-sorter striped centered' style="display:none;">
+                    <thead>
+                        {% include "components/table-pager.html" %}
+                        <tr>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id='exomiser_table_body'>
+                    </tbody>
+                    <tfoot>
+                        {% include "components/table-pager.html" %}
+                    </tfoot>
+                </table>
             </div>
         </div>
     </div>
 </div>
-
-<!-- <link rel="stylesheet"  type=text/css href="/static/css/theme.blue.css"> -->
-<!-- tablesorter plugin -->
-<!--script src='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'></script-->
-<script type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
-<script type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
-<script type="text/javascript" src="/static/js/individual_pubmed.js"></script>
-<script type="text/javascript" src="/static/js/intro.min.js"></script>
-<script type="text/javascript" src="/static/js/venn.js"></script>
-<script type="text/javascript" src="/static/js/main.js"></script>
-
-<script type="text/javascript">
-  function startIntro(){
-    var gender;
-    // set gender to male or female depending on patient sex variable 
-    if ('{{ patient.sex }}' === 'M') { gender = 'Male' } else { gender = 'Female' }
-    var candidate_genes = [
-    {% if patient.genes %}
-        {% for g in patient.genes %}
-            "{{ g.gene }}",
-        {% endfor %}
-    {% endif %}
-    ];
-
-    var intro = introJs();
-    intro.setOptions({
-      steps: [
-        {
-          element: '#individual_header',
-          intro: "This is a tutorial for individual with id {{external_id}}. If you click this link this will open the patient record in Phenotips which you can then edit."
-        },
-        {
-          element: '#sex',
-          intro: "This patient is " + gender + '.'
-        },
-        {
-          element: '#clinical_features',
-          intro: "These are the clinical features of this patient entered as Human Phenotype Ontology (HPO) terms. You can edit them in <a href=https://uclex.cs.ucl.ac.uk/{{patient.report_id}}>Phenotips</a>. Clicking on any of these will take you the page with all individuals who have that HPO term in Phenopolis."
-        },
-        {
-          element: '#consanguinity',
-          intro: "Indicates whether there is known consanguinity based on family history.  If there is, we might expect the causal mutation to be homozygote. A high number of rare homozygote mutations (below) may also suggest consanguinity."
-        },
-        {
-          element: '#inheritance_mode',
-          intro: "The mode of inheritance of the patient's phenotype based on family history. This will indicate what type of causal mutation (homozygote, compound heterozygote or heterozygote) to expect. The mode of inheritance can also be specified as an HPO term (above)."
-        },
-        {
-          element: '#candidate_gene',
-          intro: "This the gene which we believe is responsible for this individual's phenotype. The mutations in that gene is highlighted in the table of mutations below."
-        },
-        {
-          element: '#venn',
-          intro: "This Venn diagram represents the overlap of the genes assigned to the patient features according to the <a href=http://compbio.charite.de/jenkins/job/hpo.annotations/lastStableBuild/>HPO to OMIM mapping</a>. If you click on the intersection you will see the genes that overlap between the phenotypes for this individual. Clicking on the gene name will then take you to the mutation."
-        },
-        {
-          element: '#individual-tab_hom_variants_tab',
-          intro: "There are {{patient.homozygous_variants|length}} rare homozygote mutations in this individual, listed in the table below. If the inheritance mode is recessive and there is consanguinity, then this is the most likely type of causal mutations."
-        },
-        {
-          element: '#hom-variants-2',
-          intro: "The Exomiser score is based on how well the gene matches similar phenotypes in human, mouse or zebrafish. "
-        },
-        {
-          element: '#hom-variants-3',
-          intro: "The Phenogenon score is based on the -log10 p-value of the gene for the 'Retinal Dystrophy' HPO term. If you sort on this column you should find that the candidate gene "+candidate_genes+" mutation is near the top. "
-        },
-        {
-          element: '#individual-tab_comp_variants_tab',
-          intro: "These are the {{patient.compound_hets|length}} rare compound heterozygote variants in this individual. If the inheritance mode is recessive but there is no consanguinity then this is the most likely type of causal variant."
-        },
-        {
-          element: '#individual-tab_rare_variants_tab',
-          intro: "These are the {{patient.rare_variants|length}} rare variants for this indvidual. If the inheritance mode is dominant, X-linked or sporadic, this is the mutation list to check. "
-        },
-        {
-          element: '#individual-tab_Exomiser_tab',
-          intro: "This is the Exomiser output run under different inheritance models."
-        }
-      ]
-    });
-
-    intro.onafterchange(function(targetElement) {
-      if (targetElement == $('#individual-tab_hpo_omim_tab')[0]) {
-        $('#individual-tab_hpo_omim_tab').click();
-      } else if (targetElement == $('#individual-tab_hom_variants_tab')[0]) {
-        $('#individual-tab_hom_variants_tab').click();
-      } else if (targetElement == $('#individual-tab_comp_variants_tab')[0]) {
-        $('#individual-tab_comp_variants_tab').click();
-      } else if (targetElement == $('#individual-tab_rare_variants_tab')[0]) {
-        $('#individual-tab_rare_variants_tab').click();
-      } else if (targetElement == $('#individual-tab_Exomiser_tab')[0]) {
-        $('#individual-tab_Exomiser_tab').click();
-      }
-    });
-
-    intro.onbeforechange(function(targetElement) {
-     if (targetElement == $('#hom-variants-2')[0]) {
-        $('#individual-tab_hom_variants_tab').click();
-      } else if (targetElement == $('#hom-variants-3')[0]) {
-        $('#individual-tab_hom_variants_tab').click();
-      }
-      if (targetElement == $('#venn')[0]) {
-        $('#individual-tab_hpo_omim_tab').click();
-        $('.venntooltip').css('z-index', '9999999');
-        $('#omim-genes-modal').css('z-index', '9999999');
-      } else {
-        $('.venntooltip').css('z-index', 'initial');
-        $('#omim-genes-modal').css('z-index', '1050');
-      }
-    });
-    intro.start();
-  }
-</script>
-
-<script type=text/javascript>
-// load pubmed
-$('.pubmed-gene-cell').each(function(){
-    var theCell = $(this);
-    var handler = onVisibilityChange($(this), function() {
-        /* send key, get data */
-        $.get('/pubmedbatch-cache/'+theCell.attr('pubmedkey'), function(data){
-            if (!data){ 
-                theCell.html('Will be available later');
-            }
-            // get gene and terms
-            var genes = [data.key.split('_')[0]];
-            var terms = data.key.split('_')[1].split('-');
-            // add score as hidden
-            var content = theCell.children().first()[0].outerHTML;
-            $.each(data['data'], function(i,d){
-                // highlight
-                d.abstract = highlightPubmed(d.abstract, genes, terms);
-                // clean title and abstract
-                var sq = new RegExp("'", 'g');
-                var dq = new RegExp('"', 'g');
-                var lt = new RegExp('<', 'g');
-                var gt = new RegExp('>', 'g');
-                d.title = d.title.replace(sq, "&#39;");
-                d.title = d.title.replace(dq, "&#34;");
-                d.title = d.title.replace(lt, "&#60;");
-                d.title = d.title.replace(gt, "&#62;");
-                d.abstract = d.abstract.replace(sq, "&#39;");
-                d.abstract = d.abstract.replace(dq, "&#34;");
-                d.abstract = d.abstract.replace(lt, "&#60;");
-                d.abstract = d.abstract.replace(gt, "&#62;");
-                var thisClass = 'pop-modal pointer';
-                if (i>1){
-                    thisClass += ' pubmed hide';
-                }
-                content += "<span class='" + thisClass + "' title='<a href=" + '"http://www.ncbi.nlm.nih.gov/pubmed/'+d.id+ '">' + d.title + "</a>'" + 'data-content="' + d.abstract + '">'+d.id+"<br></span>";
-            });
-            if (data.data.length > 2){
-                content += '<br /><span class="pubmed"> and <b>' + (data.data.length - 2) + '</b> more...</span>';
-                content += '<br /><span class="button-more"><span class="glyphicon glyphicon-chevron-down"></span></span>';
-            }
-            // populate cell
-            theCell.html(content);
-        });
-    });
-    //jQuery
-    $(window).on('DOMContentLoaded click load resize scroll', handler);
-});
-// venn diagram
-var solved_genes = [
-    {% if patient.solved.status == 'solved' %}
-        "{{ patient.solved.gene|join('","')|safe }}"
-    {% endif %}
-    ];
-var candidate_genes = [
-    {% if patient.genes %}
-        {% for g in patient.genes %}
-            "{{ g.gene }}",
-        {% endfor %}
-    {% endif %}
-    ];
-var hom_genes = [ "{{ genes['homozygous_variants']|join('","')|safe }}" ];
-var compound_het_genes = [ "{{ genes['compound_hets']|join('","')|safe }}" ];
-var rare_genes = [ "{{ genes['rare_variants']|join('","')|safe }}" ];
-var sets = [
-    {% for combo in feature_venn %}
-        {sets: [{{ combo.key|safe }}], size: {{ combo.value|length }}, data: ["{{ combo.value|join('","')|safe }}" ]},
-    {% endfor %}
-];
-var venDiv = d3.select('#venn');
-var chart = venn.VennDiagram();
-venDiv.datum(sets).call(chart);
-// add a tooltip
-var tooltip = d3.select("body").append("div").attr("class", "venntooltip");
-venDiv.selectAll("path")
-    .style("stroke-opacity", 0)
-    .style("stroke", "#fff")
-    .style("stroke-width", 0);
-venDiv.selectAll("g")
-    .on("mouseover", function(d, i) {
-        // sort all the areas relative to the current item
-        venn.sortAreas(venDiv, d);
-
-        // Display a tooltip with the current size
-        tooltip.transition().duration(400).style("opacity", .9);
-        tooltip.text(d.size + " genes");
-
-        // highlight the current path
-        var selection = d3.select(this).transition("tooltip").duration(400);
-        selection.select("path")
-            .style("stroke-width", 3)
-            .style("fill-opacity", d.sets.length == 1 ? .4 : .1)
-            .style("stroke-opacity", 1);
-    })
-
-    .on("mousemove", function() {
-        tooltip.style("left", (d3.event.pageX) + "px")
-               .style("top", (d3.event.pageY - 28) + "px");
-    })
-
-    .on("mouseout", function(d, i) {
-        tooltip.transition().duration(400).style("opacity", 0);
-        var selection = d3.select(this).transition("tooltip").duration(400);
-        selection.select("path")
-            .style("stroke-width", 0)
-            .style("fill-opacity", d.sets.length == 1 ? .25 : .0)
-            .style("stroke-opacity", 0);
-    })
-    
-    .on("click", function(d, i){
-        // get modal title
-        var modal_title = d.sets.join('</span> & <span class="ind-header">');
-        modal_title = '<span class="ind-header">' + modal_title + '</span>';
-        $('#myModalLabel').html(modal_title);
-        // get modal content
-        var modal = d3.select('#omim-genes-modal-p')
-        modal.selectAll('span').remove();
-        modal.selectAll('p').remove();
-        modal.selectAll('span')
-            .data(d.data)
-            .enter()
-            .append('span')
-            .attr('class', function(d){
-                var gene_class = 'ind-header venn';
-                // solved? candidate? homo? ..
-                if ($.inArray(d, solved_genes) != -1){
-                    gene_class += ' solved tip';
-                } else if ($.inArray(d, candidate_genes) != -1){
-                    gene_class += ' candidate tip';
-                } else if ($.inArray(d, hom_genes) != -1){
-                    gene_class += ' hom tip'
-                } else if ($.inArray(d, compound_het_genes) != -1){
-                    gene_class += ' compound_het tip';
-                } else if ($.inArray(d, rare_genes) != -1){
-                    gene_class += ' rare tip';
-                } else {
-                    gene_class += ' common hide';
-                }
-                return gene_class;
-            })
-            .attr('title', function(d){
-                var result = '';
-                if ($.inArray(d, hom_genes) != -1){
-                    result = '<b>Rare homozygote: </b>' + $('#hom-' + d).find('.p-change').text();
-                } else if ($.inArray(d, compound_het_genes) != -1){
-                    var p = '';
-                    $('.compound_het-' + d).each(function(){
-                        console.log($(this));
-                        p += $(this).find('.p-change').text() + ' ';
-                    });
-                    result = '<b>Rare compound heterozygote: </b><br />' + p;
-                    //$('#compound_het-' + d).find('.p-change').text();
-                } else if ($.inArray(d, rare_genes) != -1){
-                    result = '<b> Rare heterozygote variant: </b>' + $('#rare-' + d).find('.p-change').text();
-                }
-                return result;
-            })
-            .append('a')
-            .attr('href',function(d){
-                if ($.inArray(d, hom_genes) != -1){
-                    return '#hom-' + d;
-                } else if ( $.inArray(d, compound_het_genes) != -1 ){ 
-                    return '#compound_het-' + d;
-                } else if ( $.inArray(d, rare_genes) != -1){
-                    // has the genes in the same page. change link to them
-                    return '#rare-' + d;
-                } else {
-                    return '/gene/' + d;
-                }
-            })
-            .attr('tab',function(d){
-                if ($.inArray(d, hom_genes) != -1){
-                    return 'individual-tab_hom_variants';
-                } else if ($.inArray(d, compound_het_genes) != -1){
-                    return 'individual-tab_comp_variants';
-                } else if ($.inArray(d, rare_genes) != -1){
-                    return 'individual-tab_rare_variants';
-                }
-                return '';
-            })
-            .text(function(d){return d;});
-        $('#modal-gene-button').show();
-        $('#omim-genes-modal').modal('show');
-        // get the links right
-        $('.ind-header.venn.tip').on('click', function(e){
-            e.preventDefault();
-            $('tr.highlight').toggleClass('highlight');
-            var the_tab = $(this).find('a').attr('tab');
-            var the_url = $(this).find('a').attr('href');
-            console.log(the_tab);
-            $('#omim-genes-modal').modal('hide');
-            $('.nav-tabs a[href="#' + the_tab + '"]').tab('show');
-            $(the_url).toggleClass('highlight');
-            var height = $(the_url).offset().top - 120;
-            $(document).scrollTop( height );
-        });
-        $('.tip').tooltip({html:true});
-    });
-
-$('.pubmed-gene-cell').on('click', 'span.button-more',function(){
-    var cell = $(this).parent();
-    cell.find('span.pubmed').toggleClass('hide');
-    $(this).find('span.glyphicon').toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
-    $('html, body').animate({ scrollTop: $(cell).offset().top - 180 }, 'slow');
-});
-
-</script>
-<script type="text/javascript" src="/static/js/individual_pubmed.js"></script>
-<script type="text/javascript">
-// call the tablesorter plugin
-$('.table-sorter').tablesorter({
-    theme : 'bootstrap',
-    headerTemplate : '{content}{icon}',
-    // hidden filter input/selects will resize the columns, so try to minimize the change
-    widthFixed : true,
-    // initialize zebra striping and filter widgets
-    widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
-    widgetOptions : {
-        zebra : ["even", "odd"],
-        // Use the $.tablesorter.storage utility to save the most recent filters
-        //filter_saveFilters : true,
-        // jQuery selector string of an element used to reset the filters
-        filter_reset : 'button.reset',
-        filter_columnFilters : true,
-        textSorter: {
-             3: $.tablesorter.sortNatural,
-        }
-        // add custom selector elements to the filter row
-        /*filter_formatter : {
-            // (jQuery selector added v2.17.0)
-            // Allele Count
-            'th:contains("Allele Count")' : function($cell, indx){
-            return $.tablesorter.filterFormatter.uiSlider( $cell, indx, {
-                delayed : true,
-                valueToHeader : false,
-                exactMatch : false,
-                allText : 'all', // this is ignored when compare is not empty
-                compare : [ '=', '>=', '<=' ],
-                selected : 1,
-                // jQuery UI slider options
-                value : 1,
-                  min : 1,
-                  max : 5000
-                });
-            }
-        }*/
-    }
-});
-
-////////////////////////////////////
-// Javascript to enable link to tab
-var url = document.location.toString();
-if (url.match('#') && url.match('-')) {
-    var hash = url.split('#')[1];
-    var tab = hash.split('-')[0];
-    if (tab == 'hom'){
-        tab = 'individual-tab_hom_variants';
-    }else if (tab == 'compound_het'){
-        tab = 'individual-tab_comp_variants';
-    }else if (tab == 'rare'){
-        tab = 'individual-tab_rare_variatns';
-    }
-    setTimeout(function(){
-        $('.nav-tabs a[href="#' + tab + '"]').tab('show');
-        $('#' + hash).toggleClass('highlight');
-        var height = $('#' + hash).offset().top - 120;
-        $(document).scrollTop( height );
-    }, 500)
-} 
-
-// Change hash for page-reload
-//$('.nav-tabs a').on('shown.bs.tab', function (e) {
-    //window.location.hash = e.target.hash;
-//})
-//->
-// export results to excel
-$('.export').on('click', function(){
-    exportTableToCSV.apply(this, [$(this).parent().parent(), 'export.csv']);
-});
-
-// resubmit the pubmed-search
-$('.re-search').on('click', function(e){
-    e.preventDefault();
-    $('span.updating').show();
-    var OR = $(this).parent().find('.re-search-input').val();
-    $.post('/research_pubmed',
-        { OR: OR, p_id: '{{ external_id }}' },
-        function(data){
-            $('span.updating').hide();
-            if (data != '0'){
-                alert('something went wrong while updating!')
-            }else{
-               location.reload();
-            }
-        });
-});
-
-// display pubmed result
-$('.pubmed-gene-cell').on('click','.pop-modal', function(){
-    var title = $(this).attr('title');
-    var content = $(this).attr('data-content');
-    $('#myModalLabel').html(title);
-    $('#omim-genes-modal-p').html('<p class="abstract">' + content + '</p>');
-    $('#modal-gene-button').hide();
-    $('#omim-genes-modal').modal('show');
-})
-
-// show all genes when pressed button
-$('#modal-gene-button').on('click',function(){
-    $('.venn.common').toggleClass('hide');
-});
-
-// download csv files
-$('.download-csv').on('click',function(){
-    folder = $(this).attr('csv');
-    p_id = '{{ external_id }}';
-    window.location='/download/send_csv?p_id='+p_id+'&folder='+folder;
-});
-
-// download files
-$('.download').on('click',function(){
-    filetype = $(this).attr('filetype');
-    index = $(this).attr('index');
-    p_id = '{{ external_id }}';
-    window.location='/download?p_id='+p_id+'&filetype='+filetype+'&index='+index;
-});
-
-
-
-// update phenotype from phenotips
-$('.update_phenotype').on('click',function(){
-    p_id = '{{ external_id }}';
-    window.location.href='/individual_update/'+p_id;
-    return false;
-});
-
-$('.variant_status').on('click',function() {
-        $.get('/set_variant_status/{{external_id}}/'+$(this).val(),
-            {  },
-            function(data){
-                if (data != '0'){
-                    //alert('something is wrong when updating!')
-                }else{
-                   location.reload();
-                }
-            });
-});
-
-var session_user= "{{session['user']}}" ;
-// get variant_id in real time
-$('.variant_id').hover(function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    $.get('/variant_json/' + id,
-        function(data){
-            var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
-            $.each(data.result.hom_samples.sort(), function(i,v){
-                 if (session_user=='demo') { var v='hidden'; }
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
-            $.each(data.result.het_samples.sort(), function(i,v){
-                 if (session_user=='demo') { var v='hidden'; }
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
-            span.attr('data-original-title', id);
-            span.attr('data-content', content);
-    });
-});
-
-
-// get individual_id in real time
-$('.individual_id').on('click',function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    $.get('/individual_json/' + id,
-        function(data){
-            if ($('h3.popover-title').text() == 'loading...'){
-                $('div.popover.in').remove();
-                span.trigger('click');
-                span.trigger('click');
-            }
-            if (!data.result) {
-                span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-                span.attr('data-content', 'no data available');
-            }
-            var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
-            content += '<p><b>Features:</b><br/>'
-            if (typeof data.result.genes != 'undefined') {
-            content += '<p><b>Genes:</b> ' + data.result.genes[0].gene + '</p>';
-            } else {
-            content += '<p><b>Genes:</b>  </p>';
-            }
-            $.each(data.result.features.sort(), function(i,v){
-                content += '<a href="/hpo/'+v.label+'">'+v.label+'</a><br/>';
-            });
-            content += '</p>';
-            span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-            span.attr('data-content', content);
-    });
-});
-
-</script>
-
-<script>
-$(document).ready(function(){
-            $('[data-toggle="popover"]').popover(); 
-            });
-</script>
-
-
-
 {% endblock %}
