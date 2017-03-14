@@ -63,6 +63,14 @@ class Patient(object):
         common_hpo_ids=[{'hpo_id':k,'hpo_term':self.hpo_terms[k]['name']} for k in common_hpo_ids]
         x['HPO']=common_hpo_ids
         print x['canonical_gene_name_upper'],common_hpo_ids
+        g=x['canonical_gene_name_upper']
+        # gene_id is used to get gene-hpo analysis result
+        temp = lookups.get_gene_by_name(Patient.variants_db, g)
+        x['gene_id'] = temp['gene_id'] if temp else None
+        x['canonical_hgvs']=dict(zip( x.get('canonical_hgvsp',''), x.get('canonical_hgvsc','')))
+        x['protein_mutations']=dict([(p,p.split(':')[1],) for p in x.get('canonical_hgvsp','') if ':' in p])
+        if 'FILTER' not in v: x['FILTER']=x['filter']
+        if 'ID' not in v: x['ID']=''
         return x
     def conditions(self, x, AC=10,kaviar=.05,consequence_exclude=['intron_variant','non_coding_transcript','5_prime_UTR_variant','3_prime_UTR_variant','upstream_gene_variant','downstream_gene_variant','synonymous_variant','non_coding_transcript_exon_variant'],consequence_include=[ 'transcript_ablation', 'splice_acceptor_variant', 'splice_donor_variant', 'stop_gained', 'frameshift_variant', 'stop_lost', 'start_lost', 'transcript_amplification', 'inframe_insertion', 'inframe_deletion', 'missense_variant', 'protein_altering_variant', 'splice_region_variant', 'regulatory_region_ablation']):
         if 'AC' not in x or x['AC'] > AC: return False
