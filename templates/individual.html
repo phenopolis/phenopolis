@@ -39,29 +39,32 @@
                 <h4 style="font-weight:300;">OMIM Genes</h4>
                 <p>This is the set of known HPO to gene relationships obtained from OMIM.</p>
                 {% include "components/loading_from_server.html" %}
-                <table id='omin_table' class='table-sorter striped centered' style="display:none;">
-                    <thead>
-                        {% include "components/table-pager.html" %}
-                        <tr>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id='omin_table_body'>
-                    </tbody>
-                    <tfoot>
-                        {% include "components/table-pager.html" %}
-                    </tfoot>
-                </table>
+                <div class="omim_venn_diagram">
+                </div>
             </div>
             <div id="homs_tab">
                 <h4 style="font-weight:300;">Rare HOMs</h4>
-                <p>This is the list of rare homozygous variants in this individual obtained with thresholds...</p>
+                <p>This is the list of rare homozygous variants in this individual obtained with thresholds.</p>
                 {% include "components/loading_from_server.html" %}
                 <table id='homs_table' class='table-sorter striped centered' style="display:none;">
                     <thead>
                         {% include "components/table-pager.html" %}
                         <tr>
-                            <th></th>
+                            <th>Genes</th>
+                            <th>Exomiser Gene Score</th>
+                            <th>Phenogenon Gene Score</th>
+                            <th>OMIM HPO</th>
+                            <th>Pubmed Gene</th>
+                            <th>Variant ID</th>
+                            <th>Allele Frequency</th>
+                            <th>ExAC Frequency</th>
+                            <th>Kaviar Frequeny</th>
+                            <th>Most Severe Consequence</th>
+                            <th>HGVSP</th>
+                            <th>Canonical CADD</th>
+                            <th>Het Individual</th>
+                            <th>Hom Individual</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id='homs_table_body'>
@@ -73,13 +76,27 @@
             </div>
             <div id="comp_hets_tab">
                 <h4 style="font-weight:300;">Rare Comp Hets</h4>
-                <p>This is the list of rare compound heterozgote variants (more than one variant in a given gene) found in this individual obtained with allele frequency thresholds...</p>
+                <p>This is the list of rare compound heterozgote variants (more than one variant in a given gene) found in this individual obtained with allele frequency thresholds.</p>
                 {% include "components/loading_from_server.html" %}
                 <table id='comp_hets_table' class='table-sorter striped centered' style="display:none;">
                     <thead>
                         {% include "components/table-pager.html" %}
                         <tr>
-                            <th></th>
+                            <th>Genes</th>
+                            <th>Exomiser Gene Score</th>
+                            <th>Phenogenon Gene Score</th>
+                            <th>OMIM HPO</th>
+                            <th>Pubmed Gene</th>
+                            <th>Variant ID</th>
+                            <th>Allele Frequency</th>
+                            <th>ExAC Frequency</th>
+                            <th>Kaviar Frequeny</th>
+                            <th>Most Severe Consequence</th>
+                            <th>HGVSP</th>
+                            <th>Canonical CADD</th>
+                            <th>Het Individual</th>
+                            <th>Hom Individual</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id='comp_hets_table_body'>
@@ -92,13 +109,27 @@
             </div>
             <div id="variants_tab">
                 <h4 style="font-weight:300;">Rare Variants</h4>
-                <p>This is the list of rare compound heterozgote variants (more than one variant in a given gene) found in this individual obtained with allele frequency thresholds...</p>
+                <p>This is the list of rare compound heterozgote variants (more than one variant in a given gene) found in this individual obtained with allele frequency thresholds.</p>
                 {% include "components/loading_from_server.html" %}
                 <table id='variants_table' class='table-sorter striped centered' style="display:none;">
                     <thead>
                         {% include "components/table-pager.html" %}
                         <tr>
-                            <th></th>
+                            <th>Genes</th>
+                            <th>Exomiser Gene Score</th>
+                            <th>Phenogenon Gene Score</th>
+                            <th>OMIM HPO</th>
+                            <th>Pubmed Gene</th>
+                            <th>Variant ID</th>
+                            <th>Allele Frequency</th>
+                            <th>ExAC Frequency</th>
+                            <th>Kaviar Frequeny</th>
+                            <th>Most Severe Consequence</th>
+                            <th>HGVSP</th>
+                            <th>Canonical CADD</th>
+                            <th>Het Individual</th>
+                            <th>Hom Individual</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id='variants_table_body'>
@@ -112,19 +143,9 @@
                 <h4 style="font-weight:300;">Exomiser</h4>
                 <p>These are the result files of running <a href="http://www.sanger.ac.uk/science/tools/exomiser">Exomiser prioritisation</a> on the variants of these individuals under different inheritance modes.</p>
                 {% include "components/loading_from_server.html" %}
-                <table id='exomiser_table' class='table-sorter striped centered' style="display:none;">
-                    <thead>
-                        {% include "components/table-pager.html" %}
-                        <tr>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id='exomiser_table_body'>
-                    </tbody>
-                    <tfoot>
-                        {% include "components/table-pager.html" %}
-                    </tfoot>
-                </table>
+                <div class="exomiser_content">
+                  
+                </div>
             </div>
         </div>
     </div>
