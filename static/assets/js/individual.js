@@ -77,10 +77,10 @@ if (!PP) {
 
   };
 
-  PP.initHomsTable = function () {
+  PP.initHomsTable = function(patient_id) {
     $.ajax({
       type: 'GET',
-      url: '',
+      url: 'homozygous_variants_json/' + patient_id,
       dataType: 'json',
       timeout: 120000,
       success: function(data) { PP.HomsSuccess(data); },
@@ -102,15 +102,45 @@ if (!PP) {
     PP.initTableSorter('#homs_table');
   };
 
-  PP.initCompHetsTable = function () {
+  PP.initCompHetsTable = function(patient_id) {
+    $.ajax({
+      type: 'GET',
+      url: 'compound_het_variants_json/' + patient_id,
+      dataType: 'json',
+      timeout: 120000,
+      success: function(data) { PP.CompHetSuccess(data); },
+      error: function(data, msg) { PP.ajaxError(data, msg); }
+    });
+  };
+
+  PP.CompHetSuccess = function(data) {
 
   };
 
-  PP.initVariantsTable = function () {
+  PP.initVariantsTable = function(patient_id) {
+    $.ajax({
+      type: 'GET',
+      url: 'rare_variants_json/' + patient_id,
+      dataType: 'json',
+      timeout: 120000,
+      success: function(data) { PP.VariantsSuccess(data); },
+      error: function(data, msg) { PP.ajaxError(data, msg); }
+    });
+  };
+
+  PP.VariantsSuccess = function(data) {
 
   };
 
-  PP.initExomiserTable = function () {
+  PP.initExomiserTab = function(patient_id) {
+    // $.ajax({
+    //   type: 'GET',
+    //   url: 'homozygous_variants_json/',
+    //   dataType: 'json',
+    //   timeout: 120000,
+    //   success: function(data) { PP.HomsSuccess(data); },
+    //   error: function(data, msg) { PP.ajaxError(data, msg); }
+    // });
 
   };
 
