@@ -56,6 +56,9 @@ def homepage():
         version_number = None
     print('Version number is:-')
     print(version_number)
+    labnames= ['black','brogan','elliott','gosgene','hardcastle','humphries','kelsell',
+               'lachmann','marks','mead','moosajee','nejentsev','rahman','segal',
+               'sisodiya','arvc','syrris','ukirdc','vulliamy','webster']
     return render_template('home.html', title='Phenopolis - Home Page',
         total_patients=total_patients,
         male_patients=male_patients,
@@ -68,5 +71,6 @@ def homepage():
         nonpass_variants=nonpass_variants,
         pass_exac_variants=pass_exac_variants,
         pass_nonexac_variants=pass_nonexac_variants,
-        version_number=version_number)
+        version_number=version_number,
+        labnames=labnames)
 

@@ -9,7 +9,7 @@ Flask-HTTPAuth==3.2.1
 Flask-Mail==0.9.1
 Flask-Runner==2.1.1
 Flask-Session==0.3.0
-hgvs==0.5.0a6
+hgvs==1.0.0a1
 mygene==3.0.0
 myvariant==0.3.1
 neo4j-driver==1.0.2
