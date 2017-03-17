@@ -268,12 +268,6 @@ input.typeahead.tt-input {
   padding-left: 4rem;
 }
 
-
-/* Force the search input to uppercase, but keep the placeholder to normal case */
-input.typeahead {
-  text-transform: uppercase;
-}
-
 .typeahead::-webkit-input-placeholder {
   /* WebKit browsers */
   text-transform: none;
