@@ -106,7 +106,6 @@ def get_hpo_individuals(hpo_id):
         if solved_patient and session['user']!='demo': p['solved_variants']=solved_patient.get('genes',{})
         return p
     patients=[f(p) for p in patients if 'external_id' in p]
-    print(patients[0])
     return patients
 
 
