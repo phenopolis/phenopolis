@@ -1,11 +1,12 @@
 /* HOME Page*/
+
 .home .section {
-    padding-top: 5rem;
-    padding-bottom: 5rem
+  padding-top: 5rem;
+  padding-bottom: 5rem
 }
 
 nav i.left {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
 .section .collection {
@@ -13,34 +14,35 @@ nav i.left {
 }
 
 .section .collection-item.avatar {
-    min-height: 118px;
-    padding-left: 134px;
-    border-bottom: none;
+  min-height: 118px;
+  padding-left: 134px;
+  border-bottom: none;
 }
 
 .section .collection-item.avatar img.circle {
-    height: 100px;
-    width: 100px;
+  height: 100px;
+  width: 100px;
 }
 
 #team .row {
-    margin-bottom: initial;
+  margin-bottom: initial;
 }
 
 #team .collection .collection-item.avatar p {
-    overflow-y: scroll;
-    margin-bottom: 1rem !important;
-    margin-top: 0.656rem
+  overflow-y: scroll;
+  margin-bottom: 1rem !important;
+  margin-top: 0.656rem
 }
 
 #team .collection .collection-item.avatar span {
-  font-size:0.8rem;
+  font-size: 0.8rem;
   line-height: 0.8rem;
 }
 
 #team .collection .collection-item.avatar .material-icons {
-  font-size:inherit;
+  font-size: inherit;
 }
+
 #team .collection .collection-item.avatar h5 {
   margin-bottom: 0
 }
@@ -86,6 +88,7 @@ p {
 /* 
 *  DROPDOWN MENU IN NAVBAR 
 */
+
 nav .dropdown-content {
   overflow-y: auto;
   background-color: #FFF;
@@ -145,6 +148,7 @@ nav .dropdown-content li>span>label {
 /* 
 *  AUTOCOMPLETE
 */
+
 .autocomplete-content {
   position: absolute;
 }
@@ -298,7 +302,7 @@ input.typeahead.tt-input {
 }
 
 .info_table td {
-  padding: 2px 8px;
+  padding: 5px 8px;
 }
 
 .info_table {
@@ -309,7 +313,14 @@ input.typeahead.tt-input {
 /*************
   Materialize theme (http://materializecss.com/)
  *************/
+
+table.tablesorter-materialize {
+  font-size: 0.9rem;
+}
+
+
 /* jQuery materialize Theme */
+
 .tablesorter-materialize thead th,
 .tablesorter-materialize thead td,
 .tablesorter-materialize tfoot th,
@@ -330,13 +341,14 @@ input.typeahead.tt-input {
 
 .tablesorter-materialize .tablesorter-header-inner {
   font-weight: 400;
-  font-size: 1.2rem;
+  font-size: 1rem;
   position: relative;
   padding: 4px 18px 4px 4px;
 }
 
 
 /* sort icons */
+
 .tablesorter-materialize thead .tablesorter-header {
   background-repeat: no-repeat;
   background-position: center right;
@@ -347,6 +359,7 @@ input.typeahead.tt-input {
 
 
 /* black unsorted icon */
+
 .tablesorter-materialize thead .tablesorter-headerUnSorted {
   /* <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 24 16"><path d="M15 8 1 8 8 0zM15 9 1 9 8 16z" fill="#222"/></svg> */
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgdmlld0JveD0iMCAwIDI0IDE2Ij48cGF0aCBkPSJNMTUgOCAxIDggOCAwek0xNSA5IDEgOSA4IDE2eiIgZmlsbD0iIzIyMiIvPjwvc3ZnPg==);
@@ -354,6 +367,7 @@ input.typeahead.tt-input {
 
 
 /* black asc icon */
+
 .tablesorter-materialize thead .tablesorter-headerAsc {
   /* <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 24 16"><path d="M15 11 1 11 8 3z" fill="#222"/></svg> */
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgdmlld0JveD0iMCAwIDI0IDE2Ij48cGF0aCBkPSJNMTUgMTEgMSAxMSA4IDN6IiBmaWxsPSIjMjIyIi8+PC9zdmc+);
@@ -361,6 +375,7 @@ input.typeahead.tt-input {
 
 
 /* black desc icon */
+
 .tablesorter-materialize thead .tablesorter-headerDesc {
   /* <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 24 16"><path d="M15 6 1 6 8 13z" fill="#222"/></svg> */
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgdmlld0JveD0iMCAwIDI0IDE2Ij48cGF0aCBkPSJNMTUgNiAxIDYgOCAxM3oiIGZpbGw9IiMyMjIiLz48L3N2Zz4=);
@@ -368,6 +383,7 @@ input.typeahead.tt-input {
 
 
 /* white unsorted icon */
+
 .tablesorter-materialize-dark thead .tablesorter-headerUnSorted {
   /* <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 24 16"><path d="M15 8 1 8 8 0zM15 9 1 9 8 16z" fill="#fff"/></svg> */
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgdmlld0JveD0iMCAwIDI0IDE2Ij48cGF0aCBkPSJNMTUgOCAxIDggOCAwek0xNSA5IDEgOSA4IDE2eiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==);
@@ -375,6 +391,7 @@ input.typeahead.tt-input {
 
 
 /* white asc icon */
+
 .tablesorter-materialize-dark thead .tablesorter-headerAsc {
   /* <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 24 16"><path d="M15 11 1 11 8 3z" fill="#fff"/></svg> */
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgdmlld0JveD0iMCAwIDI0IDE2Ij48cGF0aCBkPSJNMTUgMTEgMSAxMSA4IDN6IiBmaWxsPSIjZmZmIi8+PC9zdmc+);
@@ -382,6 +399,7 @@ input.typeahead.tt-input {
 
 
 /* white desc icon */
+
 .tablesorter-materialize-dark thead .tablesorter-headerDesc {
   /* <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 24 16"><path d="M15 6 1 6 8 13z" fill="#fff"/></svg> */
   background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgdmlld0JveD0iMCAwIDI0IDE2Ij48cGF0aCBkPSJNMTUgNiAxIDYgOCAxM3oiIGZpbGw9IiNmZmYiLz48L3N2Zz4=);
@@ -389,6 +407,7 @@ input.typeahead.tt-input {
 
 
 /* since materialize (table-striped) uses nth-child(), we just use this to add a zebra stripe color */
+
 .tablesorter-materialize > tbody > tr.odd > td,
 .tablesorter-materialize > tbody > tr.tablesorter-hasChildRow.odd:hover ~ tr.tablesorter-hasChildRow.odd ~ .tablesorter-childRow.odd > td {
   background-color: #eee;
@@ -405,6 +424,7 @@ input.typeahead.tt-input {
 
 
 /* processing icon */
+
 .tablesorter-materialize .tablesorter-processing {
   background-image: url('data:image/gif;base64,R0lGODlhFAAUAKEAAO7u7lpaWgAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQBCgACACwAAAAAFAAUAAACQZRvoIDtu1wLQUAlqKTVxqwhXIiBnDg6Y4eyx4lKW5XK7wrLeK3vbq8J2W4T4e1nMhpWrZCTt3xKZ8kgsggdJmUFACH5BAEKAAIALAcAAAALAAcAAAIUVB6ii7jajgCAuUmtovxtXnmdUAAAIfkEAQoAAgAsDQACAAcACwAAAhRUIpmHy/3gUVQAQO9NetuugCFWAAAh+QQBCgACACwNAAcABwALAAACE5QVcZjKbVo6ck2AF95m5/6BSwEAIfkEAQoAAgAsBwANAAsABwAAAhOUH3kr6QaAcSrGWe1VQl+mMUIBACH5BAEKAAIALAIADQALAAcAAAIUlICmh7ncTAgqijkruDiv7n2YUAAAIfkEAQoAAgAsAAAHAAcACwAAAhQUIGmHyedehIoqFXLKfPOAaZdWAAAh+QQFCgACACwAAAIABwALAAACFJQFcJiXb15zLYRl7cla8OtlGGgUADs=');
   background-position: center center !important;
@@ -413,12 +433,14 @@ input.typeahead.tt-input {
 
 
 /* caption */
+
 .caption {
   background-color: #fff;
 }
 
 
 /* filter widget */
+
 .tablesorter-materialize .tablesorter-filter-row input.tablesorter-filter,
 .tablesorter-materialize .tablesorter-filter-row select.tablesorter-filter {
   background-color: #fff;
@@ -451,6 +473,7 @@ input.typeahead.tt-input {
   background-color: #efefef;
 }
 */
+
 .tablesorter-materialize .tablesorter-filter-row td {
   background-color: #e0e0e0;
   line-height: normal;
@@ -465,6 +488,7 @@ input.typeahead.tt-input {
 
 
 /* hidden filter row */
+
 .tablesorter-materialize .tablesorter-filter-row.hideme td {
   padding: 2px;
   /* change this to modify the thickness of the closed border row */
@@ -485,12 +509,14 @@ input.typeahead.tt-input {
 
 
 /* rows hidden by filtering (needed for child rows) */
+
 .tablesorter .filtered {
   display: none;
 }
 
 
 /* ajax error row */
+
 .tablesorter .tablesorter-errorRow td {
   text-align: center;
   cursor: pointer;
@@ -512,6 +538,7 @@ input.typeahead.tt-input {
 
 
 /* add border to right side (LTR pages) of fixed column */
+
 .tablesorter-scroller-fixed:after {
   content: '';
   border-right: 1px solid #444;
@@ -528,12 +555,14 @@ input.typeahead.tt-input {
 
 
 /* pager wrapper, div */
+
 .tablesorter-pager {
   padding: 5px;
 }
 
 
 /* pager wrapper, in thead/tfoot */
+
 td.tablesorter-pager {
   background-color: #e6eeee;
   margin: 0;
@@ -542,6 +571,7 @@ td.tablesorter-pager {
 
 
 /* pager navigation arrows */
+
 .tablesorter-pager img {
   vertical-align: middle;
   margin-right: 2px;
@@ -550,6 +580,7 @@ td.tablesorter-pager {
 
 
 /* pager output text */
+
 .tablesorter-pager .pagedisplay {
   padding: 0 5px 0 5px;
   width: auto;
@@ -559,6 +590,7 @@ td.tablesorter-pager {
 
 
 /* pager element reset (needed for bootstrap) */
+
 .tablesorter-pager select {
   margin: 0;
   padding: 0;
@@ -566,13 +598,17 @@ td.tablesorter-pager {
 
 
 /*** css used when "updateArrows" option is true ***/
+
+
 /* the pager itself gets a disabled class when the number of rows is less than the size */
+
 .tablesorter-pager.disabled {
   display: none;
 }
 
 
 /* hide or fade out pager arrows when the first or last row is visible */
+
 .tablesorter-pager .disabled {
   opacity: 0.5;
   filter: alpha(opacity=50);
@@ -637,7 +673,38 @@ tfoot {
 }
 
 table .chip {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  display: inline-flex;
+  height: initial;
+  margin-bottom: 9px;
+  line-height: 20px;
+  padding: 5px 12px;
 }
+
+.text-small {
+  font-size: 0.75rem;
+}
+
+table .text-small {
+  font-size: 0.65rem;
+}
+
+.venntooltip {
+  position: absolute;
+  text-align: center;
+  width: 128px;
+  min-height: 36px;
+  background-color: #323232;
+  background: #323232;
+  color: #fff;
+  padding: 10px 8px;
+  border: 0px;
+  border-radius: 0 0 50% 50%;
+  border-radius: 2px;
+  opacity: 0;
+  font-size: 1rem;
+  line-height: 120%;
+  max-width: calc(100% - 4px);
+  overflow: hidden;
+  pointer-events:none;
+}
+
