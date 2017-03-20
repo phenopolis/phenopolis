@@ -2,9 +2,14 @@
 <div class="container">
     <div class="card z-depth-3">
         <div class="card-content">
-            <h3 class="truncate" style="font-weight: 300">Individual: <a href='https://phenotips.cs.ucl.ac.uk/bin/{{patient.report_id}}' target='_blank'>{{patient.external_id}}</a> <span class="grey-text" id="sex" style="font-size:0.7em;">[{{ patient.sex }}]</span></h3>
+            <span class="right"><a class="waves-effect waves-light btn-large light-blue darken-2 btn-floating tooltipped" data-position="left" data-delay="50" data-tooltip="Edit Patient Features"><i class="material-icons left">mode_edit</i></a></span>
+            <h3 class="truncate" style="font-weight: 300">Individual: {{patient.external_id}}</h3>
             <table class="info_table" style="display:none">
                 <tbody>
+                    <tr>
+                        <td>Gender</td>
+                        <td id="patient_gender"></td>
+                    </tr>
                     <tr>
                         <td>Features</td>
                         <td id="patient_features"></td>
@@ -14,15 +19,13 @@
                         <td id="patient_consanguinity"></td>
                     </tr>
                     <tr>
-                        <td>Global Mode of Inheritance</td>
-                        <td id="patient_inheritance_mode"></td>
-                    </tr>
-                    <tr>
                         <td>Candidate Genes</td>
                         <td id="patient_genes"></td>
                     </tr>
                 </tbody>
             </table>
+            <div class="clearfix"></div>
+            <!-- <a class="waves-effect bluewaves-light btn"><i class="material-icons left">edit</i>Edit Patient Details</a> -->
         </div>
         <div class="card-tabs" style="padding-top: 2rem;">
             <ul class="tabs tabs-fixed-width ">
@@ -39,7 +42,7 @@
                 <h4 style="font-weight:300;">OMIM Genes</h4>
                 <p>This is the set of known HPO to gene relationships obtained from OMIM.</p>
                 {% include "components/loading_from_server.html" %}
-                <div class="omim_venn_diagram">
+                <div id="venn" class="omim_venn_diagram center-align">
                 </div>
             </div>
             <div id="homs_tab">
