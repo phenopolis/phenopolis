@@ -99,8 +99,7 @@ def get_feature_venn(patient):
     for combo in feature_combo:
         # construct features_venn key
         #venn_ind += 1
-        dic_key = '","'.join([hpo_terms[i][1] for i in combo])
-        dic_key = '"' + dic_key + '"'
+        dic_key = [hpo_terms[i][1] for i in combo]
         for ind in range(len(combo)):
             if ind == 0:
                 x=hpo_terms[combo[ind]][0]
