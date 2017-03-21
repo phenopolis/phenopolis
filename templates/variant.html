@@ -47,26 +47,17 @@
                         <td>{{ variant.AC|int }} / {{ variant.AN|int }}</td>
                     </tr>
                     <tr>
-                        <td>UCSC</td>
-                        <td><a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&highlight=hg19.chr{{ variant.chrom|string }}%3A{{ variant.pos|string }}-{{ variant.pos|int + variant.ref|length - 1 }}&position=chr{{ variant.chrom|string }}%3A{{ variant.pos|int - 25 }}-{{ variant.pos|int + variant.ref|length - 1 + 25 }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> {{ variant.variant_id }}</a></td>
-                    </tr>
-                    <tr>
-                        <td>ExAC</td>
-                        <td><a href="http://exac.broadinstitute.org/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> {{ variant.variant_id }}</a></td>
-                    </tr>
-                    <tr>
-                        <td>varsome</td>
-                        <td><a href="http://varsome.com/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> {{ variant.variant_id }}</a></td>
-                    </tr>
-                    <tr>
-                        <td>ClinVar</td>
+                        <td>External Services</td>
                         <td>
+                            <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&highlight=hg19.chr{{ variant.chrom|string }}%3A{{ variant.pos|string }}-{{ variant.pos|int + variant.ref|length - 1 }}&position=chr{{ variant.chrom|string }}%3A{{ variant.pos|int - 25 }}-{{ variant.pos|int + variant.ref|length - 1 + 25 }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> UCSC</a> &#149;
+                            <a href="http://exac.broadinstitute.org/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> ExAC</a> &#149;
+                            <a href="http://varsome.com/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> Varsome</a> &#149;
                             {% if not variant.rsid or variant.rsid == "." %}
                                 <a href="http://www.ncbi.nlm.nih.gov/clinvar?term=({{ variant.chrom }}%5BChromosome%5D)%20AND%20{{ variant.pos }}%5BBase%20Position%20for%20Assembly%20GRCh37%5D" target="_blank">
                             {% else %}
                                 <a href="http://www.ncbi.nlm.nih.gov/clinvar?term={{ variant.rsid }}%5BVariant%20ID%5D" target="_blank">
                             {% endif %}
-                            <i class="material-icons" style="font-size:1rem;">open_in_new</i> Click to search for variant in Clinvar</a>
+                            <i class="material-icons" style="font-size:1rem;">open_in_new</i>Clinvar</a>
                         </td>
                     </tr>
                 </tbody>
