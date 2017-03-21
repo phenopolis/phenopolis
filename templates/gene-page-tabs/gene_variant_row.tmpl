@@ -88,7 +88,7 @@
     {% endif %}
 {% else %}
     {% if session['user'] == 'demo' %}
-        hidden
+        hidden &nbsp;
     {% else %}
         <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'><a href="/individual/{{s}}" target='_blank'>{{s}}</a></span><br/>
     {% endif %}
@@ -102,13 +102,13 @@
 <!-- <span class='tip' title='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'> -->
 {% if individuals[s]|length > 1 %}
     {% if session['user'] == 'demo' %}
-        hidden
+        hidden &nbsp;
     {% else %}
         <b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'><a href="/individual/{[s}}">{{s}}</a></span><br/> </b>
     {% endif %}
 {% else %}
     {% if session['user'] == 'demo' %}
-        hidden
+        hidden &nbsp;
     {% else %}
         <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'><a href="/individual/{{s}}">{{s}}</a></span><br/>
     {% endif %}
