@@ -119,7 +119,7 @@ if (!PP) {
     $.ajax({
       type: 'POST',
       url: '/register',
-      data: $('#login_form').serialize(),
+      data: $('#register_form').serialize(),
       dataType: 'json',
       timeout: 120000,
       success: function(data) {
