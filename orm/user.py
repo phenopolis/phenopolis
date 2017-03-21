@@ -12,18 +12,18 @@ class User(object):
         data=User.db.users.find_one({'user':user},{'_id':False})
         if data:
             self.__dict__.update(data)
-            self.status={ 'message':'User account exists already.', 'http_code':401}
+            self.status={ 'message':'User account exists already.'%user, 'http_code':401}
             return
         data=User.db.new_users.find_one({'user':user},{'_id':False})
         if data:
             self.__dict__.update(data)
-            self.status={ 'message':'User account request already created, still unapproved.', 'http_code':401}
+            self.status={ 'message':'User account %s request already created, still unapproved.'%user, 'http_code':401}
             return
         self.user=user
         self.email=email
         self.affiliation=affiliation
         self.groups=groups
-        self.status={ 'message':'User account request created.', 'http_code':200}
+        self.status={ 'message':'User account request created for %s.'%user, 'http_code':200}
         # add to unapproved table
         User.db.new_users.ensure_index('user',unique=True)
         User.db.new_users.insert_one( self.__dict__ )
