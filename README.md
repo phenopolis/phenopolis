@@ -10,25 +10,25 @@ Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
 
 Phenopolis is used for research into the molecular diagnosis of rare genetic diseases by clinicians, geneticists and bioinformaticians at UCL, University of Leeds, University of Manchester and University of Oxford.
 
-##The Phenopolis Website 
+## The Phenopolis Website 
 You can access a demo version of the server at:
 https://phenopolis.github.io
 username/password:
 demo/demo123
 
-#Contributors
+# Contributors
 We are especially interested in contributions to the UI (html, css, js) which could be greatly refactored and vastly improved.
 Also any performance improvements to the db queries would be also greatly appreciated.
 Let us know if you run into difficulties getting the code running!  Our goal is to make it easy for you to contribute so the project continues to grow!
 ​
-#Installation
+# Installation
 This section includes guides to a quick install and a full installation.
 ​
-##Prerequisites
+## Prerequisites
 * Python 2 - you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3. https://www.python.org/downloads/
 * MongoDB - https://www.mongodb.com/download-center#community
 
-##Quick Install Demo for Coders (no Phenotips required)
+## Quick Install Demo for Coders (no Phenotips required)
 
 I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
 When this is installed you should be able to browse to:
@@ -51,7 +51,7 @@ Phenopolis can be developed under Windows but requires some additional steps and
 
 To debug in Visual Studio, first turn off the Flask debug by setting ```app.run(..,..,..,debug=False)``` in ```runserver.py```.
 
-###Post-installation
+### Post-installation
 When this is installed you should be able to browse to:
 [http://localhost:8000/gene/TTLL5](http://localhost:8000/gene/TTLL5)
 
