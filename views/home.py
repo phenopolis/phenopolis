@@ -12,6 +12,16 @@ import csv
 import orm
 import subprocess
 
+@app.route('/register',methods=['POST'])
+def register():
+    name=request.form.get('name').replace(' ','')
+    affiliation=request.form.get('affiliation')
+    email=request.form.get('email')
+    groups=request.form.getlist('group[]')
+    user=orm.User(user_db=get_db(app.config['DB_NAME_USERS']),user=name,groups=groups,email=email,affiliation=affiliation)
+    print(user.json())
+    print(user.status)
+    return jsonify(message=user.status['message']), user.status['http_code']
 
 
 @app.route('/', methods=['GET'])
