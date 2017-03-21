@@ -123,9 +123,14 @@ if (!PP) {
       dataType: 'json',
       timeout: 120000,
       success: function(data) {
-        $('#registration_successful').show();
+        $('#registering_msg_success').text(data.message);
+        $('#registration_error').hide();
+        $('#registration_success').show();
       },
       error: function(data, msg) {
+        $('#registering_msg_error').text(data.responseJSON.message);
+        $('#registration_success').hide();
+        $('#registration_error').show();
         console.log(data);
         console.log(msg);
       }
