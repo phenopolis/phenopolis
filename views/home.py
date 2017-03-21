@@ -21,7 +21,7 @@ def register():
     user=orm.User(user_db=get_db(app.config['DB_NAME_USERS']),user=name,groups=groups,email=email,affiliation=affiliation)
     print(user.json())
     print(user.status)
-    return user.status
+    return jsonify(message=user.status['message']), user.status['http_code']
 
 
 @app.route('/', methods=['GET'])
