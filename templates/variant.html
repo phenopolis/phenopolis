@@ -1,333 +1,94 @@
-{% extends "layout.html" %}
-{% block body %}
-
-
-
-    <style>
-        .d3_graph {
-            font: 10px sans-serif;
-        }
-
-        .bar rect {
-            fill: steelblue;
-            shape-rendering: crispEdges;
-        }
-
-        .bar text {
-            fill: #fff;
-        }
-
-        .axis path, .axis line {
-            fill: none;
-            stroke: #000;
-            shape-rendering: crispEdges;
-        }
-    </style>
-
-
-    <h1><span class="hidden-xs">Variant: </span>{{ variant.chrom }}:{{ variant.pos }} {{ variant.ref }} / {{ variant.alt }}</h1>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <dl class="dl-horizontal" style="margin-bottom: 0px;">
-                        <dt>
-                            {% if variant.FILTER != "PASS" %}
-                                <span class="label label-danger">Filter Status</span>
-                            {% else %}
-                                Filter Status
-                            {% endif %}
-                        </dt>
-                        <dd>{{ variant.FILTER }}</dd>
-                        <dt> Gene </td>
-                        <dd> {{ variant.canonical_gene_name_upper|unique|href(link='gene') }} </dd>
-                        <dt> Consequence </td>
-                        <dd>{{variant.most_severe_consequence}}</dd>
-                        <dt> Transcript </td>
-                        <dd> {{ variant.canonical_transcript|unique|href(link='transcript') }} </dd>
-                        {# <dt>dbSNP Membership </dt> <dd> {{variant.DB}} </dd> #}
-                        <dt>dbSNP</dt>
+{% extends "material_app_layout.html" %} {% block body %}
+<div class="container">
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <h3 class="truncate" style="font-weight: 300">Variant: </span>{{ variant.chrom }}:{{ variant.pos }} {{ variant.ref }} / {{ variant.alt }}</h3>
+            <table class="info_table">
+                <tbody>
+                    <tr>
+                        <td>Filter Status</td>
+                        <td>{{ variant.FILTER }}</td> 
+                        <!-- Make the above red if variant.FILTER != "PASS" -->
+                    </tr>
+                    <tr>
+                        <td>Gene</td>
+                        <td>{{ variant.canonical_gene_name_upper|unique|href(link='gene') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Consequence</td>
+                        <td>{{variant.most_severe_consequence}}=</td>
+                    </tr>
+                    <tr>
+                        <td>Transcript</td>
+                        <td>{{ variant.canonical_transcript|unique|href(link='transcript') }}</td>
+                    </tr>
+                    <tr>
+                        <td>dbSNP</td>
                         {% if variant.id and variant.id != "." %}
-                            <dd><a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{ variant.id }}" target="_blank">{{ variant.id }}</a></dd>
+                            <td><a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{ variant.id }}" target="_blank">{{ variant.id }}</a></td>
                         {% else %}
-                            <dd>Not found in dbSNP</dd>
+                            <td>Not found in dbSNP</td>
                         {% endif %}
-                        <dt>Allele Frequency</dt>
-                        <dd>{% if variant.AF %}{{ '%0.4g' % variant.AF }}{% else %}NA (Allele Number = 0){% endif %}</dd>
-                        <dt>Kaviar: </dt> <dd>{{variant.kaviar}}</dd>
-                        <dt>ExAC:</dt> <dd>{{variant.EXAC.AF}}</dd>
-                        {# <dt>HOM/HET/WT/MISS </dt> <dd>  {{variant.HOM_COUNT|int}} / {{variant.HET_COUNT|int}} / {{variant.WT_COUNT|int}} / {{variant.MISS_COUNT|int}} </dd> #}
-                        <dt>Allele Count</dt> <dd>{{ variant.AC|int }} / {{ variant.AN|int }} </dd>
-                        <dt>UCSC</dt>
-                        <dd>
-                            <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&highlight=hg19.chr{{ variant.chrom|string }}%3A{{ variant.pos|string }}-{{ variant.pos|int + variant.ref|length - 1 }}&position=chr{{ variant.chrom|string }}%3A{{ variant.pos|int - 25 }}-{{ variant.pos|int + variant.ref|length - 1 + 25 }}" target="_blank">
-                                {{ variant.variant_id }}
-                                <i class="fa fa-external-link"></i>
-                            </a>
-                        </dd>
-                        <dt>ExAC</dt>
-                        <dd> <a href="http://exac.broadinstitute.org/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"> {{ variant.variant_id }} <i class="fa fa-external-link"></i> </a>
-                        </dd>
-                        <dt>varsome</dt>
-                        <dd> <a href="http://varsome.com/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"> {{ variant.variant_id }} <i class="fa fa-external-link"></i> </a>
-                        </dd>
-                        <dt>ClinVar</dt>
-                        <dd>
+                    </tr>
+                    <tr>
+                        <td>Allele Frequency</td>
+                        <td>{% if variant.AF %}{{ '%0.4g' % variant.AF }}{% else %}NA (Allele Number = 0){% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>Kaviar</td>
+                        <td>{{variant.kaviar}}</td>
+                    </tr>
+                    <tr>
+                        <td>ExAC</td>
+                        <td>{{variant.EXAC.AF}}</td>
+                    </tr>
+                    <tr>
+                        <td>Allele Count</td>
+                        <td>{{ variant.AC|int }} / {{ variant.AN|int }}</td>
+                    </tr>
+                    <tr>
+                        <td>UCSC</td>
+                        <td><a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&highlight=hg19.chr{{ variant.chrom|string }}%3A{{ variant.pos|string }}-{{ variant.pos|int + variant.ref|length - 1 }}&position=chr{{ variant.chrom|string }}%3A{{ variant.pos|int - 25 }}-{{ variant.pos|int + variant.ref|length - 1 + 25 }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> {{ variant.variant_id }}</a></td>
+                    </tr>
+                    <tr>
+                        <td>ExAC</td>
+                        <td><a href="http://exac.broadinstitute.org/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> {{ variant.variant_id }}</a></td>
+                    </tr>
+                    <tr>
+                        <td>varsome</td>
+                        <td><a href="http://varsome.com/variant/{{ variant.chrom }}-{{ variant.pos }}-{{ variant.ref }}-{{ variant.alt }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> {{ variant.variant_id }}</a></td>
+                    </tr>
+                    <tr>
+                        <td>ClinVar</td>
+                        <td>
                             {% if not variant.rsid or variant.rsid == "." %}
                                 <a href="http://www.ncbi.nlm.nih.gov/clinvar?term=({{ variant.chrom }}%5BChromosome%5D)%20AND%20{{ variant.pos }}%5BBase%20Position%20for%20Assembly%20GRCh37%5D" target="_blank">
                             {% else %}
                                 <a href="http://www.ncbi.nlm.nih.gov/clinvar?term={{ variant.rsid }}%5BVariant%20ID%5D" target="_blank">
                             {% endif %}
-                                Click to search for variant in Clinvar
-                                <i class="fa fa-external-link"></i>
-                            </a>
-                        </dd>
-
-                        <!-- <dt>AC</dt> <dd>{{variant['AC']|int}} </dd> -->
-                        <!-- <dt>AF</dt> <dd>{{variant['AF']}} </dd> -->
-                        <!-- <dt>AN</dt> <dd> <td> {{variant['AN']|int}}</dd> -->
-
-                    </dl>
-                </div>
+                            <i class="material-icons" style="font-size:1rem;">open_in_new</i> Click to search for variant in Clinvar</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-tabs" style="padding-top: 2rem;">
+            <ul class="tabs tabs-fixed-width ">
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#frequency_tab">Frequency</a></li>
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#consequences_tab">Consequence ()</a></li>
+                <div class="indicator light-blue darken-2" style="z-index:1"></div>
+            </ul>
+        </div>
+        <div class="card-content grey lighten-5">
+            <div id="frequency_tab">
+                <h4 style="font-weight:300;">Frequency</h4>
+                <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             </div>
-
-            {#
-    <table>
-            <tr> <td> {{variant.canonical_hgvsc}} </td> </tr>
-            <tr> <td> {{variant.canonical_hgvsp}} </td> </tr>
-            <tr> <td>  </td> </tr>
-    </table>
-    #}
-
-
-
-<div class="tabs">
-
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="active"><a href="#frequency" role="tab" data-toggle="tab">Frequency</a></li> 
-        <li><a href="#consequence" role="tab" data-toggle="tab">Consequence ({{variant.transcript_consequences|length}}) </a></li>
-{% if session['user'] != 'demo' %}
-        <li><a href="#quality" role="tab" data-toggle="tab">Quality</a></li>
-{% endif %}
-{% if session['user'] != 'demo' %}
-<li><a href="#individuals" role="tab" data-toggle="tab">Individuals ({{variant.hom_samples|length}} / {{variant.het_samples|length}} )</a></li>
-{% endif %}
-    </ul>
-
-<div class="tab-content">
-
-<div id="frequency" class="tab-pane active">
-            <table class="table-sorter">
-                    <thead>
-                        <tr><th> </th> <th>AC</th> <th>AN</th> <th>Het</th> <th>Hom</th> <th>AF POPMAX</th> <th> AF </th></tr>
-                    </thead>
-                    <tbody>
-                        <tr> <td> Internal </td> <td> {{variant.AC|int}} </td> <td> {{variant.AN|int}} </td> <td> {{variant.HET_COUNT|int}} </td> <td> {{variant.HOM_COUNT|int}} </td> <td> </td> <td> {{variant.AF}} </td> </tr>
-            {% if variant.EXAC %}
-                        <tr> <td> African </td> <td>{{variant.EXAC.AC_AFR|int}}</td> <td>{{variant.EXAC.AN_AFR|int}}</td> <td>{{variant.EXAC.Het_AFR|int}}</td> <td>{{variant.EXAC.Hom_AFR|int}}</td> <td></td><td>{{variant.EXAC.AC_AFR / variant.EXAC.AN_AFR}}</td></tr>
-                        <tr> <td> East Asian </td> <td>{{variant.EXAC.AC_EAS|int}}</td> <td>{{variant.EXAC.AN_EAS|int}}</td> <td>{{variant.EXAC.Het_EAS|int}}</td> <td>{{variant.EXAC.Hom_EAS|int}}</td> <td></td><td>{{variant.EXAC.AC_EAS / variant.EXAC.AN_EAS}}</td></tr>
-                        <tr> <td> Finnish </td> <td>{{variant.EXAC.AC_FIN|int}}</td> <td>{{variant.EXAC.AN_FIN|int}}</td> <td>{{variant.EXAC.Het_FIN|int}}</td> <td>{{variant.EXAC.Hom_FIN|int}}</td> <td></td><td>{{variant.EXAC.AC_FIN / variant.EXAC.AN_FIN}}</td></tr>
-                        <tr> <td> Non-Finnish European </td> <td>{{variant.EXAC.AC_NFE|int}}</td> <td>{{variant.EXAC.AN_NFE|int}}</td> <td>{{variant.EXAC.Het_NFE|int}}</td> <td>{{variant.EXAC.Hom_NFE|int}}</td> <td></td><td>{{variant.EXAC.AC_NFE / variant.EXAC.AN_NFE}}</td></tr>
-                        <tr> <td> American </td> <td>{{variant.EXAC.AC_AMR|int}}</td> <td>{{variant.EXAC.AN_AMR|int}}</td> <td>{{variant.EXAC.Het_AMR|int}}</td> <td>{{variant.EXAC.Hom_AMR|int}}</td> <td></td><td>{{variant.EXAC.AC_AMR / variant.EXAC.AN_AMR}}</td></tr> 
-                        <tr> <td> Other </td> <td>{{variant.EXAC.AC_OTH|int}}</td> <td>{{variant.EXAC.AN_OTH|int}}</td> <td>{{variant.EXAC.Het_OTH|int}}</td> <td>{{variant.EXAC.Hom_OTH|int}}</td> <td></td><td>{{variant.EXAC.AC_OTH / variant.EXAC.AN_OTH}}</td></tr>
-                        <tr> <td> South Asian </td> <td>{{variant.EXAC.AC_SAS|int}}</td> <td>{{variant.EXAC.AN_SAS|int}}</td> <td>{{variant.EXAC.Het_SAS|int}}</td> <td>{{variant.EXAC.Hom_SAS|int}}</td> <td></td><td>{{variant.EXAC.AC_SAS / variant.EXAC.AN_SAS}}</td></tr>
-                        <tr> <td> Adj </td> <td>{{variant.EXAC.AC_Adj|int}}</td> <td>{{variant.EXAC.AN_Adj|int}} {# {{variant.EXAC.AN|int}} #}</td> <td>{{variant.EXAC.AC_Het|int}}</td> <td>{{variant.EXAC.AC_Hom|int}}</td> <td></td><td>{{variant.EXAC.AC_Adj / variant.EXAC.AN_Adj}}</td></tr>
-                        <tr> <td> Female </td> <td>{{variant.EXAC.AC_FEMALE|int}}</td> <td>{{variant.EXAC.AN_FEMALE|int}}</td> <td> </td> <td> </td> <td></td><td>{{variant.EXAC.AC_FEMALE / variant.EXAC.AN_FEMALE}}</td></tr>
-                        <tr> <td> Male </td> <td>{{variant.EXAC.AC_MALE|int}}</td> <td>{{variant.EXAC.AN_MALE|int}}</td> <td> </td> <td> </td> <td></td><td>{{variant.EXAC.AC_MALE / variant.EXAC.AN_MALE}}</td></tr>
-                        <tr> <td> Consanguineous </td> <td>{{variant.EXAC.AC_CONSANGUINEOUS|int}}</td> <td>{{variant.EXAC.AN_CONSANGUINEOUS|int}}</td> <td> </td> <td>{{variant.EXAC.Hom_CONSANGUINEOUS|int}}</td> <td></td><td>{{variant.EXAC.AC_CONSANGUINEOUS / variant.EXAC.AN_CONSANGUINEOUS}}</td></tr>
-                        {# <tr> <td> Pop max </td> <td> {{variant.EXAC.POPMAX}} {{variant.EXAC.AC_POPMAX|int}}</td> <td>{{variant.EXAC.AN_POPMAX|int}}</td> <td></td> <td></td> <td></td><td></td></tr> #}
-                        <tr> <td> OneKG </td> <td>{{variant.EXAC.KG_AC|int}}</td> <td></td><td></td><td></td>   <td>{{variant.EXAC.KG_AF_POPMAX}}</td> <td>{{variant.EXAC.KG_AF_GLOBAL}}</td> </tr>
-                        <tr> <td> ESP </td> <td> {{variant.EXAC.ESP_AC|int}} </td> <td></td> <td></td> <td></td> <td> {{variant.EXAC.ESP_AF_POPMAX}} </td> <td> {{variant.EXAC.ESP_AF_GLOBAL}} </td> </tr>
-             {% endif %}
-             {% if variant.kaviar %}
-                        <tr> <td> Kaviar </td> <td>  </td> <td></td> <td></td> <td></td> <td>  </td> <td> {{variant.kaviar}} </td> </tr>
-             {% endif %}
-                        </tbody>
-           </table>
-
-                        {#
-                        <tr>
-                            <td> Quality </td>
-                            <td>{{variant.EXAC.BaseQRankSum}}</td>
-                            <td>{{variant.EXAC.ClippingRankSum}}</td>
-                            <td>{{variant.EXAC.DOUBLETON_DIST}}</td>
-                            <td>{{variant.EXAC.DP}}</td>
-                            <td>{{variant.EXAC.FS}}</td>
-                            <td>{{variant.EXAC.GQ_MEAN}}</td>
-                            <td>{{variant.EXAC.GQ_STDDEV}}</td>
-                            <td>{{variant.EXAC.InbreedingCoeff}}</td>
-                            <td>{{variant.EXAC.ReadPosRankSum}}</td>
-                            <td>{{variant.EXAC.VQSLOD}}</td>
-                            <td>{{variant.EXAC.culprit}}</td>
-                            <td>{{variant.EXAC.QD}}</td>
-                            <td>{{variant.EXAC.MQ}}</td>
-                            <td>{{variant.EXAC.MQ0}}</td>
-                            <td>{{variant.EXAC.MQRankSum}}</td>
-                        </tr>
-                        #}
-                        {#
-                        <tr>
-                        <td>{{variant.EXAC.K1_RUN}}</td>
-                        <td>{{variant.EXAC.K2_RUN}}</td>
-                        <td>{{variant.EXAC.K3_RUN}}</td>
-                        </tr>
-                        #}
+            <div id="consequences_tab">
+                <h4 style="font-weight:300;">Consequences</h4>
+                <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div id='consequence' class="tab-pane">
-                <table style="table-layout: width: 100%" class="table-sorter">
-                        <thead>
-                            <tr>
-                             <th> gene symbol</th>
-                             <th> strand </th>
-                             <th> transcript </th>
-                             <th> protein </th>
-                             <th> consequence terms</th>
-                             <th> impact</th>
-                             <th> cadd</th>
-                             <th> polyphen </th>
-                             <th> sift </th>
-                             <th> carol</th>
-                         </tr>
-                         </thead>
-                         <tbody>
-                        {% for csq in variant.transcript_consequences %}
-                            <tr>
-                            <td>
-                            {{csq.gene_symbol}} 
-                            <a href="http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=HGNC:{{csq.hgnc_id}}">{{csq.hgnc_id}}</a>
-                            <a href=http://grch37.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g={{csq.gene_id}}>{{csq.gene_id}}</a>
-                            </td>
-                            <td> {{ {-1:'-',1:'+'}[csq.strand]}} </td>
-                            <td>
-                            {# <a href=http://grch37.ensembl.org/Homo_sapiens/Transcript/Summary?db=core;t={{csq.transcript_id}}>{{csq.transcript_id}}</a> #}
-                            <a href=http://grch37.ensembl.org/Homo_sapiens/Transcript/Summary?db=core;t={{csq.transcript_id}}>{{csq.hgvsc}}</a>
-                            {{csq.codons}}
-                            <a href=https://varsome.com/variant/hg19/{{csq.samecodon}}>{{csq.samecodon}}</a>
-                            <td>
-                            {# <a href="http://www.uniprot.org/uniprot/?query={{csq.hgvsp}}">{{csq.hgvsp}}</a> #}
-                            {{csq.hgvsp}}
-                            {{csq.amino_acids}}
-                            </td>
-                            <td> {{csq.consequence_terms|join(' ')}}</td>
-                            <td> {{csq.impact}}</td>
-                            <td> {{csq.cadd}}</td>
-                            <td> {{csq.polyphen_prediction}} {{csq.polyphen_score}} </td>
-                            <td> {{csq.sift_prediction}} {{csq.sift_score}}</td>
-                            <td> {{csq.carol}}</td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                    </table>
-</div>
-
-
-{% if session['user'] != 'demo' %}
-<div id="quality" class="tab-pane">
-                <table id="individuals_table" class="tablesorter">
-                        <tr> <td> Culprit: </td> <td> {{variant.culprit}} </td> </tr>
-                        <tr> <td> Quality: </td> <td> {{variant['QUAL']}} </td> </tr>
-                        <tr> <td> Z-score from Wilcoxon rank sum test of Alt Vs. Ref base qualities: </td> <td> {{variant['BaseQRankSum']}}   </td> </tr> 
-                        <tr> <td> Z-score From Wilcoxon rank sum test of Alt vs. Ref number of hard clipped bases: </td> <td> {{variant['ClippingRankSum']}}  </td> </tr> 
-                        <tr> <td> Approximate read depth; some reads may have been filtered: </td> <td> {{variant['DP']}} </td> </tr> 
-                        <tr> <td> Were any of the samples downsampled?: </td> <td> {{variant['DS']}} </td> </tr> 
-                        <tr> <td> Stop position of the interval: </td> <td> {{variant['END']}} </td> </tr> 
-                        <tr> <td> Phred-scaled p-value for exact test of excess heterozygosity: </td> <td> {{variant['ExcessHet']}} </td> </tr> 
-                        <tr> <td> Phred-scaled p-value using Fisher's exact test to detect strand bias: </td> <td> {{variant['FS']}} </tr> 
-                        <tr> <td> Consistency of the site with at most two segregating haplotypes: </td> <td> {{variant['HaplotypeScore']}} </tr> 
-                        <tr> <td> Inbreeding coefficient as estimated from the genotype likelihoods per-sample when compared against the Hardy-Weinberg expectation: </td> <td> {{variant['InbreedingCoeff']}} </td> </tr> 
-                        <tr> <td> Maximum likelihood expectation (MLE) for the allele counts (not necessarily the same as the AC), for each ALT allele, in the same order as listed: </td> <td> {{variant['MLEAC']}} </td> </tr> 
-                        <tr> <td> Maximum likelihood expectation (MLE) for the allele frequency (not necessarily the same as the AF), for each ALT allele, in the same order as listed: </td> <td> {{variant['MLEAF']}} </td> </tr> 
-                        <tr> <td> RMS Mapping Quality: </td> <td> {{variant['MQ']}}  </td> </tr> 
-                        <tr> <td> Total Mapping Quality Zero Reads: </td> <td> {{variant['MQ0']}} </td> </tr> 
-                        <tr> <td> Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities: </td> <td> {{variant['MQRankSum']}} </td> </tr> 
-                        <tr> <td> Variant Confidence/Quality by Depth: </td> <td> {{variant['QD']}} </td> </tr> 
-                        <tr> <td> Raw data for RMS Mapping Quality: </td> <td> {{variant['RAW_MQ']}} </td> </tr> 
-                        <tr> <td> Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias: </td> <td> {{variant['ReadPosRankSum']}} </td> </tr> 
-                        <tr> <td> Symmetric Odds Ratio of 2x2 contingency table to detect strand bias: </td> <td> {{variant['SOR']}} </td> </tr> 
-                    </table>
-</div>
-{% endif %}
-
-
-{% if session['user'] != 'demo' %}
-<div id='individuals' class="tab-pane">
-          <table id="individuals_table" class="table-sorter">
-                <tr> <td> HOM <hr/></td>
-                <td>
-                {% for y in variant['hom_samples'] %}
-                 <a href="/individual/{{y}}">{{y}}</a>
-                {% endfor %}
-                <hr />
-                </td>
-                <tr> <td> HET <hr/></td>
-                <td>
-                {% for y in variant['het_samples'] %}
-                <a href="/individual/{{y}}">{{y}}</a>
-                {% endfor %}
-                <hr />
-                </td>
-                <tr> <td> WT </td>
-                <td>
-                {% for y in variant['wt_samples'] %}
-                 <a href="/individual/{{y}}">{{y}}</a>
-                {% endfor %}
-                </td>
-                </tr>
-                </tr>
-                </tr>
-       </table>
-</div>
-{% endif %}
-
-</div>
-
-</div> <!-- tabs -->
-
-
-<script type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
-<script type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
-<script type="text/javascript">
-// call the tablesorter plugin
-$('.table-sorter').tablesorter({
-    theme : 'bootstrap',
-    headerTemplate : '{content}{icon}',
-    // hidden filter input/selects will resize the columns, so try to minimize the change
-    widthFixed : true,
-    // initialize zebra striping and filter widgets
-    widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
-    widgetOptions : {
-        zebra : ["even", "odd"],
-        // Use the $.tablesorter.storage utility to save the most recent filters
-        //filter_saveFilters : true,
-        // jQuery selector string of an element used to reset the filters
-        filter_reset : 'button.reset',
-        filter_columnFilters : true,
-        textSorter: {
-             3: $.tablesorter.sortNatural,
-        }
-        // add custom selector elements to the filter row
-        /*filter_formatter : {
-            // (jQuery selector added v2.17.0)
-            // Allele Count
-            'th:contains("Allele Count")' : function($cell, indx){
-            return $.tablesorter.filterFormatter.uiSlider( $cell, indx, {
-                delayed : true,
-                valueToHeader : false,
-                exactMatch : false,
-                allText : 'all', // this is ignored when compare is not empty
-                compare : [ '=', '>=', '<=' ],
-                selected : 1,
-                // jQuery UI slider options
-                value : 1,
-                  min : 1,
-                  max : 5000
-                });
-            }
-        }*/
-    }
-});
-</script>
-
-
-
 {% endblock %}
