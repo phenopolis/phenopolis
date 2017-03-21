@@ -1,0 +1,72 @@
+<div id="simreg_tab">
+    <h4 style="font-weight:300;">Simreg Analysis</h4>
+    <p>This is a very interesting analsis that allows us to... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <p>Select the below tabs to see the recessive and dominant...</p>
+    <div class="card-tabs" style="padding-top: 2rem; margin-right: -24px; margin-left: -24px">
+        <ul class="tabs tabs-fixed-width">
+            <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#simreg_recessive_tab">Recessive</a></li>
+            <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#simreg_dominant_tab">Dominant</a></li>
+            <div class="indicator light-blue darken-2" style="z-index:1"></div>
+        </ul>
+    </div>
+    <div id="simreg_recessive_tab">
+        <h4 style="font-weight:100;">Recessive</h4>
+        <br>
+        <div class="row">
+            {% if simreg.rec.data %} 
+            <div class="col m6">
+                <table id="" class="table-sorter striped highlight centered">
+                    <thead>
+                        <tr>
+                            <th>HPO</th>
+                            <th>Phi Probability score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="simreg_recessive_table_body">
+                        {% for h in simreg.rec.data -%}
+                        <tr>
+                            <td><a href='/hpo/{{h.hpo_id|upper}}'>{{ h.desc }}</a></td>
+                            <td>{{ h.prob }}</td>
+                        </tr>
+                        {%- endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            <div class="col m6">
+                <h5 style="font-weight: 100;">Visual Summary</h5>
+                <img src="/static/SimReg/{{ gene.gene_id }}-rec.svg">
+            </div>
+        </div>
+    </div>
+    <div id="simreg_dominant_tab">
+        <h4 style="font-weight:100;">Dominant</h4>
+        <br>
+        <div class="row">
+            {% if simreg.dom.data %}
+            <div class="col m6">
+                <table id="" class="table-sorter striped highlight centered">
+                    <thead>
+                        <tr>
+                            <th>HPO</th>
+                            <th>Phi Probability score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="simreg_recessive_table_body">
+                         {% for h in simreg.dom.data -%}
+                        <tr>
+                            <td><a href='/hpo/{{h.hpo_id|upper}}'>{{ h.desc }}</a></td>
+                            <td>{{ h.prob }}</td>
+                        </tr>
+                        {%- endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            <div class="col m6">
+                <h5 style="font-weight: 100;">Visual Summary</h5>
+                <img src="/static/SimReg/{{ gene.gene_id }}-rec.svg">
+            </div>
+        </div>
+    </div>
+</div>
