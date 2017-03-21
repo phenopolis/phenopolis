@@ -65,7 +65,7 @@ class Patient(object):
         print x['canonical_gene_name_upper'],common_hpo_ids
         g=x['canonical_gene_name_upper']
         # gene_id is used to get gene-hpo analysis result
-        temp = lookups.get_gene_by_name(Patient.variants_db, g)
+        temp = lookups.get_gene_by_name(Patient.variant_db, g)
         x['gene_id'] = temp['gene_id'] if temp else None
         x['canonical_hgvs']=dict(zip( x.get('canonical_hgvsp',''), x.get('canonical_hgvsc','')))
         x['protein_mutations']=dict([(p,p.split(':')[1],) for p in x.get('canonical_hgvsp','') if ':' in p])
