@@ -128,7 +128,6 @@ else:
 def check_auth(username, password):
     """
     This function is called to check if a username / password combination is valid.
-    Will try to connect to phenotips instance.
     """
     db_users=get_db(app.config['DB_NAME_USERS'])
     r=db_users.users.find_one({'user':username})
@@ -184,7 +183,6 @@ def login():
 def logout():
     print('DELETE SESSION')
     session.pop('user',None)
-    session.pop('phenotips_session',None)
     if config.LOCAL:
         return redirect('/')
     else:
