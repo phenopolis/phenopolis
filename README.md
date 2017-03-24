@@ -28,7 +28,7 @@ This section includes guides to a quick install and a full installation.
 * Python 2 - you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3. https://www.python.org/downloads/
 * MongoDB - https://www.mongodb.com/download-center#community
 
-## Quick Install Demo for Coders (no Phenotips required)
+## Quick Install Demo for Coders
 
 I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
 When this is installed you should be able to browse to:
@@ -57,11 +57,10 @@ When this is installed you should be able to browse to:
 
 The example dataset covers only gene TTLL5. Web pages for other genes will show no information. 
 
-### Full Installation (including Phenotips)
+### Full Installation
 
 Phenopolis requires:
 * a running mongo database
-* a running Phenotips server (needed to provide the HPO phenotypes per patient) on which you will need to create an Admin account which has access to all patient
 * (optionally) a running Exomiser stand-alone server, which can be obtained on request as it being developed separately by [Julius Jacobsen](https://github.com/julesjacobsen).
 
 You will then be able to run ```phenopolis.py```, the python Flask server.
@@ -70,10 +69,6 @@ The first step is to clone the repository.
 
 ```
 git clone git@github.com:pontikos/phenopolis.git
-```
-Download Phenotips:
-```
-https://phenotips.org/Download
 ```
 
 If you wish to download the Exomiser stand-alone server, please get in touch with [Julius Jacobsen](https://github.com/julesjacobsen).
@@ -137,15 +132,6 @@ If one wishes to change the cutoffs to filter the variants after phenogenon is d
 After this, `python hpo_gene_anlaysis.py` will extract all genes with significant p values for each valid HPO term, and write to a JSON file for each HPO term.
 
 ## Running servers
-
-Run Phenotips:
-Check with [Nikolas Pontikos](https://github.com/pontikos), what version is being used and replace '''1.3-milestone-4''' in the script below accordingly.
-```
-wget https://nexus.phenotips.org/nexus/content/repositories/releases/org/phenotips/phenotips-standalone/1.3-milestone-4/phenotips-standalone-1.3-milestone-4.zip
-unzip phenotips-standalone-1.3-milestone-4.zip
-cd phenotips-standalone-1.3-milestone-4
-bash start.sh
-```
 
 Run Exomiser standalone:
 ```
