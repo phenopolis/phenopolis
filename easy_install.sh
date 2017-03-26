@@ -1,7 +1,7 @@
 # Get phenopolis and its submodule.
 git clone https://github.com/pontikos/phenopolis.git
 cd phenopolis
-git submodule update --init --remote --recursive
+git submodule update --init --recursive
 cd varnorm
 python setup.py install --user
 cd ../..
@@ -19,6 +19,7 @@ mongod --dbpath $DBPATH --port 27017 &
 # download minimal files
 # import them
 # create indexes
+cd phenopolis
 
 #wget --no-check-certificate https://uclex.cs.ucl.ac.uk/static/demo/hpo-hpo.json -O hpo-hpo.json
 mongoimport --db hpo --collection hpo --file tests/data/hpo-hpo.json --drop
