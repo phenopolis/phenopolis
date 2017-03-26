@@ -134,6 +134,7 @@ def load_patient(individual,auth,pubmed_key,hpo='HP:0000001',AC=10,kaviar=.05,co
     print('number of compound hets:',patient['rare_compound_hets_count'])
     patient["pubmedbatch_status"]=0
     patient["pubmed_key"]=pubmed_key
+    if '_id' in patient: del patient['_id']
     db.patients.update({'external_id':patient_id}, patient, upsert=True)
 
 
