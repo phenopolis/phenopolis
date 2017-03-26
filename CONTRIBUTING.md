@@ -1,5 +1,5 @@
 # Request for contributions
-We welcome new contributors. We have an active set of users and we are providing them with new analysis functionality to help them in their investigations into genetic diseases. We'd love for you to join us.
+We welcome new contributors. We have an active set of users and we are providing them with new analysis functionality to help them in their investigations into genetic diseases. We'd love for you to join us. Take a look at our [pitch](https://uclex.cs.ucl.ac.uk/about#pitch).
 
 We have a list of open [issues](https://github.com/phenopolis/phenopolis/issues) and a need for improved performance and test coverage.
 
