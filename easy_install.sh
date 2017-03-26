@@ -81,8 +81,7 @@ mongo patients --eval "db.patients.createIndex({'specificity.score' : 1})"
 mongoimport --db users --collection users --file tests/data/users.json --drop
 
 
-# Run server
-cd phenopolis 
+# Run server 
 python runserver.py
 
 exec $SHELL
