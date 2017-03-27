@@ -78,6 +78,7 @@ from Crypto.Cipher import DES
 import base64
 from binascii import b2a_base64, a2b_base64
 from werkzeug.security import generate_password_hash, check_password_hash
+from passlib.hash import argon2
 
 import orm
 from lookups import *
@@ -135,7 +136,11 @@ def check_auth(username, password):
     if not r: return False
     session['user']=username
     auth='%s:%s' % (username, password,)
-    return check_password_hash(r['password'],password)
+    if not config.USE_ARGON2_AUTH:
+        return check_password_hash(r['password'],password)
+    else:
+        return argon2.verify(password, r['password'])
+
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
