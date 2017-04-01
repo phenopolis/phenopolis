@@ -1,3 +1,5 @@
+# Explanation of variant properties
+
 ```
 {  
    "BaseQRankSum":0.481,
@@ -153,7 +155,7 @@
             }
          }
       ],
-      "gnomad_22":[  
+      "gnomad":[  
          {  
             "allele":"G",
             "name":"rs13911",
@@ -328,3 +330,62 @@
    ]
 }
 ```
+
+
+## Variant quality
+
+### FILTER
+Values:
+* PASS
+* FAIL
+* VQSR
+
+### FS: Fisher Strand
+Whether there is a bias in the fisher strand.
+
+### BaseQRankSum
+
+### MQ
+Mapping quality
+
+### QD
+Quality depth
+
+### ClippingRankSum
+
+### MQRankSum
+
+## Variant Frequency
+
+### Kaviar
+
+The [Kaviar db](db.systemsbiology.net/kaviar/)
+
+Released: February 29, 2016 (version 160204-Public)
+Kaviar contains 162 million SNV sites (including 25M not in dbSNP) and incorporates data from 35 projects encompassing 77,781 individuals (13.2K whole genome, 64.6K exome).
+* Kaviar also contains 50 million short indels and substitutions from a subset of the data sources.
+* Kaviar excludes cancer genomes but includes some data from cell lines and individuals affected by disease.
+* An effort was made to exclude data from related individuals.
+
+### Gnomad
+
+The Genome Aggregation Database (gnomAD) is a resource developed by an international coalition of investigators, with the goal of aggregating and harmonizing both exome and genome sequencing data from a wide variety of large-scale sequencing projects, and making summary data available for the wider scientific community.
+
+The data set provided on this website spans 123,136 exome sequences and 15,496 whole-genome sequences from unrelated individuals sequenced as part of various disease-specific and population genetic studies.
+
+
+### ExAC
+
+## Variant function impact
+
+### CADD
+The CADD is not transcript specific but depends on the DNA
+
+### Transcript Consequences
+
+The trancript consequences field contains the functional impact of the variant on all transcript on which it occurs.
+Each transcript consequence contains:
+* exon affected : the number of the exon affected
+* hgvsc : change in cDNA (cDNA has introns spliced out)
+* hgvsp: if the transcript is protein coding, what is the effect on the protein?
+
