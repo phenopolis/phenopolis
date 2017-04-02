@@ -1,11 +1,11 @@
 # Explanation of variant properties
 
 
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| input.fields.InbreedingCoeff  | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
+| Field        |    Value        |  Explanation | Pheno4J mapping |
+| ------------- |:-------------:| -----:| -----:|
+| input.fields.InbreedingCoeff  | 0.0552 |  | Variant.InbreedingCoeff |
+|       |       |    |
+|  |       |     |
 
 ```
 {  
