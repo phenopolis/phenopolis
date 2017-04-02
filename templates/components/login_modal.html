@@ -54,12 +54,48 @@
         </form>
         <p id="registration_successful" style="color:#4CAF50; display: none;">Registration successful. We will review your application and will email you with login details if your application is successful.</p>
     </div>
+    <div class="modal-content" id="change_password_content" style="display:none;">
+        <i class="material-icons right modal-close">close</i>
+        <h4>Change Password</h4>
+        <form id="change_password_form" class="col s12" action="/change_password" method="POST">
+            <div class="row">
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">account_circle</i>
+                    <input id="changePwd_Name" type="text" value="{{username}}" name="name" autocomplete="name" class="validate">
+                    <label for="changePwd_Name">Username</label>
+                </div>
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">lock</i>
+                    <input id="current_password" type="password" name="current_password" class="validate">
+                    <label for="current_password">Current password</label>
+                </div>
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">lock</i>
+                    <input id="new_password_1" type="password" name="new_password_1" class="validate">
+                    <label for="new_password_1">New password</label>
+                </div>
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">lock</i>
+                    <input id="new_password_2" type="password" name="new_password_2" class="validate">
+                    <label for="new_password_2">Retype new password</label>
+                </div>
+                <p class="col s12" id="change_password_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">
+                    Password change failed. Please try again.
+                    <br>Contact us if you continue to have issues.
+                </p>
+            </div>
+        </form>
+        <p id="change_password_successful" style="color:#4CAF50; display: none;">Your password has been changed.</p>
+    </div>
     <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
+        <!-- To test the Change Password functionality, comment out the 'Close' line below and comment in the 'Change Password' line below that. -->
         <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Close</a>
+        <!--<a id="change_password_btn" href="#!" class="left waves-effect waves-green btn-flat">Change Password</a>--> 
         <a id="register_btn" href="#!" class="left waves-effect waves-green btn-flat">Register</a>
         <a id="enter_login_btn" href="#!" class="left waves-effect waves-green btn-flat" style="display:none;">Login</a>
         <!-- Right side of fotter -->
         <a id="submit_register_btn" href="#!" class="waves-effect waves-green btn-flat" style="display: none;">Submit</a>
+        <a id="submit_change_password_btn" href="#!" class="waves-effect waves-green btn-flat" style="display: none;">Change Password</a>
         <a id="login_btn" href="#!" class="waves-effect waves-green btn-flat">Login</a>
         <a id="demo_login_btn" href="#!" class="waves-effect waves-green btn-flat">Demo Login</a>
     </div>

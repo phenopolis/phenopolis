@@ -32,6 +32,14 @@ def load_data():
         else:
             import_data('test_users', 'users', "./tests/data/users_argon2.json")
 
+# Load the test data set needed for test_login.
+def load_user_data():
+    app = Flask(__name__)
+    with app.app_context():
+        if not config.USE_ARGON2_AUTH:
+            import_data('test_users', 'users', "./tests/data/users.json")
+        else:
+            import_data('test_users', 'users', "./tests/data/users_argon2.json")
 
 # Create a collection in the db, drop any existing data, add data from file.
 # Create indexes in to the data.
