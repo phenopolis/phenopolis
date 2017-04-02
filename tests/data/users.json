@@ -1,1 +1,2 @@
 {"user" : "demo", "password" : "pbkdf2:sha1:1000$td8DSTdY$767ce7cc3b25a2b55763f90d46b1cdc9efd1be08", "external_ids" : [ "WebsterURMD_Sample_GV4344", "WebsterURMD_Sample_IC16489", "WebsterURMD_Sample_SJ17898", "WebsterURMD_Sample_SK13768" ] }
+{"user" : "test", "password" : "pbkdf2:sha1:1000$llWOOv6J$c1fc91b13d6007a83b6dc2cee1933f47c053d1f9", "external_ids" : [ "WebsterURMD_Sample_GV4344", "WebsterURMD_Sample_IC16489", "WebsterURMD_Sample_SJ17898", "WebsterURMD_Sample_SK13768" ] }

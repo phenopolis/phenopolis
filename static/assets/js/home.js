@@ -54,8 +54,16 @@ if (!PP) {
       PP.showRegistrationForm();
     });
 
+    $('#change_password_btn').on('click', function () {
+        PP.showChangePasswordForm();
+    });
+
     $('#submit_register_btn').on('click', function() {
       PP.submitRegisterForm();
+    });
+
+    $('#submit_change_password_btn').on('click', function () {
+        PP.submitChangePassword();
     });
   };
 
@@ -86,7 +94,11 @@ if (!PP) {
   //
   PP.showRegistrationForm = function() {
     $('#login_content').hide();
+    $('#change_password_content').hide();
+    $('#change_password_btn').hide();
     $('#register_btn').hide();
+    $('#submit_change_password_btn').hide();
+
     $('#login_btn').hide();
     $('#demo_login_btn').hide();
 
@@ -96,15 +108,40 @@ if (!PP) {
   };
 
   //
+  PP.showChangePasswordForm = function () {
+      $('#change_password_form')[0].reset();
+      $("#change_password_form_error_msg").hide();
+
+      $('#login_content').hide();
+      $('#change_password_btn').hide();
+      $('#register_btn').hide();
+      $('#change_password_successful').hide();
+
+      $('#login_btn').hide();
+      $('#demo_login_btn').hide();
+
+      $('#register_content').hide();
+      $('#submit_register_btn').hide();
+
+      $('#enter_login_btn').show();
+      $('#change_password_content').show();
+      $('#submit_change_password_btn').show();
+
+  };
+
+  //
   PP.showLoginForm = function() {
     $('#login_content').show();
+    $('#change_password_btn').show();
     $('#register_btn').show();
     $('#login_btn').show();
     $('#demo_login_btn').show();
 
     $('#register_content').hide();
+    $('#change_password_content').hide();
     $('#enter_login_btn').hide();
     $('#submit_register_btn').hide();
+    $('#submit_change_password_btn').hide();
   };
 
   //
@@ -130,6 +167,33 @@ if (!PP) {
         console.log(msg);
       }
     });
+  };
+
+  PP.submitChangePassword = function () {
+      $('#auth_modal').modal({ dismissible: false, endingTop: '20%' });
+      $('#auth_modal').modal('open');
+      $('#change_password_form_error_msg').hide();
+      $('#change_password_successful').hide();
+
+      $.ajax({
+          type: 'POST',
+          url: '/change_password',
+          data: $('#change_password_form').serialize(),
+          dataType: 'json',
+          timeout: 120000,
+          success: function (data) {
+              $('#auth_modal').modal('close');
+              $('#change_password_successful').show();
+              $("#change_password_successful").text(data.success);
+          },
+          error: function (data, msg) {
+              $('#auth_modal').modal('close');
+              $("#username, #password, #new_password_1, #new_password_2").addClass("invalid");
+              $("#username, #password, #new_password_1, #new_password_2").prop("aria-invalid", "true");
+              $('#change_password_form_error_msg').show();
+              $("#change_password_form_error_msg").text(data.responseJSON.error);
+          }
+      });
   };
 }());
 // End of PP module
