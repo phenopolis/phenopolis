@@ -220,6 +220,28 @@ def homozgous_variants(individual):
     patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
     return jsonify(result=patient.homozygous_variants)
 
+
+@app.route('/homozygous_variants_json2/<individual>')
+@requires_auth
+def homozgous_variants2(individual):
+    statements2={'statements':[{"statement":
+    """MATCH (g:Gene)-[]->(gv:GeneticVariant)-[:HomVariantToPerson]->(p:Person)
+       WHERE p.personId="%s" AND gv.HOM_COUNT=1 AND (gv.hasExac=false OR gv.EXAC_Hom_AFR=0)
+       WITH gv,g MATCH (gv)-[]->(tv:TranscriptVariant)
+       RETURN gv, g, tv;""" % individual
+       }]}
+    statements={'statements':[{"statement":
+    """MATCH (g:Gene)-[]->(gv:GeneticVariant)-[:HomVariantToPerson]->(p:Person)
+       WHERE p.personId="%s" AND gv.HOM_COUNT=1 AND (gv.hasExac=false OR gv.EXAC_Hom_AFR=0)
+       RETURN gv, g;""" % individual
+       }]}
+    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
+    print(resp.json())
+    data=[r['row'] for r in resp.json()['results'][0]['data']]
+    #variants=[r['row'][0] for r in resp.json()['results'][0]['data']]
+    #variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}).get('canonical_gene_name_upper','') for v in variants]
+    return jsonify(result=data)
+
 @app.route('/compound_het_variants_json/<individual>')
 @requires_auth
 def compound_het_variants(individual):
