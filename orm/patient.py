@@ -14,6 +14,7 @@ class Patient(object):
         Patient.hpo_db=hpo_db
         data=Patient.db.patients.find_one({'external_id':patient_id},{'_id':False})
         self.__dict__.update(data)
+        if 'genes' not in self.__dict__: self.__dict__['genes']=[]
     def __getattribute__(self, key):
         "Emulate type_getattro() in Objects/typeobject.c"
         v = object.__getattribute__(self, key)
@@ -67,10 +68,10 @@ class Patient(object):
         # gene_id is used to get gene-hpo analysis result
         temp = lookups.get_gene_by_name(Patient.variant_db, g)
         x['gene_id'] = temp['gene_id'] if temp else None
-        x['canonical_hgvs']=dict(zip( x.get('canonical_hgvsp',''), x.get('canonical_hgvsc','')))
-        x['protein_mutations']=dict([(p,p.split(':')[1],) for p in x.get('canonical_hgvsp','') if ':' in p])
-        if 'FILTER' not in v: x['FILTER']=x['filter']
-        if 'ID' not in v: x['ID']=''
+        x['canonical_hgvs']=dict(zip( [x2.replace('.','_') for x2 in x.get('canonical_hgvsp','')], x.get('canonical_hgvsc','')))
+        x['protein_mutations']=dict([(p.replace('.','_'),p.split(':')[1],) for p in x.get('canonical_hgvsp','') if ':' in p])
+        if 'FILTER' not in x: x['FILTER']=x['filter']
+        if 'ID' not in x: x['ID']=''
         return x
     def conditions(self, x, AC=10,kaviar=.05,consequence_exclude=['intron_variant','non_coding_transcript','5_prime_UTR_variant','3_prime_UTR_variant','upstream_gene_variant','downstream_gene_variant','synonymous_variant','non_coding_transcript_exon_variant'],consequence_include=[ 'transcript_ablation', 'splice_acceptor_variant', 'splice_donor_variant', 'stop_gained', 'frameshift_variant', 'stop_lost', 'start_lost', 'transcript_amplification', 'inframe_insertion', 'inframe_deletion', 'missense_variant', 'protein_altering_variant', 'splice_region_variant', 'regulatory_region_ablation']):
         if 'AC' not in x or x['AC'] > AC: return False
