@@ -69,6 +69,9 @@ def homepage():
     labnames= ['black','brogan','elliott','gosgene','hardcastle','humphries','kelsell',
                'lachmann','marks','mead','moosajee','nejentsev','rahman','segal',
                'sisodiya','arvc','syrris','ukirdc','vulliamy','webster']
+    username = ''
+    if session and 'user' in session:
+        username = session['user']
     return render_template('home.html', title='Phenopolis - Home Page',
         total_patients=total_patients,
         male_patients=male_patients,
@@ -82,5 +85,6 @@ def homepage():
         pass_exac_variants=pass_exac_variants,
         pass_nonexac_variants=pass_nonexac_variants,
         version_number=version_number,
-        labnames=labnames)
+        labnames=labnames,
+        username=username)
 
