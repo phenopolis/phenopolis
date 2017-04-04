@@ -1,124 +1,79 @@
 
 # Mapping of variant properties from VEP JSON output to Pheno4J
 
-| root  |  Explanation | Pheno4J mapping |
-| ------------- |:-------------:| -----:| -----:|
+| |  Value | Explanation | Pheno4J mapping |
+| ------------- | ------------- | ----- | ----- |
 |allele_string|A/G| | GeneticVariant.allele_string |
 |start|38212762| | GeneticVariant.start |
 |end|38212762| | GeneticVariant.end |
-|seq_region_name||22| | GeneticVariant.chrom |
-|most_severe_consequence||intron_variant| | GeneticVariant.most_severe_consequence |
+|seq_region_name| 22| chromosome | GeneticVariant.chrom |
+|most_severe_consequence|intron_variant| worst consequence on a transcript | GeneticVariant.most_severe_consequence |
 |strand|1| posi/nega tive strand | GeneticVariant.stand |
 
 
 | custom_annotations |    Value |  Explanation | Pheno4J mapping |
-| ------------- |:-------------:| -----:| -----:|
+| ------------- | ------------- | ----- | ----- |
 | input[0].fields.name | "22-38212762-A-G" | | GeneticVariant.variantId |
-| input[0].fields.InbreedingCoeff  | 0.0552 |  | GeneticVariant.InbreedingCoeff |
-| input[0].fields.SOR | 0.829 | | |
+| input[0].fields.AC | 6339 | internal allele count | GeneticVariant.AC|
 | input[0].fields.AF | 0.651 | internal allele frequency | GeneticVariant.allele_freq |
-| input[0].fields.culprit | FS | | Culprit | GeneticVariant.Culprit |
-| input[0].fields.AC | 6339 | | |
-| input[0].fields.AN | 9740 | | GeneticVariant.AN | 
-| input[0].fields.FS | 1.189 | | |
-| input[0].fields.ClippingRankSum | 0.03 |
-| input[0].fields.MLEAC | 6341 | | |
-| input[0].fields.ReadPosRankSum | 0.326 |
-| input[0].fields.VQSLOD | 3.37 | | |
+| input[0].fields.AN | 9740 | internal allele number | GeneticVariant.AN | 
 | input[0].fields.BaseQRankSum | 0.481 |
-| input[0].fields.MLEAF | 0.651 | | |
-| input[0].fields.MQ0 | 0 | | |
-| input[0].fields.QD | 20.93 | | |
-| input[0].fields.ExcessHet | 0 | Excess heterozygosity | GeneticVariant.ExcessHet | 
-| input[0].fields.MQRankSum | 0.032 |
-| input[0].fields.MQ | 23.88 | | |
+| input[0].fields.ClippingRankSum | 0.03 |
 | input[0].fields.DP | 245471 | | |
-| gnomad_genomes[0].fields.AC_AFR|7224| allele count in africans | GeneticVariant.gnomad_genomes_AC_AFR |
-| gnomad_genomes[0].fields.AC_AMR|540| americans | GeneticVariant.gnomad_genomes_AC_AMR |
-| gnomad_genomes[0].fields.AC_ASJ|184| | |
-| gnomad_genomes[0].fields.AC_EAS|1441| | |
-| gnomad_genomes[0].fields.AC_FIN|2260| | |
-| gnomad_genomes[0].fields.AC_Female|9802| | |
-| gnomad_genomes[0].fields.AC_Male|12193| | |
-| gnomad_genomes[0].fields.AC_NFE|9704| | |
-| gnomad_genomes[0].fields.AC_OTH|642| | |
-| gnomad_genomes[0].fields.AC_raw|22041| raw allele count | GeneticVariant.gnomad_genomes_AC_raw |
-| gnomad_genomes[0].fields.AF_AFR|0.828821| | |
-| gnomad_genomes[0].fields.AF_AMR|0.644391| | |
-| gnomad_genomes[0].fields.AF_ASJ|0.609272| | |
-| gnomad_genomes[0].fields.AF_EAS|0.891708| | |
-| gnomad_genomes[0].fields.AF_FIN|0.647564| | |
-| gnomad_genomes[0].fields.AF_Female|0.709159|
-| gnomad_genomes[0].fields.AF_Male|0.713959|
-| gnomad_genomes[0].fields.AF_NFE|0.64875| allele frequency in non-finish europeans | GeneticVariant.gnomad_genomes_AF_NFE |
-| gnomad_genomes[0].fields.AF_OTH|0.655102| | |
-| gnomad_genomes[0].fields.AF_raw|0.711184| | |
-| gnomad_genomes[0].fields.AN_AFR|8716| | |
-| gnomad_genomes[0].fields.AN_AMR|838| | |
-| gnomad_genomes[0].fields.AN_ASJ|302| | |
-| gnomad_genomes[0].fields.AN_EAS|1616| | |
-| gnomad_genomes[0].fields.AN_FIN|3490| | |
-| gnomad_genomes[0].fields.AN_Female|13822| | |
-| gnomad_genomes[0].fields.AN_Male|17078| | |
-| gnomad_genomes[0].fields.AN_NFE|14958| | |
-| gnomad_genomes[0].fields.AN_OTH|980| | |
-| gnomad_genomes[0].fields.AN_raw|30992| | |
-| gnomad_genomes[0].fields.Hom_AFR|2989| | |
-| gnomad_genomes[0].fields.Hom_AMR|171| | |
-| gnomad_genomes[0].fields.Hom_ASJ|55| | |
-| gnomad_genomes[0].fields.Hom_EAS|645| | |
-| gnomad_genomes[0].fields.Hom_FIN|722| | |
-| gnomad_genomes[0].fields.Hom_Female|3561| | |
-| gnomad_genomes[0].fields.Hom_Male|4413| | |
-| gnomad_genomes[0].fields.Hom_NFE|3177| | |
-| gnomad_genomes[0].fields.Hom_OTH|215| | |
-| gnomad_genomes[0].fields.Hom_raw|7990| | |
-| gnomad_genomes[0].fields.Hom|7974| | |
-| gnomad_exomes[0].fields.AC_AFR|12189| allele count in africans | GeneticVariant.gnomad_exomes_AC_AFR |
-| gnomad_exomes[0].fields.AC_AMR|21338| | |
-| gnomad_exomes[0].fields.AC_ASJ|5851| | |
-| gnomad_exomes[0].fields.AC_EAS|15092| | |
-| gnomad_exomes[0].fields.AC_FIN|13756| | |
-| gnomad_exomes[0].fields.AC_Female|74238| | |
-| gnomad_exomes[0].fields.AC_Male|90078| | |
-| gnomad_exomes[0].fields.AC_NFE|70249| | |
-| gnomad_exomes[0].fields.AC_OTH|3472| | |
-| gnomad_exomes[0].fields.AC_SAS|22369| | |
-| gnomad_exomes[0].fields.AC_raw|167279| | |
-| gnomad_exomes[0].fields.AF_AFR|0.825254| | |
-| gnomad_exomes[0].fields.AF_AMR|0.63848| | |
-| gnomad_exomes[0].fields.AF_ASJ|0.601583| | |
-| gnomad_exomes[0].fields.AF_EAS|0.879077| | |
-| gnomad_exomes[0].fields.AF_FIN|0.637442| | |
-| gnomad_exomes[0].fields.AF_Female|0.682046| | |
-| gnomad_exomes[0].fields.AF_Male|0.678768| | |
-| gnomad_exomes[0].fields.AF_NFE|0.645802| | |
-| gnomad_exomes[0].fields.AF_OTH|0.642963| | |
-| gnomad_exomes[0].fields.AF_SAS|0.728347| | |
-| gnomad_exomes[0].fields.AF_raw|0.679471| | |
-| gnomad_exomes[0].fields.AN_AFR|14770| | |
-| gnomad_exomes[0].fields.AN_AMR|33420| | |
-| gnomad_exomes[0].fields.AN_ASJ|9726| | |
-| gnomad_exomes[0].fields.AN_EAS|17168| | |
-| gnomad_exomes[0].fields.AN_FIN|21580| | |
-| gnomad_exomes[0].fields.AN_Female|108846| | |
-| gnomad_exomes[0].fields.AN_Male|132708| | |
-| gnomad_exomes[0].fields.AN_NFE|108778| | |
-| gnomad_exomes[0].fields.AN_OTH|5400| | |
-| gnomad_exomes[0].fields.AN_SAS|30712| | |
-| gnomad_exomes[0].fields.AN_raw|246190| | |
-| gnomad_exomes[0].fields.Hom_AFR|5020| | |
-| gnomad_exomes[0].fields.Hom_AMR|6841| | |
-| gnomad_exomes[0].fields.Hom_ASJ|1772| | |
-| gnomad_exomes[0].fields.Hom_EAS|6643| | |
-| gnomad_exomes[0].fields.Hom_FIN|4361| | |
-| gnomad_exomes[0].fields.Hom_Female|25590| | |
-| gnomad_exomes[0].fields.Hom_Male|30978| | |
-| gnomad_exomes[0].fields.Hom_NFE|22584| | |
-| gnomad_exomes[0].fields.Hom_OTH|1127| | |
-| gnomad_exomes[0].fields.Hom_SAS|8220| | |
-| gnomad_exomes[0].fields.Hom_raw|57694| | |
-| gnomad_exomes[0].fields.Hom|56568| | |
+| input[0].fields.ExcessHet | 0 | Excess heterozygosity | GeneticVariant.ExcessHet | 
+| input[0].fields.FS | 1.189 | Fisher strand | GeneticVariant.FS |
+| input[0].fields.InbreedingCoeff  | 0.0552 |  quality | GeneticVariant.InbreedingCoeff |
+| input[0].fields.MLEAC | 6341 | | GeneticVariant.MLEAC |
+| input[0].fields.MLEAF | 0.651 | | GeneticVariant.MLEAF |
+| input[0].fields.MQ | 23.88 | mapping quality | GeneticVariant.MQ |
+| input[0].fields.MQ0 | 0 | | |
+| input[0].fields.MQRankSum | 0.032 | | GeneticVariant.MQRankSum |
+| input[0].fields.QD | 20.93 | | |
+| input[0].fields.ReadPosRankSum | 0.326 | | GeneticVariant.ReadPosRankSum | 
+| input[0].fields.SOR | 0.829 | | |
+| input[0].fields.VQSLOD | 3.37 | variant quality score log odds | GeneticVariant.VQSLOD |
+| input[0].fields.culprit | FS | | Culprit | GeneticVariant.Culprit |
+| gnomad_(exomes/genomes)[0].fields.AC_AFR|7224| allele count in africans | GeneticVariant.gnomad_(exomes/genomes)_AC_AFR |
+| gnomad_(exomes/genomes)[0].fields.AC_AMR|540| americans | GeneticVariant.gnomad_(exomes/genomes)_AC_AMR |
+| gnomad_(exomes/genomes)[0].fields.AC_ASJ|184| | |
+| gnomad_(exomes/genomes)[0].fields.AC_EAS|1441| | |
+| gnomad_(exomes/genomes)[0].fields.AC_FIN|2260| | |
+| gnomad_(exomes/genomes)[0].fields.AC_Female|9802| | |
+| gnomad_(exomes/genomes)[0].fields.AC_Male|12193| | |
+| gnomad_(exomes/genomes)[0].fields.AC_NFE|9704| | |
+| gnomad_(exomes/genomes)[0].fields.AC_OTH|642| | |
+| gnomad_(exomes/genomes)[0].fields.AC_raw|22041| raw allele count | GeneticVariant.gnomad_(exomes/genomes)_AC_raw |
+| gnomad_(exomes/genomes)[0].fields.AF_AFR|0.828821| | |
+| gnomad_(exomes/genomes)[0].fields.AF_AMR|0.644391| | |
+| gnomad_(exomes/genomes)[0].fields.AF_ASJ|0.609272| | |
+| gnomad_(exomes/genomes)[0].fields.AF_EAS|0.891708| | |
+| gnomad_(exomes/genomes)[0].fields.AF_FIN|0.647564| | |
+| gnomad_(exomes/genomes)[0].fields.AF_Female|0.709159|
+| gnomad_(exomes/genomes)[0].fields.AF_Male|0.713959|
+| gnomad_(exomes/genomes)[0].fields.AF_NFE|0.64875| allele frequency in non-finish europeans | GeneticVariant.gnomad_(exomes/genomes)_AF_NFE |
+| gnomad_(exomes/genomes)[0].fields.AF_OTH|0.655102| | |
+| gnomad_(exomes/genomes)[0].fields.AF_raw|0.711184| | |
+| gnomad_(exomes/genomes)[0].fields.AN_AFR|8716| | |
+| gnomad_(exomes/genomes)[0].fields.AN_AMR|838| | |
+| gnomad_(exomes/genomes)[0].fields.AN_ASJ|302| | |
+| gnomad_(exomes/genomes)[0].fields.AN_EAS|1616| | |
+| gnomad_(exomes/genomes)[0].fields.AN_FIN|3490| | |
+| gnomad_(exomes/genomes)[0].fields.AN_Female|13822| | |
+| gnomad_(exomes/genomes)[0].fields.AN_Male|17078| | |
+| gnomad_(exomes/genomes)[0].fields.AN_NFE|14958| | |
+| gnomad_(exomes/genomes)[0].fields.AN_OTH|980| | |
+| gnomad_(exomes/genomes)[0].fields.AN_raw|30992| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_AFR|2989| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_AMR|171| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_ASJ|55| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_EAS|645| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_FIN|722| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_Female|3561| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_Male|4413| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_NFE|3177| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_OTH|215| | |
+| gnomad_(exomes/genomes)[0].fields.Hom_raw|7990| | |
+| gnomad_(exomes/genomes)[0].fields.Hom|7974| | |
 | kaviar[0].fields.AF | 0.6665359 | kaviar alelle frequency | GeneticVariant.kaviar_AF |
 | kaviar[0].fields.AC | 103649 | kaviar allele count | GeneticVariant.kaviar_AC |
 | kaviar[0].fields.AN | 155504 | kaviar allele number | GeneticVariant.kaviar_AN |
@@ -126,7 +81,7 @@
 
 
 | transcript_consequences[*] | Value |  Explanation | Pheno4J mapping |
-| ------------- |:-------------:| -----:| -----:|
+| ------------- | ------------- | ----- | ----- |
 | exac_af|0.682| ExAC allele frequency| GeneticVariant.exac_AF |
 | exac_af_adj|0.685| ExAC allele frequency in adjusted | GeneticVariant.exac_AF_ADJ |
 | exac_af_afr|0.824| ExAC allele frequency in africans | GeneticVariant.exac_AF_AFR |
@@ -140,7 +95,7 @@
 | exac_af_oth|0.713| ExAC allele frequency in others | GeneticVariant.exac_AF_OTH |
 | exac_af_popmax|0.878| Max ExAC allele frequency | GeneticVariant.exac_AF_POPMAX |
 | exac_af_sas|0.728| ExAC allele frequency in south asians | GeneticVariant.exac_AF_SAS |
-| cadd_phred | 1.563 | Phred CADD | score | GeneticVariant.cadd_phred |
+| cadd_phred | 1.563 | Phred CADD score | GeneticVariant.cadd_phred |
 | cadd_raw | -0.123251 | Raw CADD score | GeneticVariant.cadd_raw |
 | hgvsc | "ENST00000323205.6:c.*7+30A>G" | cDNA mutation in HGVS format | TranscriptVariant.hgvsc |
 | impact | "MODIFIER" |  | TranscriptVariant.impact |
