@@ -120,8 +120,6 @@ def get_feature_venn(patient):
             #gene_hpo[gene_name]=gene_hpo.get(gene_name,[])+[{'hpo_id':hpo_id,'hpo_term':hpo_term}]
             hpo_gene[hpo_id]=hpo_gene.get(hpo_id,[])+[gene_name]
     for k in hpo_gene: hpo_gene[k]=list(frozenset(list(hpo_gene[k])))
-<<<<<<< Updated upstream
-=======
     print '========'
     print hpo_gene
     print '========'
@@ -146,7 +144,6 @@ def get_feature_venn(patient):
     # get known and retnet genes
     known_genes=[x['gene_name'] for x in db.retnet.find()]
     RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},projection={'_id':False})])
->>>>>>> Stashed changes
     # get combinatorics of features to draw venn diagram
     feature_combo = []
     feature_venn = []
