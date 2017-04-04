@@ -27,19 +27,13 @@ def load_data():
         import_data('test_hpo', 'genes_pheno', "./tests/data/hpo-genes_pheno-TTLL5.json", indexes)
         indexes = ['external_id', 'report_id', 'features.id', 'sex', 'genes.gene', 'solved', 'clinicalStatus.clinicalStatus', 'specificity.score']
         import_data('test_patients', 'patients', "./tests/data/patients-patients-hidden.json", indexes)
-        if not config.USE_ARGON2_AUTH:
-            import_data('test_users', 'users', "./tests/data/users.json")
-        else:
-            import_data('test_users', 'users', "./tests/data/users_argon2.json")
+        import_data('test_users', 'users', "./tests/data/users.json")
 
 # Load the test data set needed for test_login.
 def load_user_data():
     app = Flask(__name__)
     with app.app_context():
-        if not config.USE_ARGON2_AUTH:
-            import_data('test_users', 'users', "./tests/data/users.json")
-        else:
-            import_data('test_users', 'users', "./tests/data/users_argon2.json")
+        import_data('test_users', 'users', "./tests/data/users.json")
 
 # Create a collection in the db, drop any existing data, add data from file.
 # Create indexes in to the data.
