@@ -76,37 +76,70 @@ def edit_patient_features(individual):
     return 'done'
 
 
-
-
 @app.route('/individual/<individual>')
 @requires_auth
 #@cache.cached(timeout=24*3600)
 def individual_page(individual):
-    #print 'full_path', request.full_path
-    #print  'url_root', request.url_root
+    patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
     #if session['user']=='demo': individual=decrypt(str(individual))
     # make sure that individual is accessible by user
     if not lookup_patient(db=get_db(app.config['DB_NAME_USERS']),user=session['user'],external_id=individual): return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
     db=get_db()
     hpo_db=get_db(app.config['DB_NAME_HPO'])
-    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
-    patient = db.patients.find_one({'external_id':individual})
-    patient2 = patient_db.patients.find_one({'external_id':individual})
-    if patient2 is None or 'report_id' not in patient2 or patient is None: return 'patient not loaded'
-    patient['report_id']=patient2['report_id']
-    patient['sex'] = patient2['sex']
-    patient['features'] = patient2['features']
-    patient['family_history'] = patient2.get('family_history',[])
-    hpo_ids=[f['id'] for f in patient['features'] if f['observed']=='yes']
     # TODO
     # mode of inheritance in hpo terms: HP:0000005
     #print lookups.get_hpo_children(hpo_db, 'HP:0000005')
-    patient['global_mode_of_inheritance']=patient2.get('global_mode_of_inheritance',None)
+    #patient['global_mode_of_inheritance']=patient2.get('global_mode_of_inheritance',None)
     # minimise it
-    hpo_ids = lookups.hpo_minimum_set(hpo_db, hpo_ids)
-    hpo_terms = [(i, hpo_db.hpo.find_one({'id':i})['name'][0]) for i in hpo_ids]
-    patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
-    return patient.json()
+    patient.__dict__['hpo_ids']=lookups.hpo_minimum_set(get_db(app.config['DB_NAME_HPO']), patient.hpo_ids)
+    hpo_gene=get_hpo_gene(patient.hpo_ids)
+    # get pubmedbatch scores
+    pubmedbatch = {}
+    if patient.pubmed_key:
+        genes = [v.get('canonical_gene_name_upper',None) for v in patient.rare_variants+patient.homozygous_variants+patient.compound_het_variants]
+        pubmed_keys = ['_'.join([g,patient.pubmed_key]) for g in set(genes)]
+        pubmedbatch = list(get_db('pubmedbatch').cache.find({'key':{'$in':pubmed_keys}},{'key':1,'score':1,'_id':0}))
+        if pubmedbatch: pubmedbatch = dict([(i['key'],i.get('score',None)) for i in pubmedbatch])
+    genes = {}
+    # is this still updating?
+    if type(pubmedbatch) is dict:
+        update_status = pubmedbatch.get('status', 0)
+    else:
+        update_status=0
+    # get known and retnet genes
+    known_genes=[x['gene_name'] for x in db.retnet.find()]
+    RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},projection={'_id':False})])
+    print 'get pubmed score and RETNET'
+    gene_info=dict()
+    individuals=dict()
+    #
+    genes=[]
+    #genes['homozygous_variants']=[v['canonical_gene_name_upper'] for v in patient.homozygous_variants]
+    #genes['compound_hets']=[v['canonical_gene_name_upper'] for v in patient.compound_het_variants]
+    #genes['rare_variants']=[v['canonical_gene_name_upper'] for v in patient.rare_variants]
+            # print(g, genes_pubmed[g])
+    # figure out the order of columns from the variant row
+    table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?.*>",file('templates/individual-page-tabs/individual_variant_row.tmpl','r').read())
+    if session['user']=='demo': table_headers=table_headers[:-1]
+    print table_headers
+    # get a list of genes related to retinal dystrophy. only relevant to subset group of ppl. talk to Jing or Niko for other cohorts. Note that dominant p value only counts paitents with 1 qualified variant on the gene. 
+    # current setting: unrelated, exac_af 0.01 for recessive, 0.001 for dominant, cadd_phred 15
+    print 'get phenogenon genes'
+    retinal_genes = {}
+    return render_template('individual.html', 
+            patient=patient,
+            table_headers=table_headers,
+            pubmedbatch=pubmedbatch,
+            pubmed_db=get_db('pubmed_cache'),
+            genes = genes,
+            individuals=individuals,
+            hpo_gene = hpo_gene,
+            gene_info={},
+            update_status = 0,
+            retinal_genes = {},
+            feature_venn = [])
+
+
 def get_feature_venn(patient):
     hpo_ids=[feature['id'] for feature in patient.observed_features]
     hpo_db=get_db(app.config['DB_NAME_HPO'])
@@ -123,27 +156,7 @@ def get_feature_venn(patient):
     print '========'
     print hpo_gene
     print '========'
-    # get pubmedbatch scores
-    pubmedbatch = {}
-    if patient.get('pubmed_key',None):
-        genes = [v.get('canonical_gene_name_upper',None) for v in patient['rare_variants']+patient['homozygous_variants']+patient['compound_hets']]
-        pubmed_keys = ['_'.join([g,patient['pubmed_key']]) for g in set(genes)]
-        pubmedbatch = list(get_db('pubmedbatch').cache.find({'key':{'$in':pubmed_keys}},{'key':1,'score':1,'_id':0}))
-        if pubmedbatch:
-            pubmedbatch = dict([(i['key'],i.get('score',None)) for i in pubmedbatch])
-    # candidate genes
-    patient['genes'] = patient2.get('genes',[])
-    # solved genes
-    patient['solved'] = patient2.get('solved',[])
     genes = {}
-    # is this still updating?
-    if type(pubmedbatch) is dict:
-        update_status = pubmedbatch.get('status', 0)
-    else:
-        update_status=0
-    # get known and retnet genes
-    known_genes=[x['gene_name'] for x in db.retnet.find()]
-    RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},projection={'_id':False})])
     # get combinatorics of features to draw venn diagram
     feature_combo = []
     feature_venn = []
@@ -357,69 +370,6 @@ def load_patient(individual,auth,pubmed_key,hpo='HP:0000001'):
     pubmed_key="blindness-macula-macular-pigmentosa-retina-retinal-retinitis-stargardt"
     patient["pubmed_key"]=pubmed_key
     #db.patients.update({'external_id':patient_id}, patient, upsert=True)
-
-@app.route('/individual/<individual>')
-@requires_auth
-#@cache.cached(timeout=24*3600)
-def individual_page(individual):
-    patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
-    #if session['user']=='demo': individual=decrypt(str(individual))
-    # make sure that individual is accessible by user
-    if not lookup_patient(db=get_db(app.config['DB_NAME_USERS']),user=session['user'],external_id=individual): return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
-    db=get_db()
-    hpo_db=get_db(app.config['DB_NAME_HPO'])
-    # TODO
-    # mode of inheritance in hpo terms: HP:0000005
-    #print lookups.get_hpo_children(hpo_db, 'HP:0000005')
-    #patient['global_mode_of_inheritance']=patient2.get('global_mode_of_inheritance',None)
-    # minimise it
-    patient.__dict__['hpo_ids']=lookups.hpo_minimum_set(get_db(app.config['DB_NAME_HPO']), patient.hpo_ids)
-    hpo_gene=get_hpo_gene(patient.hpo_ids)
-    # get pubmedbatch scores
-    pubmedbatch = {}
-    if patient.pubmed_key:
-        genes = [v.get('canonical_gene_name_upper',None) for v in patient.rare_variants+patient.homozygous_variants+patient.compound_het_variants]
-        pubmed_keys = ['_'.join([g,patient.pubmed_key]) for g in set(genes)]
-        pubmedbatch = list(get_db('pubmedbatch').cache.find({'key':{'$in':pubmed_keys}},{'key':1,'score':1,'_id':0}))
-        if pubmedbatch: pubmedbatch = dict([(i['key'],i.get('score',None)) for i in pubmedbatch])
-    genes = {}
-    # is this still updating?
-    if type(pubmedbatch) is dict:
-        update_status = pubmedbatch.get('status', 0)
-    else:
-        update_status=0
-    # get known and retnet genes
-    known_genes=[x['gene_name'] for x in db.retnet.find()]
-    RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},projection={'_id':False})])
-    print 'get pubmed score and RETNET'
-    gene_info=dict()
-    individuals=dict()
-    #
-    genes=[]
-    #genes['homozygous_variants']=[v['canonical_gene_name_upper'] for v in patient.homozygous_variants]
-    #genes['compound_hets']=[v['canonical_gene_name_upper'] for v in patient.compound_het_variants]
-    #genes['rare_variants']=[v['canonical_gene_name_upper'] for v in patient.rare_variants]
-            # print(g, genes_pubmed[g])
-    # figure out the order of columns from the variant row
-    table_headers=re.findall("<td class='?\"?(.*)-cell'?\"?.*>",file('templates/individual-page-tabs/individual_variant_row.tmpl','r').read())
-    if session['user']=='demo': table_headers=table_headers[:-1]
-    print table_headers
-    # get a list of genes related to retinal dystrophy. only relevant to subset group of ppl. talk to Jing or Niko for other cohorts. Note that dominant p value only counts paitents with 1 qualified variant on the gene. 
-    # current setting: unrelated, exac_af 0.01 for recessive, 0.001 for dominant, cadd_phred 15
-    print 'get phenogenon genes'
-    retinal_genes = {}
-    return render_template('individual.html', 
-            patient=patient,
-            table_headers=table_headers,
-            pubmedbatch=pubmedbatch,
-            pubmed_db=get_db('pubmed_cache'),
-            genes = genes,
-            individuals=individuals,
-            hpo_gene = hpo_gene,
-            gene_info={},
-            update_status = 0,
-            retinal_genes = {},
-            feature_venn = [])
 
 
 
