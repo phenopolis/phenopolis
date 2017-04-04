@@ -4,6 +4,7 @@ from gene import Gene
 from transcript import Transcript
 from individual import Individual
 from user import User
+from patient import Patient
 
 
 
