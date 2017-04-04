@@ -50,7 +50,7 @@
 | gnomad_(exomes/genomes)[0].fields.AF_FIN|0<float<1| | |
 | gnomad_(exomes/genomes)[0].fields.AF_Female|0<float<1|
 | gnomad_(exomes/genomes)[0].fields.AF_Male|0<float<1|
-| gnomad_(exomes/genomes)[0].fields.AF_NFE|0<float<1 allele frequency in non-finish europeans | GeneticVariant.gnomad_(exomes/genomes)_AF_NFE |
+| gnomad_(exomes/genomes)[0].fields.AF_NFE|0<float<1 | allele frequency in non-finish europeans | GeneticVariant.gnomad_(exomes/genomes)_AF_NFE |
 | gnomad_(exomes/genomes)[0].fields.AF_OTH|0<float<1| |  GeneticVariant.gnomad_(exomes/genomes)_AF_OTH |
 | gnomad_(exomes/genomes)[0].fields.AF_raw|0<float<1| | GeneticVariant.gnomad_(exomes/genomes)_AF_raw |
 | gnomad_(exomes/genomes)[0].fields.AN_AFR|int| |  GeneticVariant.gnomad_(exomes/genomes)_AN_AFR |
@@ -86,7 +86,7 @@
 | exac_af_adj|0<float<1| ExAC allele frequency in adjusted | GeneticVariant.exac_AF_ADJ |
 | exac_af_afr|0<float<1| ExAC allele frequency in africans | GeneticVariant.exac_AF_AFR |
 | exac_af_amr|0<float<1| ExAC allele frequency in americans | GeneticVariant.exac_AF_AMR |
-| exac_af_consanguineous|0<float<1 ExAC allele frequency in consanguineous | GeneticVariant.exac_AF_CONSANGUINEOUS |
+| exac_af_consanguineous|0<float<1 | ExAC allele frequency in consanguineous | GeneticVariant.exac_AF_CONSANGUINEOUS |
 | exac_af_eas|0<float<1| ExAC allele frequency in east asians | GeneticVariant.exac_AF_EAS |
 | exac_af_female|0<float<1| ExAC allele frequency in females | GeneticVariant.exac_AF_FEMALE |
 | exac_af_fin|0<float<1| ExAC allele frequency in finnish | GeneticVariant.exac_AF_FIN |
@@ -100,15 +100,15 @@
 | hgvsc | "ENST00000323205.6:c.*7+30A>G" | cDNA mutation in HGVS format | TranscriptVariant.hgvsc |
 | hgvsp |  | protein mutation in HGVS format | TranscriptVariant.hgvsp |
 | impact | "MODIFIER" |  | TranscriptVariant.impact |
-| consequence_terms | ["intron_variant"] | consequence of mutation | TranscriptVariant.consequence_terms | 
+| consequence_terms | list of strings | consequence of mutation | TranscriptVariant.consequence_terms | 
 | transcript_id | "ENST00000323205" | ensembl id of transcript | TranscriptVariant.trancript_id |
 | intron/exon | "9/9" | which intron/exon is mutation in | TranscriptVariant.intron/exon |
 | gene_id | "ENSG00000100116" | ensembl gene id | TranscriptVariant.gene_id, Gene.gene_id |
 | gene_symbol | "GCAT" | | TranscriptVariant.gene_name, Gene.gene_name |
-| hgnc_id | 4188 | | Gene.hgnc_id |
+| hgnc_id | int | | Gene.hgnc_id |
 | transcript_id | "ENST00000323205" | ensembl id of transcript | Transcript.trancript_id |
-| canonical | 1 | canonical transcript | Transcript.canonical |
-| strand | 1 | positive/negative strand | Transcript.strand |
+| canonical | bool | canonical transcript | Transcript.canonical |
+| strand | -1 or 1 | positive/negative strand | Transcript.strand |
 | protein_id | "ENSP00000371110" | ensembl protein id | Transcript.ensembl_protein_id |
 | swissprot | ["O75600"] | swissprot protein id | Transcript.swissprot_protein_id |
 
