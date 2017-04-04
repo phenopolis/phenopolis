@@ -98,6 +98,7 @@
 | cadd_phred | 1.563 | Phred CADD score | GeneticVariant.cadd_phred |
 | cadd_raw | -0.123251 | Raw CADD score | GeneticVariant.cadd_raw |
 | hgvsc | "ENST00000323205.6:c.*7+30A>G" | cDNA mutation in HGVS format | TranscriptVariant.hgvsc |
+| hgvsp |  | protein mutation in HGVS format | TranscriptVariant.hgvsp |
 | impact | "MODIFIER" |  | TranscriptVariant.impact |
 | consequence_terms | ["intron_variant"] | consequence of mutation | TranscriptVariant.consequence_terms | 
 | transcript_id | "ENST00000323205" | ensembl id of transcript | TranscriptVariant.trancript_id |
@@ -165,7 +166,7 @@ The CADD is not transcript specific but depends on the DNA
 
 The trancript consequences field contains the functional impact of the variant on all transcript on which it occurs.
 Each transcript consequence contains:
-* exon affected : the number of the exon affected
+* intron/exon affected : the number of the intron/exon affected
 * hgvsc : change in cDNA (cDNA has introns spliced out)
 * hgvsp: if the transcript is protein coding, what is the effect on the protein?
 
