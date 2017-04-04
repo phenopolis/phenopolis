@@ -52,7 +52,8 @@
                 {% endfor %}
             </div>
         </form>
-        <p id="registration_successful" style="color:#4CAF50; display: none;">Registration successful. We will review your application and will email you with login details if your application is successful.</p>
+        <p class="col s12" id="registration_error" style="display:none; color: #F44336;"><span id="registering_msg_error"></span> Please feel free to contact us if you are having any issues registering.</p>
+        <p class="col s12" id="registration_success" style="display:none; color: #459e48;"><span id="registering_msg_success"></span> We are reviewing your application and will email you with login details once your application has been approved.</p>
     </div>
     <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
         <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Close</a>
