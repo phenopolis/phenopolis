@@ -1,7 +1,7 @@
 
 # Mapping of variant properties from VEP JSON output to Pheno4J
 
-|   |  Explanation | Pheno4J mapping |
+| root  |  Explanation | Pheno4J mapping |
 | ------------- |:-------------:| -----:| -----:|
 |allele_string|A/G| | GeneticVariant.allele_string |
 |start|38212762| | GeneticVariant.start |
