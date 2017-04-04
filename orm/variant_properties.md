@@ -32,10 +32,10 @@
 | input[0].fields.ReadPosRankSum | float | | GeneticVariant.ReadPosRankSum | 
 | input[0].fields.SOR | float | | |
 | input[0].fields.VQSLOD | float | variant quality score log odds | GeneticVariant.VQSLOD |
-| input[0].fields.culprit | string | | Culprit | GeneticVariant.Culprit |
+| input[0].fields.culprit | string | Culprit | GeneticVariant.Culprit |
 | gnomad_(exomes/genomes)[0].fields.AC_AFR|int| allele count in africans | GeneticVariant.gnomad_(exomes/genomes)_AC_AFR |
-| gnomad_(exomes/genomes)[0].fields.AC_AMR|int| americans | GeneticVariant.gnomad_(exomes/genomes)_AC_AMR |
-| gnomad_(exomes/genomes)[0].fields.AC_ASJ|int| | |
+| gnomad_(exomes/genomes)[0].fields.AC_AMR|int| allele count in americans | GeneticVariant.gnomad_(exomes/genomes)_AC_AMR |
+| gnomad_(exomes/genomes)[0].fields.AC_ASJ|int| |  GeneticVariant.gnomad_(exomes/genomes)_AC_ASJ |
 | gnomad_(exomes/genomes)[0].fields.AC_EAS|int| | |
 | gnomad_(exomes/genomes)[0].fields.AC_FIN|int| | |
 | gnomad_(exomes/genomes)[0].fields.AC_Female|int| | |
@@ -51,9 +51,9 @@
 | gnomad_(exomes/genomes)[0].fields.AF_Female|0<float<1|
 | gnomad_(exomes/genomes)[0].fields.AF_Male|0<float<1|
 | gnomad_(exomes/genomes)[0].fields.AF_NFE|0<float<1 allele frequency in non-finish europeans | GeneticVariant.gnomad_(exomes/genomes)_AF_NFE |
-| gnomad_(exomes/genomes)[0].fields.AF_OTH|0<float<1| | |
-| gnomad_(exomes/genomes)[0].fields.AF_raw|0<float<1| | |
-| gnomad_(exomes/genomes)[0].fields.AN_AFR|int| | |
+| gnomad_(exomes/genomes)[0].fields.AF_OTH|0<float<1| |  GeneticVariant.gnomad_(exomes/genomes)_AF_OTH |
+| gnomad_(exomes/genomes)[0].fields.AF_raw|0<float<1| | GeneticVariant.gnomad_(exomes/genomes)_AF_raw |
+| gnomad_(exomes/genomes)[0].fields.AN_AFR|int| |  GeneticVariant.gnomad_(exomes/genomes)_AN_AFR |
 | gnomad_(exomes/genomes)[0].fields.AN_AMR|int| | |
 | gnomad_(exomes/genomes)[0].fields.AN_ASJ|int| | |
 | gnomad_(exomes/genomes)[0].fields.AN_EAS|int| | |
@@ -171,4 +171,5 @@ Each transcript consequence contains:
 * hgvsp: if the transcript is protein coding, what is the effect on the protein?
 
                   
+
 
