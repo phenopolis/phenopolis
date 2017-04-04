@@ -4,7 +4,7 @@
         <div class='col-md-12'>
             <form class='form-inline'>
                 <div class='form-group'>
-                   <label>Pubmed Search term: </label> <input type='text' class='re-search-input' size="80" value='{% if 'pubmed_key' in patient %}{{ patient.pubmed_key }}{% endif %}' />
+                   <label>Pubmed Search term: </label> <input type='text' class='re-search-input' size="80" value='{{ patient.pubmed_key }}' />
                 </div>
                 <button class='btn btn-primary btn-sm re-search'>Re-search</button>
                 <span class='updating'>updating</span>
