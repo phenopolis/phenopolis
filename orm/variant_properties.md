@@ -8,7 +8,7 @@
 |end|38212762| | GeneticVariant.end |
 |seq_region_name| 22| chromosome | GeneticVariant.chrom |
 |most_severe_consequence|intron_variant| worst consequence on a transcript | GeneticVariant.most_severe_consequence |
-|strand|1| posi/nega tive strand | GeneticVariant.stand |
+|strand|1| posi/nega tive strand | GeneticVariant.strand |
 
 
 | custom_annotations |    Value |  Explanation | Pheno4J mapping |
