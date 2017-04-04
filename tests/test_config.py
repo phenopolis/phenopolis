@@ -13,7 +13,6 @@ class ConfigTestCase(unittest.TestCase):
 
     def test_import_flag(self):
         assert config.IMPORT_PYSAM_PRIMER3 == True # This needs to be True before committing to the repo.    
-        assert config.USE_ARGON2_AUTH == False # This needs to be False before committing to the repo. 
 
 if __name__ == '__main__':
     unittest.main()

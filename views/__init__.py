@@ -135,10 +135,7 @@ def check_auth(username, password):
     #print r
     if not r: return False
     session['user']=username
-    if not config.USE_ARGON2_AUTH:
-        return check_password_hash(r['password'],password)
-    else:
-        return argon2.verify(password, r['password'])
+    return argon2.verify(password, r['password'])
 
 
 def authenticate():
@@ -209,10 +206,7 @@ def change_password():
         return jsonify(error='Username and current password incorrect. Please try again.'), 401
     else:
         print 'LOGIN SUCCESS, CHANGING PASSWORD'
-        if not config.USE_ARGON2_AUTH:
-            hash = generate_password_hash(new_password_1)
-        else:
-            hash = argon2.hash(new_password_1)
+        hash = argon2.hash(new_password_1)
         db_users = get_db(app.config['DB_NAME_USERS'])
         db_users.users.update_one({'user':username},{'$set':{'password':hash}})
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
