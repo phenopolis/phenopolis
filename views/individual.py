@@ -31,7 +31,6 @@ import requests
 
 
 
-
 @app.route('/individual_json/<individual>')
 @requires_auth
 def individual_json(individual):
@@ -76,6 +75,38 @@ def edit_patient_features(individual):
     views.individuals.individuals_update([external_id])
     return 'done' 
 
+
+
+
+@app.route('/individual/<individual>')
+@requires_auth
+#@cache.cached(timeout=24*3600)
+def individual_page(individual):
+    #print 'full_path', request.full_path
+    #print  'url_root', request.url_root
+    #if session['user']=='demo': individual=decrypt(str(individual))
+    # make sure that individual is accessible by user
+    if not lookup_patient(db=get_db(app.config['DB_NAME_USERS']),user=session['user'],external_id=individual): return 'Sorry you are not permitted to see this patient, please get in touch with us to access this information.'
+    db=get_db()
+    hpo_db=get_db(app.config['DB_NAME_HPO'])
+    patient_db=get_db(app.config['DB_NAME_PATIENTS'])
+    patient = db.patients.find_one({'external_id':individual})
+    patient2 = patient_db.patients.find_one({'external_id':individual})
+    if patient2 is None or 'report_id' not in patient2 or patient is None: return 'patient not loaded'
+    patient['report_id']=patient2['report_id']
+    patient['sex'] = patient2['sex']
+    patient['features'] = patient2['features']
+    patient['family_history'] = patient2.get('family_history',[])
+    hpo_ids=[f['id'] for f in patient['features'] if f['observed']=='yes']
+    # TODO
+    # mode of inheritance in hpo terms: HP:0000005
+    #print lookups.get_hpo_children(hpo_db, 'HP:0000005')
+    patient['global_mode_of_inheritance']=patient2.get('global_mode_of_inheritance',None)
+    # minimise it
+    hpo_ids = lookups.hpo_minimum_set(hpo_db, hpo_ids)
+    hpo_terms = [(i, hpo_db.hpo.find_one({'id':i})['name'][0]) for i in hpo_ids]
+    patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
+    return patient.json()
 def get_feature_venn(patient):
     hpo_ids=[feature['id'] for feature in patient.observed_features]
     hpo_db=get_db(app.config['DB_NAME_HPO'])
@@ -89,6 +120,33 @@ def get_feature_venn(patient):
             #gene_hpo[gene_name]=gene_hpo.get(gene_name,[])+[{'hpo_id':hpo_id,'hpo_term':hpo_term}]
             hpo_gene[hpo_id]=hpo_gene.get(hpo_id,[])+[gene_name]
     for k in hpo_gene: hpo_gene[k]=list(frozenset(list(hpo_gene[k])))
+<<<<<<< Updated upstream
+=======
+    print '========'
+    print hpo_gene
+    print '========'
+    # get pubmedbatch scores
+    pubmedbatch = {}
+    if patient.get('pubmed_key',None):
+        genes = [v.get('canonical_gene_name_upper',None) for v in patient['rare_variants']+patient['homozygous_variants']+patient['compound_hets']]
+        pubmed_keys = ['_'.join([g,patient['pubmed_key']]) for g in set(genes)]
+        pubmedbatch = list(get_db('pubmedbatch').cache.find({'key':{'$in':pubmed_keys}},{'key':1,'score':1,'_id':0}))
+        if pubmedbatch:
+            pubmedbatch = dict([(i['key'],i.get('score',None)) for i in pubmedbatch])
+    # candidate genes
+    patient['genes'] = patient2.get('genes',[])
+    # solved genes
+    patient['solved'] = patient2.get('solved',[])
+    genes = {}
+    # is this still updating?
+    if type(pubmedbatch) is dict:
+        update_status = pubmedbatch.get('status', 0)
+    else:
+        update_status=0
+    # get known and retnet genes
+    known_genes=[x['gene_name'] for x in db.retnet.find()]
+    RETNET = dict([(i['gene_name'],i) for i in db.retnet.find({},projection={'_id':False})])
+>>>>>>> Stashed changes
     # get combinatorics of features to draw venn diagram
     feature_combo = []
     feature_venn = []
