@@ -135,11 +135,7 @@ def check_auth(username, password):
     #print r
     if not r: return False
     session['user']=username
-    auth='%s:%s' % (username, password,)
-    if not config.USE_ARGON2_AUTH:
-        return check_password_hash(r['password'],password)
-    else:
-        return argon2.verify(password, r['password'])
+    return argon2.verify(password, r['password'])
 
 
 def authenticate():
@@ -193,6 +189,28 @@ def logout():
     else:
         return redirect('https://uclex.cs.ucl.ac.uk/')
 
+
+# 
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    username = request.form['name']
+    password = request.form['current_password']
+    new_password_1 = request.form['new_password_1']
+    new_password_2 = request.form['new_password_2']
+    if username == 'demo': 
+        return jsonify(error='You do not have permission to change the password for username \'demo\'.'), 401
+    elif new_password_1 != new_password_2: 
+        return jsonify(error='New password and re-typed password do not match. Please try again.'), 401
+    elif not check_auth(username,password):
+        print 'Change password:- Login Failed'
+        return jsonify(error='Username and current password incorrect. Please try again.'), 401
+    else:
+        print 'LOGIN SUCCESS, CHANGING PASSWORD'
+        hash = argon2.hash(new_password_1)
+        db_users = get_db(app.config['DB_NAME_USERS'])
+        db_users.users.update_one({'user':username},{'$set':{'password':hash}})
+        msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
+        return jsonify(success=msg), 200
 
 @app.route('/set/<query>')
 def set(query):
