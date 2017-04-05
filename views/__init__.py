@@ -135,7 +135,7 @@ def check_auth(username, password):
     #print r
     if not r: return False
     session['user']=username
-    return argon2.verify(password, r['password'])
+    return argon2.verify(password, r['argon_password'])
 
 
 def authenticate():
