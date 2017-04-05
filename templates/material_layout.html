@@ -16,15 +16,41 @@
                 <a href="/" class="brand-logo"> Phenopolis</a>
                 <a href="#" data-activates="mobile-menu" class="button-collapse"><i class="material-icons" style="font-size: 2.6rem;">menu</i></a>
                 <ul class="right hide-on-med-and-down" style="position:absolute;top:0 !important;right:0;">
+                  {% if session['user'] %}
+                  <li>
+                    <a class="white-text" href="/search" style="display: flex;">
+                      <span style="padding-right:10px;">Search</span>
+                      <i class="material-icons">search</i>
+                    </a>
+                  </li>
+                    <li>
+                      <a class="white-text" href="/my_patients" style="display: flex;">
+                        <span style="padding-right:10px;">My Patients</span>
+                        <i class="material-icons">wc</i>
+                      </a>
+                    </li>
+                    <li class="user">
+                        <a class="white-text dropdown-button" data-activates="navbar_side_dropdown" data-beloworigin="true" href="#!" style="display: flex;">
+                            <span class="truncate" style="max-width: 150px; padding-right:10px;">{{session['user'].title() }}</span>
+                            <i class="material-icons">perm_identity</i>
+                        </a>
+                    </li>
+                  {% else %}
                     <li><a href="http://biorxiv.org/content/early/2016/10/31/084582" target="_blank"><i class="material-icons left">class</i>Publication</a></li>
                     <li><a href="/about"><i class="material-icons left">info_outline</i>About</a></li>
                     <li><a class="modal-trigger" href="#login_modal"><i class="material-icons left">perm_identity</i>Login</a></li>
+                  {% endif %}
                 </ul>
                 <ul class="side-nav" id="mobile-menu">
-                    <li><a href="https://phenotips.cs.ucl.ac.uk" target="_blank"><i class="material-icons left">assignment_ind</i>Phenotips</a></li>
                     <li><a href="http://biorxiv.org/content/early/2016/10/31/084582" target="_blank"><i class="material-icons left">class</i>Publication</a></li>
                     <li><a href="/about"><i class="material-icons left">info_outline</i>About</a></li>
+                  {% if session['user'] %}
+                    <li><a href="/search"><i class="material-icons left">search</i>Search</a></li>
+                    <li><a href="/my_patients"><i class="material-icons left">wc</i>My Patients</a></li>
+                    <li><a href="/logout"><i class="material-icons left">perm_identity</i>Logout</a></li>
+                  {% else %}
                     <li><a class="modal-trigger" href="#login_modal"><i class="material-icons left">perm_identity</i>Login</a></li>
+                  {% endif %}
                 </ul>
             </div>
         </div>
@@ -39,7 +65,11 @@
                     <h5 class="header col s12" style="font-size:2rem;">An Open Platform for Harmonization &amp; Analysis of Sequencing &amp; Phenotype Data.</h5>
                 </div>
                 <div class="row center">
+                  {% if session['user'] %}
+                    <a href="/search" class="btn-large waves-effect z-depth-5 waves-light blue">Search Phenopolis</a>
+                  {% else %}
                     <a href="#!" id="parallax_demo_login_btn" class="btn-large waves-effect z-depth-5 waves-light blue">Login as Demo User</a>
+                  {% endif %}
                 </div>
                 <br>
                 <br>
@@ -49,13 +79,15 @@
     </div>
     {% block body %} {% endblock %}
     <!-- Footer -->
-    {% include "components/material_footer.html" %} {% include "components/login_modal.html" %}
+    {% include "components/material_footer.html" %} {% include "components/login_modal.html" %} {% include "components/navbar_dropdown.html" %}
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='assets/js/phenopolis.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/home.js') }}"></script>
     <script type="text/javascript">
       (function($) {
           $(function() {
+            PP.addUserDropDown();
             PP.equalizeAboutBoxes();
             $('.parallax').parallax(); // Init parallax
             $('.modal').modal({ complete: PP.showLoginForm() }); // Init Modals
