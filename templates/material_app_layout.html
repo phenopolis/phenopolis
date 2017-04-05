@@ -11,7 +11,11 @@
 <body class="app">
     <nav class="light-blue darken-2" role="navigation">
         <div class="nav-wrapper" style="padding:0 10px">
-            <a href="/" class="brand-logo left"> Phenopolis</a>
+            {% if session['user'] %}
+              <a href="/search" class="brand-logo left"> Phenopolis</a>
+            {% else %}  
+              <a href="/" class="brand-logo left"> Phenopolis</a>
+            {% endif %}  
             <div id="nav_search_bar_wrapper" class="valign-wrapper hide-on-med-and-down">
                 <form id="navbar_search_form" action="/awesome">
                     <div class="input-field">
@@ -45,21 +49,8 @@
     <div class="app-wrapper">
         {% block body %}{% endblock %}
     </div>
-    <!-- NAVBAR DROPDOWN -->
-    <ul class="dropdown-content collection" id="navbar_side_dropdown" style="z-index:5;">
-        <li class="collection-item avatar" onclick="location.href='/faq';">
-            <i class="material-icons circle light-blue accent-2"> live_help</i><span class="title">FAQs</span>
-        </li>
-        <li class="collection-item avatar" onclick="location.href='/feedback';">
-            <i class="material-icons circle light-blue accent-2"> feedback</i><span class="title">Feedback</span>
-        </li>
-        <li class="collection-item avatar" onclick="location.href='/logout';" style="cursor: pointer;">
-            <i class="material-icons circle light-blue accent-2"> power_settings_new</i><span class="title">Log Out</span>
-        </li>
-    </ul>
 
-    {% include "components/login_modal.html" %}
-
+    {% include "components/login_modal.html" %} {% include "components/navbar_dropdown.html" %}
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/typeahead.js') }}"></script>
