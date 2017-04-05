@@ -209,6 +209,7 @@ def change_password():
         hash = argon2.hash(new_password_1)
         db_users = get_db(app.config['DB_NAME_USERS'])
         db_users.users.update_one({'user':username},{'$set':{'password':hash}})
+        db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
         return jsonify(success=msg), 200
 
