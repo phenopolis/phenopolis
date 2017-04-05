@@ -9,7 +9,7 @@
         <div class="card-tabs ">
             <ul class="tabs tabs-fixed-width ">
                 <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#search_tab">Search</a></li>
-                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#hpo_browser_tab">HPO Browser</a></li>
+                <li class="tab" style="display:none;"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#hpo_browser_tab">HPO Browser</a></li>
                 <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#publications_tab">Publications</a></li>
                 <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#terms_tab">Terms of Use</a></li>
                 <div class="indicator light-blue darken-2" style="z-index:1"></div>
@@ -29,7 +29,7 @@
                 </form>
                 <div class="clearfix"></div>
             </div>
-            <div id="hpo_browser_tab">
+            <div id="hpo_browser_tab" style="display:none;">
             </div>
             <div id="publications_tab">
                 {% include "components/publications.html" %}
