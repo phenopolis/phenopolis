@@ -83,6 +83,7 @@ from passlib.hash import argon2
 import orm
 from lookups import *
 from config import config
+import regex
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -437,6 +438,13 @@ def get_rathergood_suggestions(query):
     results = patient_results+gene_results+hpo_results
     results = itertools.islice(results, 0, 20)
     return list(results)
+
+@app.route('/phenotype_suggestions/<hpo>')
+def get_phenotype_suggestions(hpo):
+    r = regex.compile(r"(%s){e<2}"%regex.escape(hpo), re.IGNORECASE)
+    hpo_results=[{k:x[k][0] for k in ['name','id']} for x in get_db(app.config['DB_NAME_HPO']).hpo.find({},{'_id':0}) if r.search(x['name'][0])]
+    return jsonify(results=hpo_results)
+
 
 def get_rathergood_result(db, query):
     """
