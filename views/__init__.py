@@ -445,6 +445,11 @@ def get_phenotype_suggestions(hpo):
     hpo_results=[{k:x[k][0] for k in ['name','id']} for x in get_db(app.config['DB_NAME_HPO']).hpo.find({},{'_id':0}) if r.search(x['name'][0])]
     return jsonify(results=hpo_results)
 
+@app.route('/gene_suggestions/<gene>')
+def get_gene_suggestions(gene):
+    regex = re.compile('^' + re.escape(gene), re.IGNORECASE)
+    gene_results = [x['gene_name'] for x in get_db().genes.find({'gene_name':regex})]
+    return jsonify(results=gene_results)
 
 def get_rathergood_result(db, query):
     """
