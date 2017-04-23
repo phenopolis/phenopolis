@@ -29,4 +29,5 @@ lxml==3.7.3
 bs4==0.0.1
 passlib==1.7.1
 argon2_cffi==16.3.0
+regex
 
