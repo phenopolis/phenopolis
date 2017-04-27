@@ -57,7 +57,6 @@ if (!PP) {
       classNames: { menu: "autocomplete-content dropdown-content" }
     }, {
       name: 'my-dataset',
-      displayKey: 'value',
       source: inputAutoComplete,
     });
   };
@@ -87,7 +86,7 @@ if (!PP) {
   // redirect page upon selecting an option
   PP.bindTypeaheadSelect = function() {
     $('.typeahead').bind('typeahead:select', function(obj, datum) {
-      window.location.href = '/awesome?query=' + datum.value;
+      window.location.href = '/awesome?query=' + datum;
     });
   };
 
