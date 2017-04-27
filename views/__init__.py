@@ -544,7 +544,7 @@ def get_rathergood_result(db, query):
 @app.route('/autocomplete/<query>')
 def rathergood_autocomplete(query):
     suggestions = get_rathergood_suggestions(query)
-    return Response(json.dumps([{'value': s} for s in suggestions]),  mimetype='application/json')
+    return Response(json.dumps(suggestions),  mimetype='application/json')
 
 
 @app.route('/awesome')
