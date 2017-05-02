@@ -30,8 +30,8 @@ if (!PP) {
 
   // Sets up Autocomplete & Allows submission upon pressing enter
   PP.setUpSearchField = function() {
-    var inputAutoComplete = PP.initialiseBloodHound();
-    PP.initialiseTypeahead(inputAutoComplete);
+    var inputAutoComplete = PP.initialiseBloodHound('/autocomplete');
+    PP.initialiseTypeahead('.searching .typeahead', inputAutoComplete);
     PP.fixHomeSearchBug();
     PP.addNavbarSearchAnimation();
     PP.bindTypeaheadSelect();
@@ -39,27 +39,31 @@ if (!PP) {
   };
 
   // Used in autocomplete - connects to the server and provides autocomplete options
-  PP.initialiseBloodHound = function() {
+  PP.initialiseBloodHound = function(autocompleteUrl) {
     return new Bloodhound({
       datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
       queryTokenizer: Bloodhound.tokenizers.whitespace,
       remote: {
-        url: '/autocomplete/%QUERY',
+        url: autocompleteUrl + '/%QUERY',
         wildcard: '%QUERY'
       }
     });
   };
 
   //
-  PP.initialiseTypeahead = function(inputAutoComplete) {
-    $('.typeahead').typeahead({
+  PP.initialiseTypeahead = function(input, inputAutoComplete) {
+    $(input).typeahead({
       autoselect: true,
-      classNames: { menu: "autocomplete-content dropdown-content" }
+      classNames: { menu: "autocomplete-content dropdown-content" },
     }, {
       name: 'my-dataset',
       source: inputAutoComplete,
+      limit: 19
     });
+
   };
+
+
 
   // Typeahead moves the input into a div. This causes issues with other JS/CSS
   // because the label and icon are no longer sister to the input
