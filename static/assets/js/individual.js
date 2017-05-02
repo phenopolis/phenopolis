@@ -39,47 +39,131 @@ if (!PP) {
     PP.addPatientFeaturesInfo(data.result.observed_features); // Or observed_features
     PP.addPatientConsanguinityInfo(data.result.family_history);
     PP.addPatientGenesInfo(data.result.genes);
+    PP.submitEditedIndividual();
     $('.info_table').show();
+    $('#edit_icon').show();
+    $('.modal').modal();
   };
-
 
   PP.addPatientGenderInfo = function(gender) {
-    var gender_full = gender === 'M' ? 'Male' : 'Female';
-    $('#patient_gender').text(gender_full);
-  };
-
-  //
-  PP.addPatientFeaturesInfo = function(features) {
-    var features_html = '';
-    for (var i = 0; i < features.length; i++) {
-      features_html = features_html + ' ' + PP.create_url('/hpo', features[i].label, features[i].id, 'chip');
+    var gender_full;
+    if (gender === 'M') {
+      gender_full = 'Male';
+    } else if (gender === 'F') {
+      gender_full = 'Female';
+    } else {
+      gender_full = 'Unknown';
     }
-    $('#patient_features').html(features_html);
+    $('#'+gender_full+'_edit').prop('checked', true)
+    $('#patient_gender').text(gender_full);
   };
 
   //
   PP.addPatientConsanguinityInfo = function(family_history) {
     if (family_history !== undefined) {
-      $('#patient_consanguinity').closest('tr').hide();
-      return;
+      $('#consanguinity_unknown_edit').prop('checked', true);
+      return $('#patient_consanguinity').closest('tr').hide();
     }
     if (family_history.consanguinity === undefined || family_history.consanguinity === null) {
-      $('#patient_consanguinity').closest('tr').hide();
-      return;
+      $('#consanguinity_unknown_edit').prop('checked', true);
+      return $('#patient_consanguinity').closest('tr').hide();
+    }
+    if (family_history.consanguinity == 'Y') {
+      $('#consanguinity_yes_edit').prop('checked', true);
+    } else if (family_history.consanguinity == 'N') {
+      $('#consanguinity_no_edit').prop('checked', true);
     }
     $('#patient_consanguinity').text(family_history.consanguinity);
   };
 
   //
-  PP.addPatientGenesInfo = function(genes) {
-    var gene_html = '';
-    for (var i = 0; i < genes.length; i++) {
-      gene_html = gene_html + ' ' + PP.create_url('/gene', genes[i].gene, genes[i].gene, 'chip');
+  PP.addPatientFeaturesInfo = function(features) {
+    var features_html = '';
+    var features_array = [];
+    for (var i = 0; i < features.length; i++) {
+      features_html = features_html + ' ' + PP.create_url('/hpo', features[i].label, features[i].id, 'chip');
+      features_array.push( {tag: features[i].label} );
     }
-    $('#patient_genes').html(gene_html);
+    $('#patient_features').html(features_html);
+    PP.setupChipsAutoComplete('#features_edit', features_array, '/phenotype_suggestions')
   };
 
+  //
+  PP.typeAheadSelectBind = function (wrapper, endpoint) {
+    $(wrapper).bind('typeahead:select', '.chips-initial input', function(ev, suggestion) {
+      currentData = $(wrapper+' .chips-autocomplete').material_chip('data');
+      currentData.push( { tag: suggestion })
+      $(wrapper+' .chips input').val('')
+      // Delete current Material_chip binding and create new one with the updated data... 
+      $(wrapper+' .chips-initial').material_chip('destroy')
+      $(wrapper+' .chips-initial').material_chip({data: currentData});
+      var inputAutoComplete = PP.initialiseBloodHound(endpoint);
+      PP.initialiseTypeahead(wrapper+' .chips input', inputAutoComplete);
+      PP.setupDropdownStyling(wrapper);
+    });
+  }
 
+  // Makes the dropdown full width of the input
+  PP.setupDropdownStyling = function(wrapper) {
+    $(wrapper).bind('typeahead:active', '.chips-initial input', function() {
+      var position = $(wrapper + ' .twitter-typeahead').position().left - 24;
+      var width = $(wrapper + ' .chips-initial').width()
+      $(wrapper + ' .autocomplete-content').css('margin-left', '-'+(position) +'px')
+      $(wrapper + ' .autocomplete-content').css('width', (width) +'px');
+    });
+  }
+
+  PP.focusOnInputAfterSelect = function(wrapper) {
+    $(wrapper).bind('typeahead:select', '.chips-initial input', function() {
+      $(wrapper + ' .chips-initial input').focus();
+    });
+  }
+
+  //
+  PP.setupChipsAutoComplete = function(wrapper, data, endpoint) {
+    $(wrapper+' .chips-initial').material_chip({data: data})
+    var inputAutoComplete = PP.initialiseBloodHound(endpoint);
+    PP.initialiseTypeahead(wrapper+' .chips-initial input', inputAutoComplete);
+    PP.typeAheadSelectBind(wrapper, endpoint);
+    PP.setupDropdownStyling(wrapper);
+    PP.focusOnInputAfterSelect(wrapper);
+  }
+
+  //
+  PP.addPatientGenesInfo = function(genes) {
+    var gene_html = '';
+    var genes_array = [];
+    for (var i = 0; i < genes.length; i++) {
+      gene_html = gene_html + ' ' + PP.create_url('/gene', genes[i].gene, genes[i].gene, 'chip');
+      genes_array.push( {tag: genes[i].gene} );
+    }
+    $('#patient_genes').html(gene_html);
+    PP.setupChipsAutoComplete('#genes_edit', genes_array, '/gene_suggestions')
+  };
+
+  PP.submitEditedIndividual = function() {
+    $('#save_modal').on('click', function(){
+      $('#confirm_edit_modal').modal({ endingTop: '20%' });
+      $('#confirm_edit_modal').modal('open');
+    });
+    $('#submit_edit_modal').on('click', function() {
+      $.ajax({
+        type: 'POST',
+        url: '/update_patient_data',
+        data: $('#edit_patient_data_form').serialize(),
+        dataType: 'json',
+        timeout: 120000,
+        success: function(data) {
+          // update page 
+        },
+        error: function(data, msg) {
+          // 
+        }
+      });
+    })
+  }
+
+  //
   PP.initOmimPlot = function(patient_id) {
     $.ajax({
       type: 'GET',
@@ -91,12 +175,14 @@ if (!PP) {
     });
   };
 
+  //
   PP.vennSuccess = function(data) {
     sets = PP.generateSets(data.result);
     PP.createVennDiagram(sets);
     $('#omim_tab #progress_row').remove();
   };
 
+  //
   PP.generateSets = function(data) {
     sets = [];
     for (var i = 0; i < data.length; i++) {
