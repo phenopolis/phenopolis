@@ -154,14 +154,18 @@ nav .dropdown-content li>span>label {
 }
 
 span.twitter-typeahead {
+  display: inline-block !important;
+}
+
+.searching span.twitter-typeahead {
   display: inherit !important;
 }
 
-input.typeahead.tt-input {
+.searching input.typeahead.tt-input {
   vertical-align: initial !important;
 }
 
-.input-field .twitter-typeahead + label:after {
+.searching .input-field .twitter-typeahead + label:after {
   display: block;
   content: "";
   position: absolute;
@@ -170,7 +174,7 @@ input.typeahead.tt-input {
   transition: 0.2s opacity ease-out, 0.2s color ease-out;
 }
 
-.input-field .twitter-typeahead ~ .material-icons {
+.searching .input-field .twitter-typeahead ~ .material-icons {
   position: absolute;
   top: 0;
   right: 1rem;
@@ -179,6 +183,7 @@ input.typeahead.tt-input {
   font-size: 2rem;
   transition: 0.3s color;
 }
+
 
 .tt-suggestion,
 .tt-selectable {
@@ -207,18 +212,22 @@ input.typeahead.tt-input {
   color: #999;
 }
 
-.twitter-typeahead {
+.searching .twitter-typeahead {
   margin-left: 3rem;
 }
 
-.tt-hint,
-.twitter-typeahead .prefix {
+.searching .tt-hint,
+.searching .twitter-typeahead .prefix {
   margin-left: -3rem;
 }
 
-.input-field .twitter-typeahead .prefix ~ input.tt-hint,
-.input-field .twitter-typeahead .prefix ~ .autocomplete-content {
+.searching .input-field .twitter-typeahead .prefix ~ input.tt-hint,
+.searching .input-field .twitter-typeahead .prefix ~ .autocomplete-content {
   margin-left: 0;
+}
+
+.chips .twitter-typeahead .input {
+  height:2rem;
 }
 
 #search_home,
@@ -266,9 +275,17 @@ input.typeahead.tt-input {
   opacity: initial;
   margin-left: -4rem;
   width: calc(100% + 4rem);
+  max-height: 600px;
+  overflow: scroll;
 }
 
-#navbar_search_form .tt-suggestion.tt-selectable {
+.chips .twitter-typeahead .autocomplete-content.dropdown-content {
+  max-height: 250px;
+  overflow: scroll;
+  margin-top: 9px;
+}
+
+#navbar_search_form .twitter-typeahead .tt-suggestion.tt-selectable {
   padding-left: 4rem;
 }
 
@@ -708,3 +725,6 @@ table .text-small {
   pointer-events:none;
 }
 
+.chips .input {
+  width: initial;
+}
