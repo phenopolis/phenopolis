@@ -431,25 +431,42 @@ def get_rathergood_suggestions(query):
     query is the string that user types
     If it is the prefix for a gene, return list of gene names
     """
-    regex = re.compile('^' + re.escape(query), re.IGNORECASE)
-    patient_results = [x['external_id'] for x in get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':regex})]
-    gene_results = [x['gene_name'] for x in get_db().genes.find({'gene_name':regex})]
-    hpo_results = [x['name'][0] for x in get_db(app.config['DB_NAME_HPO']).hpo.find({'name':regex})]
+    pattern = '.*?'.join(re.escape(query))   # Converts 'kid' to 'k.*?i.*?d'
+    regex = re.compile(re.escape(query), re.IGNORECASE)
+    patient_results = [x['external_id'] for x in get_db(app.config['DB_NAME_PATIENTS']).patients.find(
+      {'external_id':regex}, {'score': {'$meta': 'textScore'}}
+      ).sort([('score', {'$meta': 'textScore'})])
+    ]
+    gene_results = [x['gene_name'] for x in get_db().genes.find(
+      {'gene_name':regex}, {'score': {'$meta': 'textScore'}}
+      ).sort([('score', {'$meta': 'textScore'})])
+    ]
+    hpo_results = [x['name'][0] for x in get_db(app.config['DB_NAME_HPO']).hpo.find(
+      {'name':regex}, {'score': {'$meta': 'textScore'}}
+      ).sort([('score', {'$meta': 'textScore'})])
+    ]
     results = patient_results+gene_results+hpo_results
     results = itertools.islice(results, 0, 20)
     return list(results)
 
 @app.route('/phenotype_suggestions/<hpo>')
 def get_phenotype_suggestions(hpo):
-    r = regex.compile(r"(%s){e<2}"%regex.escape(hpo), re.IGNORECASE)
-    hpo_results=[{k:x[k][0] for k in ['name','id']} for x in get_db(app.config['DB_NAME_HPO']).hpo.find({},{'_id':0}) if r.search(x['name'][0])]
-    return jsonify(results=hpo_results)
+    pattern = '.*?'.join(re.escape(hpo))   # Converts 'kid' to 'k.*?i.*?d'
+    regex = re.compile(pattern, re.IGNORECASE)  # Compiles a regex.
+    suggestions = [x['name'][0] for x in get_db(app.config['DB_NAME_HPO']).hpo.find(
+            {['name'][0]:regex}, {"score": {"$meta": "textScore"}} 
+      ).sort([('score', {'$meta': 'textScore'})])]
+    return json.dumps(suggestions[0:20])
 
 @app.route('/gene_suggestions/<gene>')
 def get_gene_suggestions(gene):
-    regex = re.compile('^' + re.escape(gene), re.IGNORECASE)
-    gene_results = [x['gene_name'] for x in get_db().genes.find({'gene_name':regex})]
-    return jsonify(results=gene_results)
+    pattern = '.*?'.join(re.escape(gene))   # Converts 'kid' to 'k.*?i.*?d'
+    regex = re.compile(pattern, re.IGNORECASE)  # Compiles a regex.
+    suggestions = [x['gene_name'] for x in get_db().genes.find(
+        {'gene_name':regex}, {"score": {"$meta": "textScore"}} 
+      ).sort([('score', {'$meta': 'textScore'})]
+    )]
+    return json.dumps(suggestions[0:20])
 
 def get_rathergood_result(db, query):
     """
