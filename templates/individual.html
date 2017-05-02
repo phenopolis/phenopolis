@@ -2,7 +2,7 @@
 <div class="container">
     <div class="card z-depth-3">
         <div class="card-content">
-            <span class="right"><a class="waves-effect waves-light btn-large light-blue darken-2 btn-floating tooltipped" data-position="left" data-delay="50" data-tooltip="Edit Patient Features"><i class="material-icons left">mode_edit</i></a></span>
+            <div class="right" id="edit_icon" style="display:none;"><a class="modal-trigger waves-effect waves-light btn-large light-blue darken-2 btn-floating tooltipped" data-position="left" data-delay="50" data-tooltip="Edit Patient Features" href="#edit_modal"><i class="material-icons left">mode_edit</i></a></div>
             <h3 class="truncate" style="font-weight: 300">Individual: {{patient.external_id}}</h3>
             <table class="info_table" style="display:none">
                 <tbody>
@@ -108,7 +108,6 @@
                         {% include "components/table-pager.html" %}
                     </tfoot>
                 </table>
-
             </div>
             <div id="variants_tab">
                 <h4 style="font-weight:300;">Rare Variants</h4>
@@ -147,10 +146,86 @@
                 <p>These are the result files of running <a href="http://www.sanger.ac.uk/science/tools/exomiser">Exomiser prioritisation</a> on the variants of these individuals under different inheritance modes.</p>
                 {% include "components/loading_from_server.html" %}
                 <div class="exomiser_content">
-                  
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<!-- Edit Modal -->
+<div id="edit_modal" class="modal">
+    <form id="edit_patient_data_form">
+        <div class="modal-content">
+            <i class="material-icons right modal-close">close</i>
+            <h4>Patient Data</h4>
+            <div>
+                <h5 style="font-weight: 300">Gender</h5>
+                <div class="gender_edit">
+                    <div class="row">
+                        <p class="col s2">
+                            <input name="gender_edit" type="radio" id="Male_edit" />
+                            <label for="Male_edit">Male</label>
+                        </p>
+                        <p class="col s2">
+                            <input name="gender_edit" type="radio" id="Female_edit" />
+                            <label for="Female_edit">Female</label>
+                        </p>
+                        <p class="col s2">
+                            <input name="gender_edit" type="radio" id="Unknown_edit" />
+                            <label for="Unknown_edit">Unknown</label>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h5 style="font-weight: 300">Features</h5>
+                <div id="features_edit">
+                    <div class="chips chips-initial chips-autocomplete">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h5 style="font-weight: 300">Candidate Genes</h5>
+                <div id="genes_edit">
+                    <div class="chips chips-initial chips-autocomplete">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h5 style="font-weight: 300">Consanguinity</h5>
+                <div class="consanguinity_edit">
+                    <div class="row">
+                        <p class="col s2">
+                            <input name="consanguinity_edit" type="radio" id="consanguinity_yes_edit" />
+                            <label for="consanguinity_yes_edit">Yes</label>
+                        </p>
+                        <p class="col s2">
+                            <input name="consanguinity_edit" type="radio" id="consanguinity_no_edit" />
+                            <label for="consanguinity_no_edit">No</label>
+                        </p>
+                        <p class="col s2">
+                            <input name="consanguinity_edit" type="radio" id="consanguinity_unknown_edit" />
+                            <label for="consanguinity_unknown_edit">Unknown</label>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
+            <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+            <a id="save_modal" href="#!" class="waves-effect waves-green btn-flat">Save</a>
+        </div>
+    </form>
+</div>
+<!-- Confirmation Modal -->
+<div id="confirm_edit_modal" class="modal">
+    <div class="modal-content">
+        <i class="material-icons right modal-close">close</i>
+        <h4>Please Confirm...</h4>
+        <p>This will update the database. Are you sure you want to continue</p>
+    </div>
+    <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
+        <a href="#!" class="left modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+        <a id="submit_edit_modal" href="#!" class="waves-effect waves-green btn-flat">Submit</a>
     </div>
 </div>
 {% endblock %}
