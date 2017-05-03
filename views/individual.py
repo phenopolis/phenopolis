@@ -37,12 +37,12 @@ def update_patient_data(individual):
     gender_edit=request.form.getlist('gender_edit[]')
     genes=request.form.getlist('genes[]')
     features=request.form.getlist('feature[]')
-    print(gender_edit)
-    print(consanguinity_edit)
-    print(genes)
-    print(features)
+    print('GENDER',gender_edit)
+    print('CONSANGUINITY',consanguinity_edit)
+    print('GENES',genes)
+    print('FEATURES',features)
     patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
-    print(patient['features'])
+    print(patient.features)
     return ''
 
 
@@ -307,36 +307,14 @@ def homozgous_variants(individual):
 @app.route('/homozygous_variants_json2/<individual>')
 @requires_auth
 def homozgous_variants2(individual):
-    statements={'statements':[{"statement":
-    """
-    MATCH
-    (g:Gene)-[]->(gv:GeneticVariant)-[:HomVariantToPerson]->(p:Person),    
-    (gv)-[]->(tv:TranscriptVariant)<-[]-(t:Transcript)
-    WHERE p.personId="%s"
-    AND gv.AN < 10
-    AND (NOT EXISTS(gv.exac_af))
-    WITH g,gv,t,{tv: tv.hgvsc} as TranscriptVariants
-    WITH g,gv,{Transcript: t.transcript_id, TranscriptVariants:collect(distinct TranscriptVariants)} as TranscriptToTranscriptVariants
-    WITH gv, {gene_name: g.gene_name, TranscriptToTranscriptVariants: collect(TranscriptToTranscriptVariants)} as GeneToTranscriptToTranscriptVariants
-    WITH
-    {variantId: gv.variantId,
-    cadd: gv.cadd,
-    HET_COUNT: gv.HET_COUNT,
-    WT_COUNT:gv.WT_COUNT,
-    HOM_COUNT:gv.HOM_COUNT,
-    MISS_COUNT:gv.MISS_COUNT,
-    allele_freq:gv.allele_freq,
-    hasExac:gv.hasExac,
-    GeneToTranscriptToTranscriptVariants:collect(GeneToTranscriptToTranscriptVariants)} as GeneticVariantToGeneToTranscriptToTranscriptVariants
-    RETURN GeneticVariantToGeneToTranscriptToTranscriptVariants;
-    """ % individual
-       }]}
+    allele_freq=float(request.get('allele_freq',0.001))
+    kaviar_AF=float(request.get('kaviar_AF',0.001))
     statements={'statements':[{"statement":
     """
     MATCH (gv:GeneticVariant)-[:HomVariantToPerson]->(p:Person)
-    WHERE p.personId="%s" and gv.kaviar_AF < 0.0001 and gv.allele_freq < 0.001
+    WHERE p.personId="%s" and gv.kaviar_AF < %f and gv.allele_freq < %f
     RETURN gv.variantId ;
-    """%individual }]}
+    """%(individual,kaviar_AF,allele_freq,)}]}
     resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
     #print(resp.json())
     data=[r['row'] for r in resp.json()['results'][0]['data']]
