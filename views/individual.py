@@ -110,12 +110,12 @@ def update_patient_data(individual):
         individual['family_history']['consanguinity']=False
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
     # also trigger refresh of that individual for individuals summary page
-    #individuals_update([external_id])
     patient=Patient(external_id,get_db(app.config['DB_NAME_PATIENTS']))
     print(patient.consanguinity)
     print(patient.observed_features)
     print(patient.genes)
     print(patient.gender)
+    individuals_update([external_id])
     return jsonify({'success': True}), 200
 
 
