@@ -80,7 +80,8 @@ def update_patient_data(individual):
     print(request.form['inheritance_mode[]'])
     # also trigger refresh of that individual for individuals summary page
     views.my_patients.individuals_update([external_id])
-    return jsonify(result={'status':'success'})
+    patient=Patient(external_id,get_db(app.config['DB_NAME_PATIENTS']))
+    return patient.json()
 
 
 @app.route('/individual_json/<individual>')
