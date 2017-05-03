@@ -61,18 +61,21 @@ if (!PP) {
 
   //
   PP.addPatientConsanguinityInfo = function(family_history) {
-    if (family_history !== undefined) {
+    var consanguinity_text
+    if (family_history === undefined) {
       return $('#consanguinity_unknown_edit').prop('checked', true);
     }
     if (family_history.consanguinity === undefined || family_history.consanguinity === null) {
       return $('#consanguinity_unknown_edit').prop('checked', true);
     }
-    if (family_history.consanguinity == true) {
+    if (family_history.consanguinity == 'true') {
+      consanguinity_text = 'Yes'
       $('#consanguinity_yes_edit').prop('checked', true);
-    } else if (family_history.consanguinity == false) {
+    } else if (family_history.consanguinity == 'false') {
+      consanguinity_text = 'No'
       $('#consanguinity_no_edit').prop('checked', true);
     }
-    $('#patient_consanguinity').text(family_history.consanguinity);
+    $('#patient_consanguinity').text(consanguinity_text);
   };
 
   //
