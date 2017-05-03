@@ -22,24 +22,24 @@ if (!PP) {
   };
 
   // init the table directly under the header
-  PP.initPatientFeatureTable = function(patient_id) {
+  PP.initPatientFeatureTable = function(patientId) {
     $.ajax({
       type: 'GET',
-      url: '/individual_json/' + patient_id,
+      url: '/individual_json/' + patientId,
       dataType: 'json',
       timeout: 120000,
-      success: function(data) { PP.PatientFeatureSuccess(data); },
+      success: function(data) { PP.PatientFeatureSuccess(data, patientId); },
       error: function(data, msg) { PP.ajaxError(data, msg); }
     });
   };
 
   //
-  PP.PatientFeatureSuccess = function(data) {
+  PP.PatientFeatureSuccess = function(data, patientId) {
     PP.addPatientGenderInfo(data.result.gender); // Or observed_features
     PP.addPatientFeaturesInfo(data.result.observed_features); // Or observed_features
     PP.addPatientConsanguinityInfo(data.result.family_history);
     PP.addPatientGenesInfo(data.result.genes);
-    PP.submitEditedIndividual();
+    PP.submitEditedIndividual(patientId);
     $('.info_table').show();
     $('#edit_icon').show();
     $('.modal').modal();
@@ -54,7 +54,7 @@ if (!PP) {
     } else {
       gender_full = 'Unknown';
     }
-    $('#'+gender_full+'_edit').prop('checked', true)
+    $('#'+gender_full.toLowerCase()+'_edit').prop('checked', true)
     $('#patient_gender').text(gender_full);
   };
 
@@ -141,7 +141,7 @@ if (!PP) {
     PP.setupChipsAutoComplete('#genes_edit', genes_array, '/gene_suggestions')
   };
 
-  PP.submitEditedIndividual = function() {
+  PP.submitEditedIndividual = function(patientId) {
     $('#save_modal').on('click', function(){
       $('#confirm_edit_modal').modal({ endingTop: '20%' });
       $('#confirm_edit_modal').modal('open');
@@ -151,7 +151,7 @@ if (!PP) {
       PP.chipToValues('#genes_edit', 'genes[]', '#edit_patient_data_form')
       $.ajax({
         type: 'POST',
-        url: '/update_patient_data',
+        url: '/update_patient_data/' + patientId,
         data: $('#edit_patient_data_form').serialize(),
         dataType: 'json',
         timeout: 120000,
@@ -181,10 +181,10 @@ if (!PP) {
   }
 
   //
-  PP.initOmimPlot = function(patient_id) {
+  PP.initOmimPlot = function(patientId) {
     $.ajax({
       type: 'GET',
-      url: '/venn_json/' + patient_id,
+      url: '/venn_json/' + patientId,
       dataType: 'json',
       timeout: 120000,
       success: function(data) { PP.vennSuccess(data); },
@@ -253,10 +253,10 @@ if (!PP) {
       });
   };
 
-  PP.initHomsTable = function(patient_id) {
+  PP.initHomsTable = function(patientId) {
     $.ajax({
       type: 'GET',
-      url: '/homozygous_variants_json2/' + patient_id,
+      url: '/homozygous_variants_json2/' + patientId,
       dataType: 'json',
       timeout: 120000,
       success: function(data) { PP.variantTableSuccess(data,'homs'); },
@@ -264,10 +264,10 @@ if (!PP) {
     });
   };
 
-  PP.initCompHetsTable = function(patient_id) {
+  PP.initCompHetsTable = function(patientId) {
      $.ajax({
        type: 'GET',
-       url: '/compound_het_variants_json2/' + patient_id,
+       url: '/compound_het_variants_json2/' + patientId,
        dataType: 'json',
        timeout: 120000,
        success: function(data) { PP.variantTableSuccess(data,'comp_hets'); },
@@ -275,10 +275,10 @@ if (!PP) {
      });
   };
 
-  PP.initVariantsTable = function(patient_id) {
+  PP.initVariantsTable = function(patientId) {
      $.ajax({
        type: 'GET',
-       url: '/rare_variants_json2/' + patient_id,
+       url: '/rare_variants_json2/' + patientId,
        dataType: 'json',
        timeout: 120000,
        success: function(data) { PP.variantTableSuccess(data,'variants'); },
@@ -347,7 +347,7 @@ if (!PP) {
   };
 
 
-  PP.initExomiserTab = function(patient_id) {
+  PP.initExomiserTab = function(patientId) {
     // $.ajax({
     //   type: 'GET',
     //   url: '/homozygous_variants_json/',
