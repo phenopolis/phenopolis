@@ -63,16 +63,18 @@ if (!PP) {
   PP.addPatientConsanguinityInfo = function(family_history) {
     var consanguinity_text
     if (family_history === undefined) {
+      $('#patient_consanguinity').text('Unkown');
       return $('#consanguinity_unknown_edit').prop('checked', true);
     }
     if (family_history.consanguinity === undefined || family_history.consanguinity === null) {
+      $('#patient_consanguinity').text('Unkown');
       return $('#consanguinity_unknown_edit').prop('checked', true);
     }
-    if (family_history.consanguinity == 'true') {
-      consanguinity_text = 'Yes'
+    if (family_history.consanguinity == true) {
+      consanguinity_text = 'Yes';
       $('#consanguinity_yes_edit').prop('checked', true);
-    } else if (family_history.consanguinity == 'false') {
-      consanguinity_text = 'No'
+    } else if (family_history.consanguinity == false) {
+      consanguinity_text = 'No';
       $('#consanguinity_no_edit').prop('checked', true);
     }
     $('#patient_consanguinity').text(consanguinity_text);
@@ -164,7 +166,6 @@ if (!PP) {
         },
         error: function(data, msg) {
 
-          $('.modal').modal('close')
         }
       });
     })
