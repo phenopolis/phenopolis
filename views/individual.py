@@ -22,7 +22,6 @@ import pysam
 import csv
 from collections import defaultdict, Counter
 #import rest as annotation
-import vcf
 from optparse import OptionParser
 import mygene
 import lookups
@@ -81,7 +80,8 @@ def update_patient_data(individual):
     print(request.form['inheritance_mode[]'])
     # also trigger refresh of that individual for individuals summary page
     views.individuals.individuals_update([external_id])
-    return 'done' 
+    patient=Patient(external_id,get_db(app.config['DB_NAME_PATIENTS']))
+    return patient.json()
 
 
 @app.route('/individual_json/<individual>')
@@ -342,7 +342,6 @@ def compound_het_variants2(individual):
     resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
     data=[r['row'][0] for r in resp.json()['results'][0]['data']]
     print(data)
-    raise 'hell'
     variants=[v[0] for v in data]
     variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}) for v in variants]
     variants=[v for v in variants if v]
