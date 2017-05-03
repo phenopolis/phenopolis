@@ -30,6 +30,20 @@ from orm import Patient
 import requests
 
 
+@app.route('/update_patient_data',methods=['POST'])
+def update_patient_data():
+    print(request.form)
+    consanguinity_edit=request.form.getlist('consangunity_edit[]')
+    gender_edit=request.form.getlist('gender_edit[]')
+    genes=request.form.getlist('genes[]')
+    features=request.form.getlist('feature[]')
+    print(gender_edit)
+    print(consanguinity_edit)
+    print(genes)
+    print(features)
+    patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
+    return ''
+
 
 @app.route('/individual_json/<individual>')
 @requires_auth
@@ -337,39 +351,24 @@ def homozgous_variants2(individual):
     return jsonify(count=len(variants),result=variants)
 
     
-@app.route('/compound_het_variants_json2/<individual>')
+@app.route('/compound_het_variants_json2/<individual>',methods=['GET','POST'])
 @requires_auth
 def compound_het_variants2(individual):
-    statements={'statements':[{"statement":
-    """MATCH
-    (g:Gene)-[]->(gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person),
-    (gv)-[]->(tv:TranscriptVariant),
-    (t:Transcript)-[]->(tv)
-    WHERE p.personId="%s" 
-    WITH gv, g, tv, count(g) AS c
-    WHERE c > 1
-    RETURN gv, g, tv limit 10;"""%individual }]}
+    kaviar_AF=float(request.args.get('kaviar_AF',0.01))
+    allele_freq=float(request.args.get('allele_freq',0.01))
     statements={'statements':[{"statement":
     """
     MATCH (g:Gene)-[]->(gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
-    WHERE p.personId="%s" AND gv.kaviar_AF < 0.00001 and gv.allele_freq < 0.001
+    WHERE p.personId="%s" AND gv.kaviar_AF<%f and gv.allele_freq < %f
     WITH p, g, collect (gv) AS cgv
     WHERE length(cgv) > 1 
     UNWIND cgv AS gv
-    RETURN p.personId,  g.gene_id, gv.variantId, count(gv)
-    ORDER BY g.gene_id;
-    """%individual }]}
-    statements={'statements':[{"statement":
-    """
-    MATCH (g:Gene)-[]->(gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
-    WHERE p.personId="%s" AND gv.kaviar_AF < 0.00001 and gv.allele_freq < 0.001
-    WITH p, g, collect (gv) AS cgv
-    WHERE length(cgv) > 1 
-    UNWIND cgv AS gv
-    RETURN gv.variantId
-    """%individual }]}
+    RETURN gv limit 10
+    """%(individual,kaviar_AF,allele_freq,) }]}
     resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
-    data=[r['row'] for r in resp.json()['results'][0]['data']]
+    data=[r['row'][0] for r in resp.json()['results'][0]['data']]
+    print(data)
+    raise 'hell'
     variants=[v[0] for v in data]
     variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}) for v in variants]
     variants=[v for v in variants if v]
