@@ -156,11 +156,11 @@ if (!PP) {
         dataType: 'json',
         timeout: 120000,
         success: function(data) {
-          console.log($('#edit_patient_data_form').serializeArray() )
           $('.modal').modal('close')
+          location.reload();
         },
         error: function(data, msg) {
-          console.log($('#edit_patient_data_form').serializeArray() )
+
           $('.modal').modal('close')
         }
       });
@@ -333,7 +333,7 @@ if (!PP) {
   };
 
   PP.generateVariantHtml = function(variant) {
-    return PP.create_url('/variant', variant) + '<br><a class="text-small" href="/sequence?variant_id=' + variant + '&symbol=&build=grch37">Primer Design</a>';
+    return PP.create_url('/variant', variant);
   };
 
   PP.generateIndividualHtml = function(individuals) {
