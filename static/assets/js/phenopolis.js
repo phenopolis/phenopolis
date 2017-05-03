@@ -131,6 +131,7 @@ if (!PP) {
         // select needs a "browser-default" class or it gets hidden
         filter_placeholder: { search: 'Filter' },
         filter_columnFilters: true,
+        filter_matchType : { 'input': 'match', 'select': 'match' }
       }
     });
     $(table).tablesorterPager({
