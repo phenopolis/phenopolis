@@ -66,9 +66,9 @@ if (!PP) {
     if (family_history.consanguinity === undefined || family_history.consanguinity === null) {
       return $('#consanguinity_unknown_edit').prop('checked', true);
     }
-    if (family_history.consanguinity == 'Y') {
+    if (family_history.consanguinity == true) {
       $('#consanguinity_yes_edit').prop('checked', true);
-    } else if (family_history.consanguinity == 'N') {
+    } else if (family_history.consanguinity == false) {
       $('#consanguinity_no_edit').prop('checked', true);
     }
     $('#patient_consanguinity').text(family_history.consanguinity);
