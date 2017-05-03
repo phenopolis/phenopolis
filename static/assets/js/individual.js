@@ -147,6 +147,8 @@ if (!PP) {
       $('#confirm_edit_modal').modal('open');
     });
     $('#submit_edit_modal').on('click', function() {
+      PP.chipToValues('#features_edit', 'feature[]', '#edit_patient_data_form')
+      PP.chipToValues('#genes_edit', 'genes[]', '#edit_patient_data_form')
       $.ajax({
         type: 'POST',
         url: '/update_patient_data',
@@ -154,13 +156,28 @@ if (!PP) {
         dataType: 'json',
         timeout: 120000,
         success: function(data) {
-          // update page 
+          console.log($('#edit_patient_data_form').serializeArray() )
+          $('.modal').modal('close')
         },
         error: function(data, msg) {
-          // 
+          console.log($('#edit_patient_data_form').serializeArray() )
+          $('.modal').modal('close')
         }
       });
     })
+  }
+
+  PP.chipToValues = function(wrapper, valueName, form) {
+    var chips = $(wrapper+' .chips').material_chip('data');
+    var data = $.map(chips, function(k) { return k.tag})
+    for (var i = 0; i < data.length; i++) {
+      existing = $(form+' input[value="'+data[i]+'"]')
+      if (!existing.length) {
+        $('<input>')
+          .attr({'name': valueName, 'value': data[i], 'type': 'hidden'}
+          ).appendTo(form)
+      }
+    }
   }
 
   //
@@ -273,7 +290,6 @@ if (!PP) {
     var d = data.result;
     for (var i = 0; i < d.length; i++) {
       // generate tr
-        console.log(d[i].variant_id);
       $('<tr>').append(
         $('<td>').html(PP.generateGeneNames(d[i].transcript_consequences)),
         $('<td>').text(' '),
