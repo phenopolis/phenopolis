@@ -79,7 +79,7 @@ def update_patient_data(individual):
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
     print(request.form['inheritance_mode[]'])
     # also trigger refresh of that individual for individuals summary page
-    views.individuals.individuals_update([external_id])
+    views.my_patients.individuals_update([external_id])
     return jsonify(result={'status':'success'})
 
 
