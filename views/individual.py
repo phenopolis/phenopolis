@@ -80,7 +80,7 @@ def update_patient_data(individual):
     external_id=individual
     individual=get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':external_id})
     print('edit patient gender')
-    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'genes':individual['genes']}}))
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'sex':{'female':'F','male':'M','unknown':'U'}[gender]}}))
     print('edit patient genes')
     individual['genes']=[]
     for g in genes:
@@ -92,8 +92,6 @@ def update_patient_data(individual):
     print(individual['genes'])
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'genes':individual['genes']}}))
     print('edit patient features')
-    features=request.form.getlist('feature[]')
-    print(features)
     individual['features']=[]
     for f in features:
         hpo=get_db(app.config['DB_NAME_HPO']).hpo.find_one({'name':re.compile('^'+f+'$',re.IGNORECASE)})
@@ -101,6 +99,7 @@ def update_patient_data(individual):
         if hpo in [h['label'] for h in individual['features']]: continue
         individual['features'].append({'id':hpo['id'][0], 'label':hpo['name'][0], 'observed':'yes'})
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'features':individual['features']}}))
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'observed_features':[f for f in individual['features'] if f['observed']=='yes']}}))
     print('edit patient consanguinity')
     individual['family_history']=individual.get('family_history',{})
     if (consanguinity)=='unknown':
@@ -112,6 +111,11 @@ def update_patient_data(individual):
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
     # also trigger refresh of that individual for individuals summary page
     #individuals_update([external_id])
+    patient=Patient(external_id,get_db(app.config['DB_NAME_PATIENTS']))
+    print(patient.consanguinity)
+    print(patient.observed_features)
+    print(patient.genes)
+    print(patient.gender)
     return jsonify({'success': True}), 200
 
 
@@ -333,8 +337,8 @@ def homozgous_variants(individual):
 @app.route('/homozygous_variants_json2/<individual>')
 @requires_auth
 def homozgous_variants2(individual):
-    allele_freq=float(request.get('allele_freq',0.001))
-    kaviar_AF=float(request.get('kaviar_AF',0.001))
+    allele_freq=float(request.args.get('allele_freq',0.001))
+    kaviar_AF=float(request.args.get('kaviar_AF',0.001))
     statements={'statements':[{"statement":
     """
     MATCH (gv:GeneticVariant)-[:HomVariantToPerson]->(p:Person)
@@ -367,12 +371,10 @@ def compound_het_variants2(individual):
     WHERE p.personId="%s" AND gv.kaviar_AF<%f and gv.allele_freq < %f
     WITH p, g, collect (gv) AS cgv
     WHERE length(cgv) > 1 
-    UNWIND cgv AS gv
-    RETURN gv limit 10
+    RETURN gv.variantId ; 
     """%(individual,kaviar_AF,allele_freq,) }]}
     resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
-    data=[r['row'][0] for r in resp.json()['results'][0]['data']]
-    print(data)
+    data=[r['row'] for r in resp.json()['results'][0]['data']]
     variants=[v[0] for v in data]
     variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}) for v in variants]
     variants=[v for v in variants if v]
@@ -395,7 +397,7 @@ def rare_variants2(individual):
     """
     MATCH (gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
     WHERE p.personId="%s" and gv.kaviar_AF < 0.0001 and gv.allele_freq < 0.001
-    RETURN gv.variantId 
+    RETURN gv.variantId ;
     """%individual }]}
     resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
     #print(resp.json())
