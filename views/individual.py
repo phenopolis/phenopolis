@@ -33,7 +33,7 @@ import requests
 @app.route('/update_patient_data/<individual>',methods=['POST'])
 def update_patient_data(individual):
     print(request.form)
-    consanguinity_edit=request.form.getlist('consangunity_edit[]')
+    consanguinity_edit=request.form.getlist('consanguinity_edit[]')
     gender_edit=request.form.getlist('gender_edit[]')
     genes=request.form.getlist('genes[]')
     features=request.form.getlist('feature[]')
