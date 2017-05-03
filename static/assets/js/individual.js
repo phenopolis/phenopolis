@@ -40,6 +40,7 @@ if (!PP) {
     PP.addPatientConsanguinityInfo(data.result.family_history);
     PP.addPatientGenesInfo(data.result.genes);
     PP.submitEditedIndividual(patientId);
+    PP.resetEditButton(patientId);
     $('.info_table').show();
     $('#edit_icon').show();
     $('.modal').modal();
@@ -164,7 +165,13 @@ if (!PP) {
         }
       });
     })
-  }
+  };
+
+  PP.resetEditButton = function(patientId){
+    $('#reset_edit_modal').on('click', function(){
+      PP.initPatientFeatureTable(patientId);
+    })
+  };
 
   PP.chipToValues = function(wrapper, valueName, form) {
     var chips = $(wrapper+' .chips').material_chip('data');
