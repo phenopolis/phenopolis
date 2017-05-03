@@ -28,6 +28,39 @@ import lookups
 from orm import Patient
 import requests
 
+def individuals_update(external_ids):
+    patients_db=get_db(app.config['DB_NAME_PATIENTS'])
+    users_db=get_db(app.config['DB_NAME_USERS'])
+    def f(eid):
+        p=patients_db.patients.find_one({'external_id':eid},{'_id':False})
+        print p['external_id']
+        p['features']=[f for f in p.get('features',[]) if f['observed']=='yes']
+        if 'solved' in p:
+            if 'gene' in p['solved']:
+                p['solved']=[p['solved']['gene']]
+            else:
+                p['solved']=[]
+        else: p['solved']=[]
+        if 'genes' in p: p['genes']=[x['gene'] for x in p['genes'] if 'gene' in x]
+        else: p['genes']=[]
+        p['genes']=list(frozenset(p['genes']+p['solved']))
+        p2=get_db().patients.find_one({'external_id':p['external_id']},{'rare_homozygous_variants_count':1,'rare_compound_hets_count':1, 'rare_variants_count':1,'total_variant_count':1})
+        if not p2: return p
+        p['rare_homozygous_variants_count']=p2.get('rare_homozygous_variants_count','')
+        p['rare_compound_hets_count']=p2.get('rare_compound_hets_count','')
+        p['rare_variants_count']=p2.get('rare_variants_count','')
+        p['total_variant_count']=p2.get('total_variant_count','')
+        #p['all_variants_count']=get_db().patients.find_one({'external_id':p['external_id']},{'_id':0,'all_variants_count':1})['all_variants_count']
+        #db.cache.find_one({"key" : "%s_blindness,macula,macular,retina,retinal,retinitis,stargardt_" % })
+        if '_id' in p: del p['_id']
+        return p
+    new_individuals=[f(eid) for eid in external_ids]
+    old_individuals=users_db.users.find_one({'user':session['user']}).get('individuals',[])
+    old_individuals=[ind for ind in old_individuals if ind['external_id'] not in external_ids]
+    individuals=new_individuals+old_individuals
+    users_db.users.update_one({'user':session['user']},{'$set':{'individuals':individuals}})
+    return individuals
+
 
 @app.route('/update_patient_data/<individual>',methods=['POST'])
 @requires_auth
@@ -79,9 +112,8 @@ def update_patient_data(individual):
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
     print(request.form['inheritance_mode[]'])
     # also trigger refresh of that individual for individuals summary page
-    views.my_patients.individuals_update([external_id])
-    patient=Patient(external_id,get_db(app.config['DB_NAME_PATIENTS']))
-    return patient.json()
+    individuals_update([external_id])
+    return jsonify({'success': True}), 200
 
 
 @app.route('/individual_json/<individual>')
