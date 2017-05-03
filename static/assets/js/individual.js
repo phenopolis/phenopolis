@@ -157,7 +157,6 @@ if (!PP) {
         type: 'POST',
         url: '/update_patient_data/' + patientId,
         data: $('#edit_patient_data_form').serialize(),
-        timeout: 120000,
         success: function(data) {
           $('.modal').modal('close')
           // PP.initPatientFeatureTable(patientId);
