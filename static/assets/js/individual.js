@@ -61,12 +61,10 @@ if (!PP) {
   //
   PP.addPatientConsanguinityInfo = function(family_history) {
     if (family_history !== undefined) {
-      $('#consanguinity_unknown_edit').prop('checked', true);
-      return $('#patient_consanguinity').closest('tr').hide();
+      return $('#consanguinity_unknown_edit').prop('checked', true);
     }
     if (family_history.consanguinity === undefined || family_history.consanguinity === null) {
-      $('#consanguinity_unknown_edit').prop('checked', true);
-      return $('#patient_consanguinity').closest('tr').hide();
+      return $('#consanguinity_unknown_edit').prop('checked', true);
     }
     if (family_history.consanguinity == 'Y') {
       $('#consanguinity_yes_edit').prop('checked', true);
