@@ -63,11 +63,11 @@ if (!PP) {
   PP.addPatientConsanguinityInfo = function(family_history) {
     var consanguinity_text
     if (family_history === undefined) {
-      $('#patient_consanguinity').text('Unkown');
+      $('#patient_consanguinity').text('Unknown');
       return $('#consanguinity_unknown_edit').prop('checked', true);
     }
     if (family_history.consanguinity === undefined || family_history.consanguinity === null) {
-      $('#patient_consanguinity').text('Unkown');
+      $('#patient_consanguinity').text('Unknown');
       return $('#consanguinity_unknown_edit').prop('checked', true);
     }
     if (family_history.consanguinity == true) {
@@ -157,15 +157,15 @@ if (!PP) {
         type: 'POST',
         url: '/update_patient_data/' + patientId,
         data: $('#edit_patient_data_form').serialize(),
-        dataType: 'json',
         timeout: 120000,
         success: function(data) {
           $('.modal').modal('close')
           // PP.initPatientFeatureTable(patientId);
           window.location.reload();
         },
-        error: function(data, msg) {
-
+        error: function(xhr, msg) {
+          console.log(xhr)
+          console.log(msg)
         }
       });
     })
