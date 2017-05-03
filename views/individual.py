@@ -31,19 +31,57 @@ import requests
 
 
 @app.route('/update_patient_data/<individual>',methods=['POST'])
+@requires_auth
 def update_patient_data(individual):
+    if session['user']=='demo': return 'not permitted'
     print(request.form)
-    consanguinity_edit=request.form.getlist('consanguinity_edit[]')
-    gender_edit=request.form.getlist('gender_edit[]')
+    consanguinity=request.form.getlist('consanguinity_edit[]')[0]
+    gender=request.form.getlist('gender_edit[]')[0]
     genes=request.form.getlist('genes[]')
     features=request.form.getlist('feature[]')
-    print('GENDER',gender_edit)
-    print('CONSANGUINITY',consanguinity_edit)
+    print('INDIVIDUAL',individual)
+    print('GENDER',gender)
+    print('CONSANGUINITY',consanguinity)
     print('GENES',genes)
     print('FEATURES',features)
-    patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
-    print(patient.features)
-    return ''
+    print(individual)
+    external_id=individual
+    individual=get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':external_id})
+    print('edit patient gender')
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'genes':individual['genes']}}))
+    print('edit patient genes')
+    individual['genes']=[]
+    for g in genes:
+        gene=get_db(app.config['DB_NAME']).genes.find_one({'gene_name_upper':g})
+        print(gene)
+        if gene in [g['gene'] for g in individual['genes']]: continue
+        if not gene: continue
+        individual['genes'].append({'gene':g, 'status':'candidate'})
+    print(individual['genes'])
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'genes':individual['genes']}}))
+    print('edit patient features')
+    features=request.form.getlist('feature[]')
+    print(features)
+    individual['features']=[]
+    for f in features:
+        hpo=get_db(app.config['DB_NAME_HPO']).hpo.find_one({'name':re.compile('^'+f+'$',re.IGNORECASE)})
+        if not hpo: continue
+        if hpo in [h['label'] for h in individual['features']]: continue
+        individual['features'].append({'id':hpo['id'][0], 'label':hpo['name'][0], 'observed':'yes'})
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'features':individual['features']}}))
+    print('edit patient consanguinity')
+    individual['family_history']=individual.get('family_history',{})
+    if (consanguinity)=='unknown':
+        individual['family_history']['consanguinity']=None
+    elif consanguinity.lower()=='yes':
+        individual['family_history']['consanguinity']=True
+    elif consanguinity.lower()=='no':
+        individual['family_history']['consanguinity']=False
+    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
+    print(request.form['inheritance_mode[]'])
+    # also trigger refresh of that individual for individuals summary page
+    views.individuals.individuals_update([external_id])
+    return 'done' 
 
 
 @app.route('/individual_json/<individual>')
@@ -51,44 +89,6 @@ def update_patient_data(individual):
 def individual_json(individual):
     patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
     return patient.json()
-
-@app.route('/edit_patient_features/<individual>',methods=['POST'])
-@requires_auth
-def edit_patient_features(individual):
-    if session['user']=='demo': return 'not permitted'
-    print(individual)
-    external_id=individual
-    individual=get_db(app.config['DB_NAME_PATIENTS']).patients.find_one({'external_id':external_id})
-    print('edit patient features')
-    features=request.form.getlist('features[]')
-    print(features)
-    individual['features']=[]
-    for f in features:
-        hpo=get_db(app.config['DB_NAME_HPO']).hpo.find_one({'name':re.compile('^'+f+'$',re.IGNORECASE)})
-        if not hpo: continue
-        individual['features'].append({'id':hpo['id'][0], 'label':hpo['name'][0], 'observed':'yes'})
-    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'features':individual['features']}}))
-    genes=request.form.getlist('candidate_genes[]')
-    individual['genes']=[]
-    for g in genes:
-        gene=get_db(app.config['DB_NAME']).genes.find_one({'gene_name_upper':g})
-        print(gene)
-        if not gene: continue
-        individual['genes'].append({'gene':g, 'status':'candidate'})
-    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'genes':individual['genes']}}))
-    consanguinity=str(request.form['consanguinity[]'])
-    individual['family_history']=individual.get('family_history',{})
-    if (consanguinity)=='unknown':
-        individual['family_history']['consanguinity']=None
-    elif consanguinity.lower()=='true':
-        individual['family_history']['consanguinity']=True
-    elif consanguinity.lower()=='false':
-        individual['family_history']['consanguinity']=False
-    print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
-    print(request.form['inheritance_mode[]'])
-    # also trigger refresh of that individual for individuals summary page
-    views.individuals.individuals_update([external_id])
-    return 'done' 
 
 
 @app.route('/individual/<individual>')
@@ -110,11 +110,6 @@ def individual_page(individual):
     hpo_gene=get_hpo_gene(patient.hpo_ids)
     # get pubmedbatch scores
     pubmedbatch = {}
-    if patient.pubmed_key:
-        genes = [v.get('canonical_gene_name_upper',None) for v in patient.rare_variants+patient.homozygous_variants+patient.compound_het_variants]
-        pubmed_keys = ['_'.join([g,patient.pubmed_key]) for g in set(genes)]
-        pubmedbatch = list(get_db('pubmedbatch').cache.find({'key':{'$in':pubmed_keys}},{'key':1,'score':1,'_id':0}))
-        if pubmedbatch: pubmedbatch = dict([(i['key'],i.get('score',None)) for i in pubmedbatch])
     genes = {}
     # is this still updating?
     if type(pubmedbatch) is dict:
@@ -169,7 +164,7 @@ def get_feature_venn(patient):
             hpo_gene[hpo_id]=hpo_gene.get(hpo_id,[])+[gene_name]
     for k in hpo_gene: hpo_gene[k]=list(frozenset(list(hpo_gene[k])))
     print '========'
-    print hpo_gene
+    #print hpo_gene
     print '========'
     genes = {}
     # get combinatorics of features to draw venn diagram
