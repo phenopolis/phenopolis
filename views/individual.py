@@ -30,8 +30,8 @@ from orm import Patient
 import requests
 
 
-@app.route('/update_patient_data',methods=['POST'])
-def update_patient_data():
+@app.route('/update_patient_data/<individual>',methods=['POST'])
+def update_patient_data(individual):
     print(request.form)
     consanguinity_edit=request.form.getlist('consangunity_edit[]')
     gender_edit=request.form.getlist('gender_edit[]')
@@ -42,6 +42,7 @@ def update_patient_data():
     print(genes)
     print(features)
     patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
+    print(patient['features'])
     return ''
 
 
