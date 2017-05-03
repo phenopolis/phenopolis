@@ -35,7 +35,7 @@ if (!PP) {
 
   //
   PP.PatientFeatureSuccess = function(data, patientId) {
-    PP.addPatientGenderInfo(data.result.gender); // Or observed_features
+    PP.addPatientGenderInfo(data.result.sex); // Or observed_features
     PP.addPatientFeaturesInfo(data.result.observed_features); // Or observed_features
     PP.addPatientConsanguinityInfo(data.result.family_history);
     PP.addPatientGenesInfo(data.result.genes);
@@ -157,6 +157,7 @@ if (!PP) {
         timeout: 120000,
         success: function(data) {
           $('.modal').modal('close')
+          // PP.initPatientFeatureTable(patientId);
           location.reload();
         },
         error: function(data, msg) {
