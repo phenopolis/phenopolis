@@ -160,7 +160,7 @@ if (!PP) {
         success: function(data) {
           $('.modal').modal('close')
           // PP.initPatientFeatureTable(patientId);
-          location.reload();
+          window.location.reload();
         },
         error: function(data, msg) {
 
