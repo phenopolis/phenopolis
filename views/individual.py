@@ -122,7 +122,7 @@ def update_patient_data(individual):
 @app.route('/individual_json/<individual>')
 @requires_auth
 def individual_json(individual):
-    patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
+    patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']))
     return patient.json()
 
 
@@ -346,7 +346,6 @@ def homozgous_variants2(individual):
     RETURN gv.variantId ;
     """%(individual,kaviar_AF,allele_freq,)}]}
     resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
-    #print(resp.json())
     data=[r['row'] for r in resp.json()['results'][0]['data']]
     variants=[v[0] for v in data]
     print(len(variants))
@@ -369,11 +368,12 @@ def compound_het_variants2(individual):
     """
     MATCH (g:Gene)-[]->(gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
     WHERE p.personId="%s" AND gv.kaviar_AF<%f and gv.allele_freq < %f
-    WITH p, g, collect (gv) AS cgv
+    WITH gv, p, g, collect (gv) AS cgv
     WHERE length(cgv) > 1 
     RETURN gv.variantId ; 
     """%(individual,kaviar_AF,allele_freq,) }]}
     resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
+    print(resp.json())
     data=[r['row'] for r in resp.json()['results'][0]['data']]
     variants=[v[0] for v in data]
     variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}) for v in variants]
