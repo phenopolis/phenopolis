@@ -239,40 +239,41 @@ if (!PP) {
   PP.initHomsTable = function(patient_id) {
     $.ajax({
       type: 'GET',
-      url: '/homozygous_variants_json/' + patient_id,
+      url: '/homozygous_variants_json2/' + patient_id,
       dataType: 'json',
       timeout: 120000,
-      success: function(data) { PP.variantTableSuccess(data); },
+      success: function(data) { PP.variantTableSuccess(data,'homs'); },
       error: function(data, msg) { PP.ajaxError(data, msg); }
     });
   };
 
   PP.initCompHetsTable = function(patient_id) {
-    // $.ajax({
-    //   type: 'GET',
-    //   url: '/compound_het_variants_json/' + patient_id,
-    //   dataType: 'json',
-    //   timeout: 120000,
-    //   success: function(data) { PP.variantTableSuccess(data); },
-    //   error: function(data, msg) { PP.ajaxError(data, msg); }
-    // });
+     $.ajax({
+       type: 'GET',
+       url: '/compound_het_variants_json2/' + patient_id,
+       dataType: 'json',
+       timeout: 120000,
+       success: function(data) { PP.variantTableSuccess(data,'comp_hets'); },
+       error: function(data, msg) { PP.ajaxError(data, msg); }
+     });
   };
 
   PP.initVariantsTable = function(patient_id) {
-    // $.ajax({
-    //   type: 'GET',
-    //   url: '/rare_variants_json/' + patient_id,
-    //   dataType: 'json',
-    //   timeout: 120000,
-    //   success: function(data) { PP.variantTableSuccess(data); },
-    //   error: function(data, msg) { PP.ajaxError(data, msg); }
-    // });
+     $.ajax({
+       type: 'GET',
+       url: '/rare_variants_json2/' + patient_id,
+       dataType: 'json',
+       timeout: 120000,
+       success: function(data) { PP.variantTableSuccess(data,'variants'); },
+       error: function(data, msg) { PP.ajaxError(data, msg); }
+     });
   };
 
-  PP.variantTableSuccess = function(data) {
+  PP.variantTableSuccess = function(data,table_name) {
     var d = data.result;
     for (var i = 0; i < d.length; i++) {
       // generate tr
+        console.log(d[i].variant_id);
       $('<tr>').append(
         $('<td>').html(PP.generateGeneNames(d[i].transcript_consequences)),
         $('<td>').text(' '),
@@ -289,11 +290,11 @@ if (!PP) {
         $('<td>').text(' '),
         $('<td>').html(PP.generateIndividualHtml(d[i].hom_samples)),
         $('<td>').text()
-      ).appendTo('#homs_table_body');
+      ).appendTo('#'+table_name+'_table_body');
     }
-    $('#homs_tab #progress_row').remove();
-    $('#homs_table').show();
-    PP.initTableSorter('#homs_table');
+    $('#'+table_name+'_tab #progress_row').remove();
+    $('#'+table_name+'_table').show();
+    PP.initTableSorter('#'+table_name+'_table');
   };
 
   PP.generateGeneNames = function(transcript_consequences) {
