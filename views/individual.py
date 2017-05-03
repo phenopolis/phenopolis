@@ -110,9 +110,8 @@ def update_patient_data(individual):
     elif consanguinity.lower()=='no':
         individual['family_history']['consanguinity']=False
     print(get_db(app.config['DB_NAME_PATIENTS']).patients.update_one({'external_id':external_id},{'$set':{'family_history':individual['family_history']}}))
-    print(request.form['inheritance_mode[]'])
     # also trigger refresh of that individual for individuals summary page
-    individuals_update([external_id])
+    #individuals_update([external_id])
     return jsonify({'success': True}), 200
 
 
