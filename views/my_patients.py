@@ -55,6 +55,14 @@ def get_individuals(build_cache=False):
         return individuals
     eids=user['external_ids']
     individuals=individuals_update(eids)
+    statements={'statements':[{"statement":
+    """
+    MATCH (gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)-[:PersonToObservedTerm]->(t:Term) 
+    WHERE p.personId =~ 'IRDC_.*'
+    WITH p, collect(t.name) as terms, length(collect(gv)) as c
+    RETURN p.personId, terms, c ;
+    """%individual }]}
+    #resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
     return individuals
 
 
