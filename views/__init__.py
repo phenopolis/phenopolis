@@ -238,10 +238,6 @@ def get_db(dbname=None):
         g.db_conn[dbname] = connect_db(dbname)
     return g.db_conn[dbname]
 
-def get_R_session():
-    if not hasattr(g, 'R_session'): g.R_session=pyRserve.connect()
-    return g.R_session
-
 def get_hpo_graph():
     """
     """
