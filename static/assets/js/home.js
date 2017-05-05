@@ -211,10 +211,15 @@ if (!PP) {
       var password = $("#new_password_1").val();
       var confirmPassword = $("#new_password_2").val();
 
-      if (password != confirmPassword)
+      if (password != confirmPassword) {
           $('#password_mismatch_msg').show();
-      else
+          $('#change_password_btn').attr('disabled', 'disabled');
+
+      }
+      else {
           $('#password_mismatch_msg').hide();
+          $('#change_password_btn').removeAttr('disabled');
+      }
   }
 }());
 // End of PP module
