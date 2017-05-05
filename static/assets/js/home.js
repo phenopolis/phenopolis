@@ -184,6 +184,7 @@ if (!PP) {
       $('#auth_modal').modal('open');
       $('#change_password_form_error_msg').hide();
       $('#change_password_successful').hide();
+      $('#password_mismatch_msg').hide();
 
       $.ajax({
           type: 'POST',
@@ -211,9 +212,9 @@ if (!PP) {
       var confirmPassword = $("#new_password_2").val();
 
       if (password != confirmPassword)
-          $("#divCheckPasswordMatch").html("Passwords do not match");
+          $('#password_mismatch_msg').show();
       else
-          $("#divCheckPasswordMatch").html("Passwords match");
+          $('#password_mismatch_msg').hide();
   }
 }());
 // End of PP module
