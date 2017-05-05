@@ -65,6 +65,11 @@ if (!PP) {
     $('#submit_change_password_btn').on('click', function () {
         PP.submitChangePassword();
     });
+
+    $(document).ready(function () {
+        $("#new_password_1, #new_password_2").keyup(PP.checkPasswordMatch);
+    });
+
   };
 
   // TODO: Replace with JQuery.validate
@@ -200,5 +205,15 @@ if (!PP) {
           }
       });
   };
+
+  PP.checkPasswordMatch = function () {
+      var password = $("#new_password_1").val();
+      var confirmPassword = $("#new_password_2").val();
+
+      if (password != confirmPassword)
+          $("#divCheckPasswordMatch").html("Passwords do not match");
+      else
+          $("#divCheckPasswordMatch").html("Passwords match");
+  }
 }());
 // End of PP module
