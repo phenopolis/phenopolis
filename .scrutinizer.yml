@@ -1,0 +1,8 @@
+# This turns off the test run.
+build: false
+
+# If you do want the tests to run, delete the line "build: false" and uncomment the lines below.
+#build:
+    #dependencies:
+    #    before:
+    #        - 'pip install Cython==0.25.2 --install-option="--no-cython-compile"'
