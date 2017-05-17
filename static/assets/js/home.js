@@ -13,196 +13,157 @@ if (!PP) {
 
 // PP module
 (function() {
-  PP.initLogin = function() {
-    PP.openLoginModelOnClick('#enter_login_btn');
-
-    // Submit form upon clicking the login button in the modal
+  PP.initLoginForm = function() {
+    $('#login_modal').modal({ complete: function() { PP.showLoginForm(); } }); // Init Modals and ensure 
+    PP.loginValidation();
+    // Submit form upon clicking the login button in the login modal
     $('#login_btn').on('click', function() {
-      PP.submitLogin();
+      $('#login_form').submit();
     });
-
     // submit form upon pressing enter in the login form
     $('#login_form input').keydown(function(e) {
-      if (e.keyCode == 13) PP.submitLogin();
+      if (e.keyCode == 13) $('#login_form').submit();
     });
-
-    // Automatically login when selecting the demo login button
-    $('#demo_login_btn, #parallax_demo_login_btn').on('click', function() {
-      $('#name').val('demo');
-      $('#password').val('demo123');
-      PP.submitLogin();
+    // Open open Login Model On Clicking #enter_login_btn
+    $('#enter_login_btn').on('click', function() {
+      PP.showLoginForm();
     });
-
-    $('#register_btn').on('click', function() {
-      PP.showRegistrationForm();
-    });
-
-    $('#change_password_btn').on('click', function () {
-        PP.showChangePasswordForm();
-    });
-
-    $('#submit_register_btn').on('click', function() {
-      PP.submitRegisterForm();
-    });
-
-    $('#submit_change_password_btn').on('click', function () {
-        PP.submitChangePassword();
-    });
-
-    $(document).ready(function () {
-        $("#new_password_1, #new_password_2").keyup(PP.checkPasswordMatch);
-    });
-
+    PP.demoAutomaticLogin();
   };
 
-  // TODO: Replace with JQuery.validate
-  // show Login Model
-  PP.submitLogin = function() {
-    $('#auth_modal').modal({ dismissible: false, endingTop: '20%' });
-    $('#auth_modal').modal('open');
-
-    $.ajax({
-      type: 'POST',
-      url: '/login',
-      data: $('#login_form').serialize(),
-      dataType: 'json',
-      timeout: 120000,
-      success: function(data) {
-        window.location.href = '/search';
+  PP.loginValidation = function() {
+    $('#login_form').validate({
+      rules: {
+        name: { 
+          required: true
+        },
+        password: {
+          required: true
+        },
       },
-      error: function(data, msg) {
-        $('#auth_modal').modal('close');
-        $("#username, #password").addClass("invalid");
-        $("#username, #password").prop("aria-invalid", "true");
-        $('#login_form_error_msg').show();
+      submitHandler: function(form) {
+        $('#auth_modal').modal({ dismissible: false, endingTop: '20%' });
+        $('#auth_modal').modal('open');
+
+        $.ajax({
+          type: 'POST',
+          url: '/login',
+          data: $('#login_form').serialize(),
+          dataType: 'json',
+          timeout: 120000,
+          success: function(data) {
+            window.location.href = '/search';
+          },
+          error: function(xhr, msg) {
+            $('#auth_modal').modal('close');
+            $("#username, #password").addClass("invalid");
+            $("#username, #password").prop("aria-invalid", "true");
+            $('#login_form_error_msg').show();
+          }
+        });
       }
     });
-  };
-
-  //
-  PP.showRegistrationForm = function() {
-    $('#login_content').hide();
-    $('#change_password_content').hide();
-    $('#change_password_btn').hide();
-    $('#register_btn').hide();
-    $('#submit_change_password_btn').hide();
-
-    $('#login_btn').hide();
-    $('#demo_login_btn').hide();
-
-    $('#register_content').show();
-    $('#enter_login_btn').show();
-    $('#submit_register_btn').show();
-  };
-
-  //
-  PP.showChangePasswordForm = function () {
-      $('#change_password_form')[0].reset();
-      $("#change_password_form_error_msg").hide();
-
-      $('#login_content').hide();
-      $('#change_password_btn').hide();
-      $('#register_btn').hide();
-      $('#change_password_successful').hide();
-
-      $('#login_btn').hide();
-      $('#demo_login_btn').hide();
-
-      $('#register_content').hide();
-      $('#submit_register_btn').hide();
-
-      $('#enter_login_btn').show();
-      $('#change_password_content').show();
-      $('#submit_change_password_btn').show();
-
   };
 
   //
   PP.showLoginForm = function() {
     $('#login_content').show();
-    $('#change_password_btn').show();
     $('#register_btn').show();
     $('#login_btn').show();
     $('#demo_login_btn').show();
 
     $('#register_content').hide();
-    $('#change_password_content').hide();
     $('#enter_login_btn').hide();
     $('#submit_register_btn').hide();
-    $('#submit_change_password_btn').hide();
   };
 
-  //
-  PP.openLoginModelOnClick = function(id) {
-    $(id).on('click', function() {
-      PP.showLoginForm();
+  // Automatically login when selecting the demo login button
+  PP.demoAutomaticLogin = function() {
+    $('#demo_login_btn, #parallax_demo_login_btn').on('click', function() {
+      $('#name').val('demo');
+      $('#password').val('demo123');
+      $('#login_form').submit();
     });
   };
 
-  //
-  PP.submitRegisterForm = function() {
-    $.ajax({
-      type: 'POST',
-      url: '/register',
-      data: $('#register_form').serialize(),
-      dataType: 'json',
-      timeout: 120000,
-      success: function(data) {
-        $('#registering_msg_success').text(data.message);
-        $('#registration_error').hide();
-        $('#registration_success').show();
+  PP.initRegistrationForm = function() {
+    PP.registrationValidation();
+    PP.showRegistrationFormOnClick();
+
+    $('#submit_register_btn').on('click', function() {
+      $('#register_form').submit();
+    });
+  };
+
+  PP.registrationValidation = function() {
+    $('#register_form').validate({
+      rules: {
+        name: { 
+          required: true
+        },
+        email: {
+          required: true
+        },
+        affliation: {
+          required: true
+        },
+        "group[]": {
+          required: true
+        }
       },
-      error: function(data, msg) {
-        $('#registering_msg_error').text(data.responseJSON.message);
-        $('#registration_success').hide();
-        $('#registration_error').show();
-        console.log(data);
-        console.log(msg);
-      }
-    });
-  };
-
-  PP.submitChangePassword = function () {
-      $('#auth_modal').modal({ dismissible: false, endingTop: '20%' });
-      $('#auth_modal').modal('open');
-      $('#change_password_form_error_msg').hide();
-      $('#change_password_successful').hide();
-      $('#password_mismatch_msg').hide();
-
-      $.ajax({
+      submitHandler: function(form) {
+        $.ajax({
           type: 'POST',
-          url: '/change_password',
-          data: $('#change_password_form').serialize(),
+          url: '/register',
+          data: $('#register_form').serialize(),
           dataType: 'json',
           timeout: 120000,
-          success: function (data) {
-              $('#auth_modal').modal('close');
-              $('#change_password_successful').show();
-              $("#change_password_successful").text(data.success);
+          success: function(data) {
+            $('#registering_msg_success').text(data.message);
+            $('#registration_error').hide();
+            $('#registration_success').show();
           },
-          error: function (data, msg) {
-              $('#auth_modal').modal('close');
-              $("#username, #password, #new_password_1, #new_password_2").addClass("invalid");
-              $("#username, #password, #new_password_1, #new_password_2").prop("aria-invalid", "true");
-              $('#change_password_form_error_msg').show();
-              $("#change_password_form_error_msg").text(data.responseJSON.error);
+          error: function(xhr, msg) {
+            $('#registering_msg_error').text(xhr.responseJSON.message);
+            $('#registration_success').hide();
+            $('#registration_error').show();
           }
-      });
+        });
+      }
+    });
   };
 
-  PP.checkPasswordMatch = function () {
-      var password = $("#new_password_1").val();
-      var confirmPassword = $("#new_password_2").val();
+  //
+  PP.showRegistrationFormOnClick = function() {
+    $('#register_btn').on('click', function() {
+      $('#login_content').hide();
+      $('#register_btn').hide();
 
-      if (password != confirmPassword) {
-          $('#password_mismatch_msg').show();
-          $('#submit_change_password_btn').addClass("disabled");
+      $('#login_btn').hide();
+      $('#demo_login_btn').hide();
 
-      }
-      else {
-          $('#password_mismatch_msg').hide();
-          $('#submit_change_password_btn').removeClass("disabled");
-      }
-  }
+      $('#register_content').show();
+      $('#enter_login_btn').show();
+      $('#submit_register_btn').show();
+    });
+  };
+
+  // make the profile boxes on the about page the same height
+  PP.equalizeAboutBoxes = function() {
+    PP.equalizeDivHeight('.collection');
+    $(window).resize(function() {
+      $('.collection').css('height', 'auto');
+      PP.equalizeDivHeight('.collection');
+    });
+  };
+
+  PP.equalizeDivHeight = function(div) {
+    if ($(div).length === 0) return;
+    var maxHeight = 0;
+    $(div).each(function() {
+      if ($(this).height() > maxHeight) { maxHeight = $(this).height(); }
+    });
+    $(div).css('height', maxHeight);
+  };
 }());
 // End of PP module
