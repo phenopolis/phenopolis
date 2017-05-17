@@ -94,7 +94,7 @@ nav .dropdown-content {
   background-color: #FFF;
   margin: 0 0 0 -1px;
   display: none;
-  min-width: 170px;
+  min-width: 250px;
   max-height: auto;
   overflow: hidden;
   opacity: 0;
@@ -708,3 +708,31 @@ table .text-small {
   pointer-events:none;
 }
 
+/* Make the Input ICON blue  */
+.input-field .prefix.active {
+  color: #0277bd;
+}
+input:not([type]):focus:not([readonly])+label, input[type=text]:focus:not([readonly])+label, input[type=password]:focus:not([readonly])+label, input[type=email]:focus:not([readonly])+label, input[type=url]:focus:not([readonly])+label, input[type=time]:focus:not([readonly])+label, input[type=date]:focus:not([readonly])+label, input[type=datetime]:focus:not([readonly])+label, input[type=datetime-local]:focus:not([readonly])+label, input[type=tel]:focus:not([readonly])+label, input[type=number]:focus:not([readonly])+label, input[type=search]:focus:not([readonly])+label, textarea.materialize-textarea:focus:not([readonly])+label{
+    color: #0277bd;
+}
+
+label:after {
+  -moz-transition-property: all !important;
+  -o-transition-property: all !important;
+  -webkit-transition-property: all !important;
+  transition-property: all !important;
+  font-size: 0.8rem;
+  -moz-transform: none;
+  -ms-transform: none;
+  -o-transform: none;
+  -webkit-transform: none;
+  transform: none;
+}
+
+label:not(.active):after {
+  -moz-transform: translateY(-140%);
+  -ms-transform: translateY(-140%);
+  -o-transform: translateY(-140%);
+  -webkit-transform: translateY(-140%);
+  transform: translateY(-140%);
+}
