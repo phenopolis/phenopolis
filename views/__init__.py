@@ -196,11 +196,8 @@ def change_password():
     username = request.form['name']
     password = request.form['current_password']
     new_password_1 = request.form['new_password_1']
-    new_password_2 = request.form['new_password_2']
     if username == 'demo': 
         return jsonify(error='You do not have permission to change the password for username \'demo\'.'), 401
-    elif new_password_1 != new_password_2: 
-        return jsonify(error='New password and re-typed password do not match. Please try again.'), 401
     elif not check_auth(username,password):
         print 'Change password:- Login Failed'
         return jsonify(error='Username and current password incorrect. Please try again.'), 401
