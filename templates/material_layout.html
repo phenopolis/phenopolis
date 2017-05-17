@@ -83,20 +83,30 @@
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/jquery-equalHeightGrid.js') }}"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.16.0/jquery.validate.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/phenopolis.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/home.js') }}"></script>
     <script type="text/javascript">
       (function($) {
           $(function() {
             PP.addUserDropDown();
+            PP.setUpValidatorDefaults();
+            PP.initLoginForm();
+            PP.initRegistrationForm();
             $('.parallax').parallax(); // Init parallax
-            $('.modal').modal({ complete: PP.showLoginForm() }); // Init Modals
             $(".button-collapse").sideNav(); // Init Mobile menu
-            PP.initLogin();
-            $('.collection').equalHeight(); // make the about boxes the same height...
           });
       })(jQuery);
     </script>
+    {% if request.endpoint == "about_page" %}
+      <script type="text/javascript">
+        (function($) {
+            $(function() {
+              PP.equalizeAboutBoxes();
+            });
+        })(jQuery);
+      </script>
+    {% endif %}
 </body>
 
 </html>

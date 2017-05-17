@@ -50,9 +50,10 @@
         {% block body %}{% endblock %}
     </div>
 
-    {% include "components/login_modal.html" %} {% include "components/navbar_dropdown.html" %}
+    {% include "components/change_password_modal.html" %} {% include "components/navbar_dropdown.html" %}
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.16.0/jquery.validate.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/typeahead.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/tablesorter.js') }}"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
@@ -62,6 +63,9 @@
         $(function() {
             PP.addUserDropDown();
             PP.setUpSearchField();
+            $('.modal').modal()
+            PP.setUpValidatorDefaults();
+            PP.initChangePasswordForm();
         });
     })(jQuery);
     </script>
