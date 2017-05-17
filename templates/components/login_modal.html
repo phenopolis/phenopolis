@@ -4,20 +4,19 @@
         <i class="material-icons right modal-close">close</i>
         <h4>Login</h4>
         <p>Please enter your credentials in order to login.</p>
-        <form id="login_form" class="col s12" action="/login" method="POST">
+        <form id="login_form" class="col s12">
             <div class="row">
                 <div class="input-field col s6">
                     <i class="material-icons prefix">account_circle</i>
-                    <input id="name" type="text" placeholder="demo" name="name" autocomplete="name" class="validate">
+                    <input id="name" type="text" placeholder="demo" name="name" autocomplete="name">
                     <label for="name">Username:</label>
                 </div>
                 <div class="input-field col s6">
                     <i class="material-icons prefix">lock</i>
-                    <input id="password" type="password" placeholder="demo123" name="password" class="validate">
+                    <input id="password" type="password" placeholder="demo123" name="password">
                     <label for="password">Password</label>
                 </div>
-                <p class="col s12" id="login_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">Authentication failed. Please enter your username and passsword again.
-                    <br>Contact us if you continue to have issues logging in.</p>
+                <p class="col s12" id="login_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">Authentication failed. Please enter your username and password again.<br>Contact us if you continue to have issues logging in.</p>
             </div>
         </form>
         <p>Alternatively, select the 'Demo Login' button below to login as a demo user.</p>
@@ -26,20 +25,20 @@
         <i class="material-icons right modal-close">close</i>
         <h4>Register</h4>
         <p>Please enter your details below and press submit. Once we have </p>
-        <form id="register_form" class="col s12" action="/register" method="POST">
+        <form id="register_form" class="col s12">
             <div class="input-field col s12">
                 <i class="material-icons prefix">account_circle</i>
-                <input id="name" type="text" name="name" class="validate">
+                <input id="name" type="text" name="name">
                 <label for="name">Full Name:</label>
             </div>
             <div class="input-field col s12">
                 <i class="material-icons prefix">email</i>
-                <input id="email" type="email" name="email" class="validate">
+                <input id="email" type="email" name="email">
                 <label for="email">Email Address:</label>
             </div>
             <div class="input-field col s12">
                 <i class="material-icons prefix">school</i>
-                <input id="affliation" type="text" name="affliation" class="validate">
+                <input id="affliation" type="text" name="affliation">
                 <label for="affliation">Affliation:</label>
             </div>
             <div class="row">
@@ -50,60 +49,22 @@
                     <label for="{{lab}}">{{lab|capitalize()}}</label>
                 </p>
                 {% endfor %}
+                <p class=" col s12 groups_validation red-text" style="font-size: .8rem; padding-left:1rem;"> </p>
             </div>
         </form>
         <p class="col s12" id="registration_error" style="display:none; color: #F44336;"><span id="registering_msg_error"></span> Please feel free to contact us if you are having any issues registering.</p>
         <p class="col s12" id="registration_success" style="display:none; color: #459e48;"><span id="registering_msg_success"></span> We are reviewing your application and will email you with login details once your application has been approved.</p>
     </div>
-    <div class="modal-content" id="change_password_content" style="display:none;">
-        <i class="material-icons right modal-close">close</i>
-        <h4>Change Password</h4>
-        <form id="change_password_form" class="col s12" action="/change_password" method="POST">
-            <div class="row">
-                <div class="input-field col s12">
-                    <i class="material-icons prefix">account_circle</i>
-                    <input id="changePwd_Name" type="text" value="{{username}}" name="name" autocomplete="name" class="validate">
-                    <label for="changePwd_Name">Username</label>
-                </div>
-                <div class="input-field col s12">
-                    <i class="material-icons prefix">lock</i>
-                    <input id="current_password" type="password" name="current_password" class="validate">
-                    <label for="current_password">Current password</label>
-                </div>
-                <div class="input-field col s12">
-                    <i class="material-icons prefix">lock</i>
-                    <input id="new_password_1" type="password" name="new_password_1" class="validate">
-                    <label for="new_password_1">New password</label>
-                </div>
-                <div class="input-field col s12">
-                    <i class="material-icons prefix">lock</i>
-                    <input id="new_password_2" type="password" name="new_password_2" class="validate">
-                    <label for="new_password_2">Retype new password</label>
-                </div>
-                <div class="registrationFormAlert" id="divCheckPasswordMatch">
-                </div>
-                <p class="col s12" id="password_mismatch_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">
-                    Passwords do not match.
-                </p>
-                <p class="col s12" id="change_password_form_error_msg" style="display:none; color: #F44336; margin-top: 0; margin-left: -1em;">
-                    Password change failed. Please try again.
-                    <br>Contact us if you continue to have issues.
-                </p>
-            </div>
-        </form>
-        <p id="change_password_successful" style="color:#4CAF50; display: none;">Your password has been changed.</p>
-    </div>
     <div class="modal-footer" style="border-top: 1px solid rgba(0, 0, 0, 0.1)">
-        <a id="change_password_btn" href="#!" class="left waves-effect waves-green btn-flat">Change Password</a>
         <a id="register_btn" href="#!" class="left waves-effect waves-green btn-flat">Register</a>
         <a id="enter_login_btn" href="#!" class="left waves-effect waves-green btn-flat" style="display:none;">Login</a>
-        <!-- Right side of footer -->
+        <!-- Right side of fotter -->
         <a id="submit_register_btn" href="#!" class="waves-effect waves-green btn-flat" style="display: none;">Submit</a>
-        <a id="submit_change_password_btn" href="#!" class="waves-effect waves-green btn-flat" style="display: none;">Change Password</a>
         <a id="login_btn" href="#!" class="waves-effect waves-green btn-flat">Login</a>
         <a id="demo_login_btn" href="#!" class="waves-effect waves-green btn-flat">Demo Login</a>
     </div>
 </div>
+
 <!-- Auth Modal -->
 <div id="auth_modal" class="modal">
     <div class="modal-content">
