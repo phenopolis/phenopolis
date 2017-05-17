@@ -213,12 +213,12 @@ if (!PP) {
 
       if (password != confirmPassword) {
           $('#password_mismatch_msg').show();
-          $('#change_password_btn').attr('disabled', 'disabled');
+          $('#submit_change_password_btn').addClass("disabled");
 
       }
       else {
           $('#password_mismatch_msg').hide();
-          $('#change_password_btn').removeAttr('disabled');
+          $('#submit_change_password_btn').removeClass("disabled");
       }
   }
 }());
