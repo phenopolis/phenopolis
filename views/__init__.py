@@ -194,7 +194,8 @@ def logout():
 # 
 @app.route('/change_password', methods=['POST'])
 def change_password():
-    username = request.form['name']
+    print 'CHANGING PASSWORD function'
+    username = request.form['change_pwd_name']
     password = request.form['current_password']
     new_password_1 = request.form['new_password_1']
     if username == 'demo': 
