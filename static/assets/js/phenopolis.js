@@ -153,7 +153,7 @@ if (!PP) {
         new_password_2: {
           equalTo: 'Both new passwords must match.'
         }
-      }
+      },
       submitHandler: function(form) {
         $('#auth_modal').modal({ dismissible: false, endingTop: '20%' });
         $('#auth_modal').modal('open');
@@ -171,7 +171,7 @@ if (!PP) {
                 $('#change_password_successful').show();
                 $("#change_password_successful").text(data.success);
             },
-            error: function (xhr, msg) {
+            error: function (data, msg) {
                 $('#auth_modal').modal('close');
                 $("#username, #password, #new_password_1, #new_password_2").addClass("invalid");
                 $("#username, #password, #new_password_1, #new_password_2").prop("aria-invalid", "true");
