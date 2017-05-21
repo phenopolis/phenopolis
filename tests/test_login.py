@@ -35,7 +35,7 @@ class LoginTestCase(unittest.TestCase):
 
     def change_password(self, username, password, new_pass_1):
         return self.app.post('/change_password', data=dict(
-            name=username,
+            change_pwd_name=username,
             current_password=password,
             new_password_1=new_pass_1,
         ), follow_redirects=True)
