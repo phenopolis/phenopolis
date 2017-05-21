@@ -1,7 +1,7 @@
 
 # Uncomment to run this module directly.
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+#import sys, os
+#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 # End of uncomment.
 
 import load_data
