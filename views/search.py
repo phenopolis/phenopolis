@@ -12,6 +12,15 @@ import csv
 import orm
 import subprocess
 
+@app.route('/search_hpo_json')
+@requires_auth
+def search_hpo_json():
+    if config.LOCAL:
+        hpo_json={}
+    else:
+        hpo_file='uclex_stats/overall_hpo_2016_Aug_2.json'
+        hpo_json = json.load(open(hpo_file,'r'))
+    return json.dumps(hpo_json),
 
 
 @app.route('/search', methods=['GET','POST'])
@@ -31,11 +40,6 @@ def search():
     female_patients=patients_db.patients.find( {'sex':'F'}).count()
     print('female_patients',female_patients,)
     unknown_patients=patients_db.patients.find( {'sex':'U'}).count()
-    if config.LOCAL:
-        hpo_json={}
-    else:
-        hpo_file='uclex_stats/overall_hpo_2016_Aug_2.json'
-        hpo_json = json.load(open(hpo_file,'r'))
     exac_variants=0
     print('exac_variants',exac_variants,)
     pass_variants=db.variants.find({'FILTER':'PASS'}).count()
@@ -82,29 +86,24 @@ def search():
     #image=urllib.quote(base64.b64encode(imgdata.buf))
     #image=imgdata.buf
     #image = '<svg' + image.split('<svg')[1]
-
     try:
         version_number = subprocess.check_output(['git', 'describe', '--exact-match'])
     except:
         version_number = None
     print('Version number is:-')
     print(version_number)
-
     t = render_template('search.html',
         title='home',
         total_patients=total_patients,
         male_patients=male_patients,
         female_patients=female_patients,
         unknown_patients=unknown_patients,
-        hpo_json=json.dumps(hpo_json),
         total_variants=total_variants,
         exac_variants=exac_variants,
         pass_variants=pass_variants,
         nonpass_variants=nonpass_variants,
         pass_exac_variants=pass_exac_variants,
         pass_nonexac_variants=pass_nonexac_variants,
-        #image=image.decode('utf8'))
-        image="",
         version_number=version_number)
     #cache.set(cache_key, t)
     return t
