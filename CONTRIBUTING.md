@@ -13,7 +13,7 @@ We use Travis CI to [build and test](https://travis-ci.org/phenopolis/phenopolis
 
 Please include tests with your pull request. We use Coveralls to monitor and analyse [test coverage](https://coveralls.io/github/phenopolis/phenopolis?branch=master). 
 
-We also run [Scrutinizer's static analysis] (https://scrutinizer-ci.com/g/phenopolis/phenopolis/)
+We also run [Scrutinizer's static analysis.] (https://scrutinizer-ci.com/g/phenopolis/phenopolis/)
 
 ##Code reviews
 We review each other's code before merging a pull request in to the master branch. Please select reviewer from the menu when setting up your pull request.
