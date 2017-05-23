@@ -83,6 +83,7 @@ from passlib.hash import argon2
 import orm
 from lookups import *
 from config import config
+import regex
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -193,14 +194,11 @@ def logout():
 # 
 @app.route('/change_password', methods=['POST'])
 def change_password():
-    username = request.form['name']
+    username = request.form['change_pwd_name']
     password = request.form['current_password']
     new_password_1 = request.form['new_password_1']
-    new_password_2 = request.form['new_password_2']
     if username == 'demo': 
         return jsonify(error='You do not have permission to change the password for username \'demo\'.'), 401
-    elif new_password_1 != new_password_2: 
-        return jsonify(error='New password and re-typed password do not match. Please try again.'), 401
     elif not check_auth(username,password):
         print 'Change password:- Login Failed'
         return jsonify(error='Username and current password incorrect. Please try again.'), 401
@@ -236,10 +234,6 @@ def get_db(dbname=None):
     elif dbname not in g.db_conn:
         g.db_conn[dbname] = connect_db(dbname)
     return g.db_conn[dbname]
-
-def get_R_session():
-    if not hasattr(g, 'R_session'): g.R_session=pyRserve.connect()
-    return g.R_session
 
 def get_hpo_graph():
     """
@@ -433,13 +427,41 @@ def get_rathergood_suggestions(query):
     query is the string that user types
     If it is the prefix for a gene, return list of gene names
     """
-    regex = re.compile('^' + re.escape(query), re.IGNORECASE)
-    patient_results = [x['external_id'] for x in get_db(app.config['DB_NAME_PATIENTS']).patients.find({'external_id':regex})]
-    gene_results = [x['gene_name'] for x in get_db().genes.find({'gene_name':regex})]
-    hpo_results = [x['name'][0] for x in get_db(app.config['DB_NAME_HPO']).hpo.find({'name':regex})]
+    regex = re.compile(re.escape(query), re.IGNORECASE)
+    patient_results = [x['external_id'] for x in get_db(app.config['DB_NAME_PATIENTS']).patients.find(
+      {'external_id':regex}, {'score': {'$meta': 'textScore'}}
+      ).sort([('score', {'$meta': 'textScore'})])
+    ]
+    gene_results = [x['gene_name'] for x in get_db().genes.find(
+      {'gene_name':regex}, {'score': {'$meta': 'textScore'}}
+      ).sort([('score', {'$meta': 'textScore'})])
+    ]
+    hpo_results = [x['name'][0] for x in get_db(app.config['DB_NAME_HPO']).hpo.find(
+      {'name':regex}, {'score': {'$meta': 'textScore'}}
+      ).sort([('score', {'$meta': 'textScore'})])
+    ]
     results = patient_results+gene_results+hpo_results
     results = itertools.islice(results, 0, 20)
     return list(results)
+
+@app.route('/phenotype_suggestions/<hpo>')
+def get_phenotype_suggestions(hpo):
+    # pattern = '.*?'.join(re.escape(hpo))   # Converts 'kid' to 'k.*?i.*?d'
+    regex = re.compile(re.escape(hpo), re.IGNORECASE)  # Compiles a regex.
+    suggestions = [x['name'][0] for x in get_db(app.config['DB_NAME_HPO']).hpo.find(
+            {['name'][0]:regex}, {"score": {"$meta": "textScore"}} 
+      ).sort([('score', {'$meta': 'textScore'})])]
+    return json.dumps(suggestions[0:20])
+
+@app.route('/gene_suggestions/<gene>')
+def get_gene_suggestions(gene):
+    # pattern = '.*?'.join(re.escape(gene))   # Converts 'kid' to 'k.*?i.*?d'
+    regex = re.compile(re.escape(gene), re.IGNORECASE)  # Compiles a regex.
+    suggestions = [x['gene_name'] for x in get_db().genes.find(
+        {'gene_name':regex}, {"score": {"$meta": "textScore"}} 
+      ).sort([('score', {'$meta': 'textScore'})]
+    )]
+    return json.dumps(suggestions[0:20])
 
 def get_rathergood_result(db, query):
     """
@@ -531,7 +553,7 @@ def get_rathergood_result(db, query):
 @app.route('/autocomplete/<query>')
 def rathergood_autocomplete(query):
     suggestions = get_rathergood_suggestions(query)
-    return Response(json.dumps([{'value': s} for s in suggestions]),  mimetype='application/json')
+    return Response(json.dumps(suggestions),  mimetype='application/json')
 
 
 @app.route('/awesome')

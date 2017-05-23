@@ -1,0 +1,20 @@
+<div id="variants_tab">
+    <h4 style="font-weight:300;">Variants Analysis</h4>
+    <p>This is a very interesting analsis that shows the... Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <table id="gene-variants-table" class="table-sorter striped highlight centered">
+        <thead>
+            <tr>
+                {% for h in table_headers %}
+                <th>{{ h }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody id="gene_variants_table_body">
+            {% set variant_type="gene" %}
+            {% set genes_pubmed=[] %}
+            {% for v in gene.variants %}
+              {% include "gene-page-tabs/gene_variant_row.tmpl" %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

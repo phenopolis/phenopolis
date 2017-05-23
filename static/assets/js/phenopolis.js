@@ -30,8 +30,8 @@ if (!PP) {
 
   // Sets up Autocomplete & Allows submission upon pressing enter
   PP.setUpSearchField = function() {
-    var inputAutoComplete = PP.initialiseBloodHound();
-    PP.initialiseTypeahead(inputAutoComplete);
+    var inputAutoComplete = PP.initialiseBloodHound('/autocomplete');
+    PP.initialiseTypeahead('.searching .typeahead', inputAutoComplete);
     PP.fixHomeSearchBug();
     PP.addNavbarSearchAnimation();
     PP.bindTypeaheadSelect();
@@ -39,28 +39,31 @@ if (!PP) {
   };
 
   // Used in autocomplete - connects to the server and provides autocomplete options
-  PP.initialiseBloodHound = function() {
+  PP.initialiseBloodHound = function(autocompleteUrl) {
     return new Bloodhound({
       datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
       queryTokenizer: Bloodhound.tokenizers.whitespace,
       remote: {
-        url: '/autocomplete/%QUERY',
+        url: autocompleteUrl + '/%QUERY',
         wildcard: '%QUERY'
       }
     });
   };
 
   //
-  PP.initialiseTypeahead = function(inputAutoComplete) {
-    $('.typeahead').typeahead({
+  PP.initialiseTypeahead = function(input, inputAutoComplete) {
+    $(input).typeahead({
       autoselect: true,
-      classNames: { menu: "autocomplete-content dropdown-content" }
+      classNames: { menu: "autocomplete-content dropdown-content" },
     }, {
       name: 'my-dataset',
-      displayKey: 'value',
       source: inputAutoComplete,
+      limit: 19
     });
+
   };
+
+
 
   // Typeahead moves the input into a div. This causes issues with other JS/CSS
   // because the label and icon are no longer sister to the input
@@ -87,7 +90,7 @@ if (!PP) {
   // redirect page upon selecting an option
   PP.bindTypeaheadSelect = function() {
     $('.typeahead').bind('typeahead:select', function(obj, datum) {
-      window.location.href = '/awesome?query=' + datum.value;
+      window.location.href = '/awesome?query=' + datum;
     });
   };
 
@@ -96,6 +99,86 @@ if (!PP) {
     $('.typeahead').keypress(function(e) {
       if (e.which == 13) {
         window.location.href = '/awesome?query=' + $(this).val();
+      }
+    });
+  };
+
+   PP.setUpValidatorDefaults = function() {
+    $.validator.addMethod("secure_password", function(value, element) {
+      return /^[A-Za-z0-9\d=!\-@._*]*$/.test(value) && // consists of only these 
+        /[a-z]/.test(value) && // has a lowercase letter
+        /[A-Z]/.test(value) && // has an uppercase letter
+        /\d/.test(value); // has a digit
+    }, 'Password must contain an upper case letter, a lower case letter and a digit.');
+
+    $.validator.setDefaults({
+      errorClass: 'invalid',
+      validClass: "valid",
+      errorPlacement: function (error, element) {
+          $(element)
+            .closest("form")
+            .find("label[for='" + element.attr("id") + "']")
+            .attr('data-error', error.text());
+      },
+    });
+  };
+
+  PP.initChangePasswordForm = function() {
+    PP.changePasswordValidation();
+
+    $('#submit_change_password_btn').on('click', function() {
+      $('#change_password_form').submit();
+    });
+  };
+
+  PP.changePasswordValidation = function() {
+    $('#change_password_form').validate({
+      rules: {
+        current_password: { 
+          required: true,
+        },
+        new_password_1: {
+          required: true,
+          secure_password: true,
+          minlength: 6
+        },
+        new_password_2: {
+          required: true,
+          secure_password: true,
+          minlength: 6,
+          equalTo: '#new_password_1'
+        },
+      },
+      messages: {
+        new_password_2: {
+          equalTo: 'Both new passwords must match.'
+        }
+      },
+      submitHandler: function(form) {
+        $('#auth_modal').modal({ dismissible: false, endingTop: '20%' });
+        $('#auth_modal').modal('open');
+        $('#change_password_form_error_msg').hide();
+        $('#change_password_successful').hide();
+
+        $.ajax({
+            type: 'POST',
+            url: '/change_password',
+            data: $('#change_password_form').serialize(),
+            dataType: 'json',
+            timeout: 120000,
+            success: function (data) {
+                $('#auth_modal').modal('close');
+                $('#change_password_successful').show();
+                $("#change_password_successful").text(data.success);
+            },
+            error: function (data, msg) {
+                $('#auth_modal').modal('close');
+                $("#username, #password, #new_password_1, #new_password_2").addClass("invalid");
+                $("#username, #password, #new_password_1, #new_password_2").prop("aria-invalid", "true");
+                $('#change_password_form_error_msg').show();
+                $("#change_password_form_error_msg").text(data.responseJSON.error);
+            }
+        });
       }
     });
   };
@@ -128,6 +211,7 @@ if (!PP) {
         // select needs a "browser-default" class or it gets hidden
         filter_placeholder: { search: 'Filter' },
         filter_columnFilters: true,
+        filter_matchType : { 'input': 'match', 'select': 'match' }
       }
     });
     $(table).tablesorterPager({

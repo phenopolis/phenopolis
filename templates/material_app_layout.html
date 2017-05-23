@@ -16,7 +16,7 @@
             {% else %}  
               <a href="/" class="brand-logo left"> Phenopolis</a>
             {% endif %}  
-            <div id="nav_search_bar_wrapper" class="valign-wrapper hide-on-med-and-down">
+            <div id="nav_search_bar_wrapper" class="valign-wrapper hide-on-med-and-down searching">
                 <form id="navbar_search_form" action="/awesome">
                     <div class="input-field">
                         <input id="search_navbar" class="typeahead" name='query' type="search" required placeholder="Search for a phenotype, patient, gene, variant or region">
@@ -50,17 +50,22 @@
         {% block body %}{% endblock %}
     </div>
 
-    {% include "components/login_modal.html" %} {% include "components/navbar_dropdown.html" %}
+    {% include "components/change_password_modal.html" %} {% include "components/navbar_dropdown.html" %}
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.16.0/jquery.validate.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/typeahead.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/tablesorter.js') }}"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/phenopolis.js') }}"></script>
     <script type="text/javascript">
     (function($) {
         $(function() {
             PP.addUserDropDown();
             PP.setUpSearchField();
+            $('.modal').modal()
+            PP.setUpValidatorDefaults();
+            PP.initChangePasswordForm();
         });
     })(jQuery);
     </script>
@@ -100,6 +105,21 @@
       (function($) {
           $(function() {
               PP.fetchPatients();
+          });
+      })(jQuery);
+      </script>
+    {% elif request.endpoint == "individual_page" %}
+      <script src="https://d3js.org/d3.v4.min.js"></script>
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/dependencies/venn.min.js') }}"></script>
+      <script type="text/javascript" src="{{ url_for('static', filename='assets/js/individual.js') }}"></script>
+      <script type="text/javascript">
+      (function($) {
+          $(function() {
+              PP.initOmimPlot('{{patient.external_id}}');
+              PP.initPatientFeatureTable('{{patient.external_id}}');
+              PP.initHomsTable('{{patient.external_id}}');
+              PP.initCompHetsTable('{{patient.external_id}}');
+              PP.initVariantsTable('{{patient.external_id}}');
           });
       })(jQuery);
       </script>

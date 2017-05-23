@@ -1,399 +1,43 @@
-{% extends "layout.html" %}
-{% block body %}
+{% extends "material_app_layout.html" %} {% block body %}
+<div class="container">
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <h3 class="truncate" style="font-weight: 300">Transcript: </span>{{transcript.transcript_id}}</h3>
+            <table class="info_table">
+                <tbody>
+                    <tr>
+                        <td>Number of variants</td>
+                        <td>{{ transcript.variants|length }}</td> 
+                    </tr>
+                    <tr>
+                        <td>Strand</td>
+                        <td>{{ transcript.strand }}</td> 
+                    </tr>
+                    <tr>
+                        <td>External Services</td>
+                        <td>
+                          <a href="http://grch37.ensembl.org/Homo_sapiens/Gene/Summary?g={{ transcript.gene_id }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> Ensembl Browser</a> &#149; 
+                          <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ transcript.chrom }}%3A{{ transcript.start - 1 }}-{{ transcript.stop - 1 }}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> UCSC Browser</a> &#149; 
+                          <a href="http://exac.broadinstitute.org/transcript/{{transcript.transcript_id}}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> ExAC Browser</a> &#149; 
+                          <a href="http://www.gtexportal.org/home/gene/{{transcript.gene_id}}" target="_blank"><i class="material-icons" style="font-size:1rem;">open_in_new</i> GTEx Browser</a> &#149; 
 
-<h1> Transcript </h1>
-<link rel="stylesheet"  type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
-<link rel="stylesheet"  type=text/css href="/static/css/theme.bootstrap.css">
-<style>
-    svg path {
-        -webkit-transition: fill 0.8s; /* Safari */
-        transition: fill 0.8s;
-    }
-    .popover {
-        text-align: center;
-    }
-    .node:hover {
-        cursor:pointer;
-    }
-    div.copy {
-        height: 200px;
-        width: 300px;
-    }
-    img {
-        max-width: 100%;
-        max-height: 100%;
-    }
-    div.hpo {
-        height: 700px;
-    }
-    h3.grey {
-        color: grey;
-    }
-    div.panel-like {
-        border: 1px grey solid;
-        border-radius: 20px;
-    }
-    span.pointer {
-        color: #3366BB;
-    }
-    span.pointer:hover {
-        cursor: pointer;
-    }
-    tr.highlight {
-       background-color: #ffa !important;
-    }
-    a.bad,span.bad {
-        color:orange;
-    }
-    a.warning,span.warning {
-        color: #6E6E6E;
-    }
-    span.candidate-tag,span.solved-tag {
-        color:white;
-        display:inline-block;
-        font-size:70%;
-        margin-left:5px;
-        margin-right:5px;
-        margin-bottom:3px;
-        vertical-align:top;
-        padding-right:2px;
-        padding-top:1px;
-        padding-left:2px;
-        border-radius:3px;
-    }
-    span.candidate-tag {
-        background-color:blue;
-    }
-    span.solved-tag {
-        background-color:green;
-    }
-    span.candidate-gene {
-        background-color:#999;
-        color:white;
-        display:inline-block;
-        padding-right:2px;
-        padding-top:1px;
-        padding-left:2px;
-        border-radius:3px;
-    }
-    span.vqsr {
-        background-color:orange;
-        display:inline-block;
-        font-size:70%;
-        margin-left:5px;
-        padding-right:2px;
-        padding-left:2px;
-        color:white;
-        border-radius:3px;
-    }
-    a.modal-patient {
-        color:#3c3c3d;
-    }
-    a.modal-patient.candidate {
-        color:steelblue;
-    }
-    a.modal-patient.solved {
-        color:green;
-    }
-</style>
-
-
-
-<div class="row">
-    <!-- <div class="col-md-4 col-xs-10 col-xs-offset-1 col-md-offset-0"> -->
-        <dl class="dl-horizontal">
-            <dt>Number of variants</dt>
-            <dd><span id="number_of_variants"> {{ transcript.variants|length }}</span></dd>
-            <dt>Strand</dt>
-            <dd>{{ transcript.strand }}</dd>
-            <dt>Ensembl Browser</dt>
-            <dd class="hidden-xs">
-                <a href="http://grch37.ensembl.org/Homo_sapiens/Gene/Summary?g={{ transcript.gene_id }}" target="_blank">
-                    {{transcript.gene_id}}
-                    <i class="fa fa-external-link"></i>
-                </a>
-            </dd>
-            <dt class="hidden-xs">UCSC Browser</dt>
-            <dd class="hidden-xs">
-                <a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ transcript.chrom }}%3A{{ transcript.start - 1 }}-{{ transcript.stop - 1 }}" target="_blank">
-                    {{ transcript.chrom }}:{{ transcript.start - 1 }}-{{ transcript.stop - 1 }}
-                    <i class="fa fa-external-link"></i>
-                </a>
-            </dd>
-            <dt class="hidden-xs">ExAC Browser</dt>
-            <dd class="hidden-xs">
-            <a href="http://exac.broadinstitute.org/transcript/{{transcript.transcript_id}}" target="_blank">
-                    {{transcript.transcript_id}}
-                    <i class="fa fa-external-link"></i>
-                </a>
-            </dd>
-            <dt class="hidden-xs">GTEx Browser</dt>
-            <dd class="hidden-xs">
-            <a href="http://www.gtexportal.org/home/gene/{{transcript.gene_id}}" target="_blank">
-                    {{transcript.transcript_id}}
-                    <i class="fa fa-external-link"></i>
-                </a>
-            </dd>
-        </dl>
-        <!-- </div> -->
-</div>
-
-
-<ul class="nav nav-tabs" id='data-nav' role="tablist">
-    <li class="active"> <a href="#transcript_variants" class="tab-li" role="tab" data-toggle="tab" id="transcript_variants">Transcript Variants</a> </li>
-</ul>
-
-
-<div class="tab-content">
-
-<div id="transcript_variants" class="tab-pane active">
-<div class='row'>
-    <div class='col-md-12'>
-    <table id="gene-variants-table" class="table-sorter">
-       <thead>
-          <tr>
-           {% for h in table_headers %}
-                <th>{{ h }}</th>
-           {% endfor %}
-          </tr>
-        </thead>
-        <tbody id="gene_variants_table_body">
-         {% for v in transcript.variants %}
-        <!-- filter row -->
-        {% if v.FILTER == 3 %}
-        <tr class='table-gene error' 
-        {% elif v.FILTER == "FAIL" %}
-        <tr class='table-gene fail' 
-        {% elif v.FILTER.startswith('VQSRTrancheSNP') %}
-        <tr class='table-gene warn' 
-        {% elif v.FILTER=='PASS' %}
-         <tr style="table-gene word-wrap; break-word"
-        {% else %}
-         <tr style="table-gene word-wrap; break-word"
-        {% endif %}
-         id='{{variant_type}}-{{ v.HUGO|upper }}'>
-            <!-- cdna_pos cell -->
-            <td class="cdna-pos-cell">
-                {{v.distance}}
-                {{v.cdna_pos}}
-            </td>
-            <!-- variant_id cell -->
-            <td class="variant-id-cell">
-                <span style='word-break: break-all;' data-placement='right' class='pop pointer variant_id'>{{ v.variant_id }}</span><br/>
-                {% if v.ID.startswith('rs') %}
-                    <a href='http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs={{v.ID}}'><small>{{ v.ID }}</small></a> <br/>
-                {% endif %}
-                <a href='/sequence?variant_id={{ v.variant_id }}&symbol={{ v.HUGO }}&build=grch37'><small>Primer design</small></a>
-            </td>
-            <!-- UCLex allele_freq -->
-            <td class='allele-freq-cell'>
-            <span class='tip' title='{{ v.allele_count|round|int~'/'~v.allele_num|round|int }}<br /><b>Missing cases: </b>{{ v.MISS_COUNT|round|int }}'>{{'%0.4f' % v.allele_freq|float }}</span>
-            </td>
-            <!-- ExAC allele_freq -->
-            <td class='ExAC-freq-cell'>
-                {% if v.EXAC %}
-                    <span class='tip' title="{% for k in v.EXAC|sort %}
-                            {% if k[0]=='H' and  v.EXAC[k]|float>0 %}
-                               <b>{{k}}: </b> {{'%0.0f' % v.EXAC[k]|float }}<br />
-                           {% endif %}
-                        {% endfor %}
-                        ">{{'%0.6f' % v.EXAC['AF'] }}</span>
-                {% else %}
-                    <b>Not in ExAC</b>
-                {% endif %}
-            </td> 
-            <!-- kaviar -->
-            <td class='kaviar-freq-cell'>
-            {% if v.kaviar %}
-                <span class='tip'>{{'%0.6f' % v.kaviar|float }}</span>
-            {% else %}
-                <b>Not in Kaviar</b>
-            {% endif %}
-            </td>
-            <!-- consequence -->
-            <td class=most-severe-consequence-cell>
-                <span class='tip' title="{{v.most_severe_consequence}}">{{v.most_severe_consequence}}</span>
-            </td>
-            <!-- protein change cell -->
-            <td class="mutation-cell">
-            {% for pm in v.protein_mutations %}
-               <span class='tip' title="{{ v.protein_mutations[pm] }}<br>{{v.canonical_hgvs[pm]}}">{{ v.protein_mutations[pm] }}</span>
-            {% endfor %}
-            </td>
-            <!-- cadd score cell -->
-            <td class="canonical-cadd-cell">
-            {{ v.canonical_cadd[0] }}
-            </td>
-            <!-- first 10 het individuals -->
-            <td class="het-individuals-cell">
-            {% for s in v.het_samples[:10]|sort %}
-            <!-- <span class='tip' title='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'> -->
-            {% if individuals[s]|length > 1 %}
-                {% if session['user'] == 'demo' %}
-                    hidden
-                {% else %}
-                    <b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
-                {% endif %}
-            {% else %}
-                {% if session['user'] == 'demo' %}
-                    hidden
-                {% else %}
-                    <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
-                {% endif %}
-            {% endif %}
-            {% endfor %}
-            </td>
-            <!-- first 10 hom individuals -->
-            <td class="hom-individuals-cell">
-            {% for s in v.hom_samples[:10]|sort %}
-            <!-- <span class='tip' title='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'> -->
-            {% if individuals[s]|length > 1 %}
-                {% if session['user'] == 'demo' %}
-                    hidden
-                {% else %}
-                    <b> <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/> </b>
-                {% endif %}
-            {% else %}
-                {% if session['user'] == 'demo' %}
-                    hidden
-                {% else %}
-                    <span  data-placement='left' class='pop pointer individual_id' variantids='{{individuals[s]|map(attribute='variant_id')|join("<br>")}}'>{{s}}</span><br/>
-                {% endif %}
-            {% endif %}
-            {% endfor %}
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                       </td> 
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-tabs" style="padding-top: 2rem;">
+            <ul class="tabs tabs-fixed-width ">
+                <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#transcript_variants">Transcript Variants</a></li>
+                <div class="indicator light-blue darken-2" style="z-index:1"></div>
+            </ul>
+        </div>
+        <div class="card-content grey lighten-5">
+            <div id="transcript_variants">
+                <h4 style="font-weight:300;">Transcript Variants</h4>
+                <p>Variants on transcript.</p>
+            </div>
+        </div>
     </div>
 </div>
-</div>
-
-</div>
-
-<script type="text/javascript" src="/static/js/jquery.tablesorter.js"></script>
-<script type="text/javascript" src="/static/js/jquery.tablesorter.widgets.js"></script>
-<script type="text/javascript" src="/static/js/individual_pubmed.js"></script>
-<script type="text/javascript" src="/static/js/venn.js"></script>
-<script type="text/javascript" src="/static/js/main.js"></script>
-
-
-<script type="text/javascript">
-// call the tablesorter plugin
-$('.table-sorter').tablesorter({
-    theme : 'bootstrap',
-    headerTemplate : '{content}{icon}',
-    // hidden filter input/selects will resize the columns, so try to minimize the change
-    widthFixed : true,
-    // initialize zebra striping and filter widgets
-    widgets : ["zebra", "filter", "stickyHeaders", "uitheme"],
-    widgetOptions : {
-        zebra : ["even", "odd"],
-        // Use the $.tablesorter.storage utility to save the most recent filters
-        //filter_saveFilters : true,
-        // jQuery selector string of an element used to reset the filters
-        filter_reset : 'button.reset',
-        filter_columnFilters : true,
-        textSorter: {
-             3: $.tablesorter.sortNatural,
-        }
-        // add custom selector elements to the filter row
-        /*filter_formatter : {
-            // (jQuery selector added v2.17.0)
-            // Allele Count
-            'th:contains("Allele Count")' : function($cell, indx){
-            return $.tablesorter.filterFormatter.uiSlider( $cell, indx, {
-                delayed : true,
-                valueToHeader : false,
-                exactMatch : false,
-                allText : 'all', // this is ignored when compare is not empty
-                compare : [ '=', '>=', '<=' ],
-                selected : 1,
-                // jQuery UI slider options
-                value : 1,
-                  min : 1,
-                  max : 5000
-                });
-            }
-        }*/
-    }
-});
-
-// Change hash for page-reload
-//$('.nav-tabs a').on('shown.bs.tab', function (e) {
-    //window.location.hash = e.target.hash;
-//})
-//->
-// export results to excel
-$('.export').on('click', function(){
-    exportTableToCSV.apply(this, [$(this).parent().parent(), 'export.csv']);
-});
-
-// display pubmed result
-var session_user= "{{session['user']}}" ;
-// get variant_id in real time
-$('.variant_id').hover(function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    $.get('/variant_json/' + id,
-        function(data){
-            var content = '<p><b>Hom count: ' + data.result.HOM_COUNT + '</b></p>';
-            $.each(data.result.hom_samples.sort(), function(i,v){
-                 if (session_user=='demo') { var v='hidden'; }
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Het count: ' + data.result.HET_COUNT + '</b></p>';
-            $.each(data.result.het_samples.sort(), function(i,v){
-                 if (session_user=='demo') { var v='hidden'; }
-                content += '<a href="/individual/' + v + '">' + v + '</a><br />'
-            });
-            content += '<hr /><p><b>Miss count: ' + data.result.MISS_COUNT + '</b></p>';
-            span.attr('data-original-title', '<a href="/variant/' + id + '">Link to variant</a>');
-            span.attr('data-content', content);
-    });
-});
-
-
-// get individual_id in real time
-$('.individual_id').on('click',function(){
-    // get variant_id
-    var span = $(this);
-    var id = span.text();
-    $.get('/individual_json/' + id,
-        function(data){
-            if ($('h3.popover-title').text() == 'loading...'){
-                $('div.popover.in').remove();
-                span.trigger('click');
-                span.trigger('click');
-            }
-            if (!data.result) {
-                span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-                span.attr('data-content', 'no data available');
-            }
-            var content = '<p><b>Status:</b> ' + data.result.solved.status + '</p>';
-            content += '<p><b>Features:</b><br/>'
-            content += '<p><b>Genes:</b> ' + data.result.genes[0].gene + '</p>';
-            $.each(data.result.features.sort(), function(i,v){
-                content += '<a href="/hpo/'+v.label+'">'+v.label+'</a><br/>';
-            });
-            content += '</p>';
-            span.attr('data-original-title', '<a href="/individual/' + id + '">'+id+'</a>');
-            span.attr('data-content', content);
-    });
-});
-
-
-
-$(document).ready(function(){
-            $('[data-toggle="popover"]').popover(); 
-            });
-
-</script>
-
-
-
-
-
 {% endblock %}

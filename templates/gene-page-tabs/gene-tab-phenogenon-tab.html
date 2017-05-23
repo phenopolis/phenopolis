@@ -1,0 +1,112 @@
+<div id="phenogenon_tab">
+    <h4 style="font-weight:300;">Phenogenon Analysis</h4>
+    <p>Phenogenon uses Fisher exact test to show enrichment of rare damaging variants in samples with a given HPO term.</p>
+    <p>Select the below tabs to see the recessive and dominant...</p>
+
+    <div class="card-tabs" style="padding-top: 2rem; margin-right: -24px; margin-left: -24px">
+        <ul class="tabs tabs-fixed-width">
+            <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#phenogenon_recessive_tab">Recessive</a></li>
+            <li class="tab"><a class="blue-text text-darken-4" style="font-size: 1rem;" href="#phenogenon_dominant_tab">Dominant</a></li>
+            <div class="indicator light-blue darken-2" style="z-index:1"></div>
+        </ul>
+    </div>
+
+    <div id="phenogenon_recessive_tab">
+        <h4 style="font-weight:100;">Recessive <small id='hom_small'></small></h4>
+        <p>Number of affected patients: <span id='hom-pNum'>X</span><br>
+           Number of matching variants: <span id='hom-vNum'>X</span></p>
+        <br>
+        <div class="row">
+            <div class="col m6">
+                <div id="hom-exac_slider_label">ExAC_AF cutoff: <span id="hom-exac_slider_val">0.01</span></div>
+                <p class="range-field">
+                    <input type="range" id="hom-exac_slider" min="0" max="0.01" step="0.0001" value="0.01" />
+                </p>
+            </div>
+            <div class="col m6">
+                <div id="hom-cadd_slider_label">CADD Phred cutoff: <span id="hom-cadd_slider_val">15</span></div>
+                <p class="range-field">
+                    <input type="range" id="hom-cadd_slider" min="0" max="50" step="1" value="15"/>
+                </p>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col m9">
+                <table id="gene-hpo-hom-table" class="table-sorter striped highlight centered">
+                    <thead>
+                        <tr>
+                            <th>HPO</th>
+                            <th title="correlation score">Phi</th>
+                            <th title="fisher test">p value</th>
+                            <th title="number of patients having the HPO term">Pat_h</th>
+                            <th title="number of patients having both the HPO term and the genotype">Pat_gh</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hom-table_body"></tbody>
+                </table>
+            </div>
+            <div class="col m3">
+                <button class='btn' id='copy-hom-comp'>Convert to png</button>
+                <br>
+                <br>
+                <div class='hpo' id='dot-hom'> </div>
+                <div class="clearfix"></div>
+                <div class='copy' id='copy-hom-div'></div>
+            </div>
+        </div>
+    </div>
+    <div id="phenogenon_dominant_tab">
+        <h4 style="font-weight:100;">Dominant <small id='het_small'></small></h4>
+        <p>Number of affected patients: <span id='dot-het-pNum'>X</span><br>
+           Number of matching variants: <span id='dot-het-vNum'>X</span></p>
+        <br>
+        <div class="row">
+            <div class="col m6">
+                <div id="het-exac_slider_label">ExAC_AF cutoff: <span id="het-exac_slider_val">0.0001</span></div>
+                <p class="range-field">
+                    <input type="range" id="het-exac_slider" min="0" max="0.01" step="0.0001" value="0.0001" />
+                </p>
+            </div>
+            <div class="col m6">
+                <div id="het-cadd_slider_label">CADD Phred cutoff: <span id="het-cadd_slider_val">15</span></div>
+                <p class="range-field">
+                    <input type="range" id="het-cadd_slider" min="0" max="50" step="1" value="15" />
+                </p>
+            </div>
+        </div>
+        <div class="switch">
+          <label>
+            Include hom-comp
+            <input id="table-remove-hom" type="checkbox">
+            <span class="lever"></span>
+            Remove hom-comp
+          </label>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col m9">
+                <table id="gene-hpo-het-table" class="table-sorter striped highlight centered">
+                    <thead>
+                        <tr>
+                            <th>HPO</th>
+                            <th title="correlation score">Phi</th>
+                            <th title="fisher test">p value</th>
+                            <th title="number of patients having the HPO term">Pat_h</th>
+                            <th title="number of patients having both the HPO term and the genotype">Pat_gh</th>
+                        </tr>
+                    </thead>
+                    <tbody id="het-table_body"></tbody>
+                </table>
+            </div>
+            <div class="col m3">
+                <button class='btn' id='copy-het-comp'>Convert to png</button>
+                <br>
+                <br>
+                <div class='hpo' id='dot-het'> </div>
+                <div class="clearfix"></div>
+                <div class='copy' id='copy-het-div'></div>
+            </div>
+        </div>
+    </div>
+</div>
