@@ -26,11 +26,23 @@ class Patient(object):
         print('writing', self.external_id, 'to database')
         return Patient.db.patients.update({'external_id':self.external_id},self.__dict__,upsert=True)
     @property
+    def gender(self):
+        return self.__dict__['sex']
+    @property
+    def consanguinity(self):
+        if 'family_history' in self.__dict__:
+            return self.__dict__['family_history'].get('consanguinity',None)
+        else:
+            return None
+    @property
     def observed_features(self):
-        if 'observed_features' in self.__dict__: return self.__dict__['observed_features']
+        # if 'observed_features' in self.__dict__: return self.__dict__['observed_features']
         self.__dict__.update({'observed_features':[feature for feature in self.__dict__['features'] if feature['observed']=='yes']})
         self.save()
         return self.__dict__['observed_features']
+    def update_features(self, observed_features):
+        #for of in observed_features:
+        return ''
     @property
     def hpo_ids(self):
         if 'hpo_ids' in self.__dict__: return self.__dict__['hpo_ids']
