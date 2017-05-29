@@ -73,17 +73,16 @@ from plotly.graph_objs import Scatter, Layout
 import numpy
 import subprocess
 import datetime
-
 from Crypto.Cipher import DES
 import base64
 from binascii import b2a_base64, a2b_base64
 from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.hash import argon2
-
 import orm
 from lookups import *
 from config import config
 import regex
+import requests
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -131,10 +130,12 @@ def check_auth(username, password):
     """
     This function is called to check if a username / password combination is valid.
     """
-    db_users=get_db(app.config['DB_NAME_USERS'])
-    r=db_users.users.find_one({'user':username})
-    #print r
-    if not r: return False
+    q={'statements':[{'statement': "MATCH (u:User {user:'%s'}) RETURN u" % username}]}
+    print(q)
+    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=q)
+    if not resp: return False
+    r=resp.json()['results'][0]['data'][0]['row'][0]
+    print(r)
     session['user']=username
     return argon2.verify(password, r['argon_password'])
 
@@ -204,12 +205,18 @@ def change_password():
         return jsonify(error='Username and current password incorrect. Please try again.'), 401
     else:
         print 'LOGIN SUCCESS, CHANGING PASSWORD'
-        hash = argon2.hash(new_password_1)
+        argon_password = argon2.hash(new_password_1)
         db_users = get_db(app.config['DB_NAME_USERS'])
-        db_users.users.update_one({'user':username},{'$set':{'password':hash}})
-        db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
+        #db_users.users.update_one({'user':username},{'$set':{'password':hash}})
+        q={'query':'MATCH (u:User {user: $user}) SET u.password=$password','parameters':{'user':username,'password':password}}
+        resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
+        print(resp.json())
+        #db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
+        q={'query':'MATCH (u:User {user: $user}) SET u.argon_password=$password','parameters':{'user':username,'password':argon_password}}
+        resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
         return jsonify(success=msg), 200
+
 
 @app.route('/set/<query>')
 def set(query):
