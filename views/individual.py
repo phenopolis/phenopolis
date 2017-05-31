@@ -339,42 +339,28 @@ def homozgous_variants(individual):
 def homozgous_variants2(individual):
     allele_freq=float(request.args.get('allele_freq',0.001))
     kaviar_AF=float(request.args.get('kaviar_AF',0.001))
-    statements={'statements':[{"statement":
-    """
+    s ="""
     MATCH (gv:GeneticVariant)-[:HomVariantToPerson]->(p:Person)
     WHERE p.personId="%s" and gv.kaviar_AF < %f and gv.allele_freq < %f
-    RETURN gv.variantId ;
-    """%(individual,kaviar_AF,allele_freq,)}]}
-    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
-    data=[r['row'] for r in resp.json()['results'][0]['data']]
-    variants=[v[0] for v in data]
-    print(len(variants))
-    #variants=[r['row'][0] for r in resp.json()['results'][0]['data']]
-    #variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}).get('canonical_gene_name_upper','') for v in variants]
-    variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}) for v in variants]
-    #print(variants)
-    variants=[v for v in variants if v]
-    for v in variants: v['HPO']=[]
-    variants=[v for v in variants if 'transcript_consequences' in v]
-    return jsonify(count=len(variants),result=variants)
-
+    RETURN gv ;
+    """%(individual,kaviar_AF,allele_freq)
+    data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json={'query':s})
+    print (data.json())
+    return jsonify(data.json())
     
 @app.route('/compound_het_variants_json2/<individual>',methods=['GET','POST'])
 @requires_auth
 def compound_het_variants2(individual):
     kaviar_AF=float(request.args.get('kaviar_AF',0.01))
     allele_freq=float(request.args.get('allele_freq',0.01))
-    statements={'statements':[{"statement":
-    """
+    s="""
     MATCH (g:Gene)-[]->(gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
     WHERE p.personId="%s" AND gv.kaviar_AF<%f and gv.allele_freq < %f
     WITH gv, p, g, collect (gv) AS cgv
     WHERE length(cgv) > 1 
     RETURN gv.variantId ; 
-    """%(individual,kaviar_AF,allele_freq,) }]}
-    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
-    print(resp.json())
-    data=[r['row'] for r in resp.json()['results'][0]['data']]
+    """%(individual,kaviar_AF,allele_freq)
+    data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json={'query':s})
     variants=[v[0] for v in data]
     variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}) for v in variants]
     variants=[v for v in variants if v]
@@ -393,15 +379,12 @@ def compound_het_variants(individual):
 def rare_variants2(individual):
     #patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
     #return jsonify(result=patient.rare_variants)
-    statements={'statements':[{"statement":
-    """
+    s="""
     MATCH (gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
     WHERE p.personId="%s" and gv.kaviar_AF < 0.0001 and gv.allele_freq < 0.001
     RETURN gv.variantId ;
-    """%individual }]}
-    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=statements)
-    #print(resp.json())
-    data=[r['row'] for r in resp.json()['results'][0]['data']]
+    """%individual
+    data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json={'query':s})
     variants=[v[0] for v in data]
     print(len(variants))
     #variants=[r['row'][0] for r in resp.json()['results'][0]['data']]
