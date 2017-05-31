@@ -26,19 +26,20 @@ if (!PP) {
       type: 'GET',
       url: '/my_patients_json',
       dataType: 'json',
-      timeout: 120000,
       success: function(data) {
-        var patients = data.result;
+        var patients = data.result.data;
+        var columns  = data.result.columns;
+        var idx      = PP.generateIndexes(columns);
         for (var i = 0; i < patients.length; i++) {
           $('<tr>').append(
-            $('<td>').html(PP.create_url('/individual', patients[i].external_id)),
-            $('<td>').text(patients[i].sex),
-            $('<td>').html(PP.generateFeaturesHtml(patients[i].features)),
-            $('<td>').text(patients[i].specificity.score.toFixed(2)),
-            $('<td>').text(patients[i].rare_homozygous_variants_count),
-            $('<td>').text(patients[i].rare_compound_hets_count),
-            $('<td>').text(patients[i].rare_variants_count),
-            $('<td>').html(PP.generateGeneHtml(patients[i].genes))
+            $('<td>').html(PP.create_url('/individual', patients[i][ idx.individual ] )), // individual
+            $('<td>').text( patients[i][ idx.gender ] ), // gender
+            $('<td>').html(PP.generatePhenotypesHtml( patients[i][ idx.phenotypes ] )), // phenotypes
+            $('<td>').text( +patients[i][ idx.phenotypeScore ].toFixed(2) ), // phenotypeScore
+            $('<td>').text( +patients[i][ idx.rare_hom_count ].toFixed(2) ), // rare_hom_count
+            $('<td>').text( +patients[i][ idx.rare_het_count ].toFixed(2) ), // rare_het_count
+            $('<td>').text(' '), // rare_count
+            $('<td>').text(' ') // candidate_genes - PP.generateGeneHtml(patients[i].genes)
           ).appendTo('#my_patients_table_body');
         }
         PP.showNumberOfPatients(patients.length);
@@ -51,20 +52,33 @@ if (!PP) {
     });
   };
 
-  PP.generateFeaturesHtml = function(features) {
-    var features_html = '';
+  PP.generateIndexes = function(columns) {
+    var idx             = {};
+    idx.individual      = columns.indexOf('individual');
+    idx.gender          = columns.indexOf('gender');
+    idx.phenotypes      = columns.indexOf('phenotypes');
+    idx.phenotypeScore  = columns.indexOf('phenotypeScore');
+    idx.rare_hom_count  = columns.indexOf('rare_hom_count');
+    idx.rare_het_count  = columns.indexOf('rare_het_count');
+    idx.rare_count      = columns.indexOf('rare_count');
+    idx.candidate_genes = columns.indexOf('candidate_genes');
+    return (idx);
+  };
+
+  PP.generatePhenotypesHtml = function(features) {
+    phenotypesHtml = '';
     for (var i = 0; i < features.length; i++) {
-      features_html = features_html + ' ' + PP.create_url('/hpo', features[i].label, features[i].id, 'chip');
+      phenotypesHtml = phenotypesHtml + ' ' + PP.create_url('/hpo', features[i].data.name, features[i].data.termId, 'chip');
     }
-    return (features_html);
+    return (phenotypesHtml);
   };
 
   PP.generateGeneHtml = function(genes) {
-    var genes_html = '';
+    var genesHtml = '';
     for (var i = 0; i < genes.length; i++) {
-      genes_html = genes_html + ' ' + PP.create_url('/gene', genes[i], genes[i], 'chip');
+      genesHtml = genesHtml + ' ' + PP.create_url('/gene', genes[i], genes[i], 'chip');
     }
-    return (genes_html);
+    return (genesHtml);
   };
 
   PP.showNumberOfPatients = function(patientsSize) {
