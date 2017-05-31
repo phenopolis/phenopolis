@@ -49,25 +49,17 @@ def get_individuals(build_cache=False):
     #hpo_db=get_db(app.config['DB_NAME_HPO'])
     users_db=get_db(app.config['DB_NAME_USERS'])
     user=users_db.users.find_one({'user':session['user']})
-    #statements={'statements':[{"statement":
     s="""
-    MATCH (p:Person)
-    WHERE p.personId =~ 'IRDC_.*'
-    WITH p, size((p)<-[:HetVariantToPerson]-()) as c, size((p)<-[:HomVariantToPerson]-()) as c2
-    MATCH (p)-[:PersonToObservedTerm]->(t:Term)
-    RETURN p.personId, collect(t.name) as terms, c, c2;
-    """
-    #}]}
+    MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term)
+    RETURN p.personId as individual,
+    p.gender as gender,
+    collect(DISTINCT t) as phenotypes,
+    p.score as phenotypeScore,
+    size((p)<-[:HomVariantToPerson]-()) as rare_hom_count,
+    size((p)<-[:HetVariantToPerson]-()) as rare_het_count;
+    """ % user['user']
     data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s})
-    #print(data)
-    if not build_cache and 'individuals' in user:
-        individuals=user['individuals']
-        individuals=[{k:ind.get(k,'') for k in ['external_id','sex','specificity','features','solved','genes','rare_homozygous_variants_count','rare_compound_hets_count','rare_variants_count','total_variant_count']} for ind in individuals]
-        return individuals
-    eids=user['external_ids']
-    individuals=individuals_update(eids)
-    return individuals
-
+    return data.json()
 
 @app.route('/my_patients_json')
 @requires_auth
