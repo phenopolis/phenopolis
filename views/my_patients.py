@@ -50,13 +50,15 @@ def get_individuals(build_cache=False):
     users_db=get_db(app.config['DB_NAME_USERS'])
     user=users_db.users.find_one({'user':session['user']})
     s="""
-    MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term)
+    MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term),
+    (p)-[:CandidateGene]-(g:Gene)
     RETURN p.personId as individual,
     p.gender as gender,
     collect(DISTINCT t) as phenotypes,
     p.score as phenotypeScore,
     size((p)<-[:HomVariantToPerson]-()) as rare_hom_count,
-    size((p)<-[:HetVariantToPerson]-()) as rare_het_count;
+    size((p)<-[:HetVariantToPerson]-()) as rare_het_count,
+    collect(DISTINCT g.gene_name) as gene_name;
     """ % user['user']
     data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s})
     return data.json()
