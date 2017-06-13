@@ -67,6 +67,13 @@ if (!PP) {
     });
 
     $(document).ready(function () {
+        if (window.location.href.indexOf('#login') != -1) {
+            $('#login_modal').modal('open');
+        }
+        if (window.location.href.indexOf('#change_password') != -1) {
+            $('#login_modal').modal('open');
+            PP.showChangePasswordForm();
+        }
         $("#new_password_1, #new_password_2").keyup(PP.checkPasswordMatch);
     });
 
