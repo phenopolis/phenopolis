@@ -66,10 +66,6 @@ if (!PP) {
         PP.submitChangePassword();
     });
 
-    $('#search_btn').on('click', function () {
-        window.location.href = '/search';
-    });
-
     // Open the login modal or the change password modal, if requested by the url.
     if (window.location.href.indexOf('#login') != -1) {
         $('#login_modal').modal('open');
