@@ -180,6 +180,11 @@ def login():
         return jsonify(success="Authenticated"), 200
 
 # 
+@app.route('/login', methods=['GET'])
+def login_form():
+    return redirect('/#login')
+
+# 
 @app.route('/logout')
 def logout():
     print('DELETE SESSION')
@@ -209,6 +214,12 @@ def change_password():
         db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
         return jsonify(success=msg), 200
+
+#
+@app.route('/change_password', methods=['GET'])
+def change_password_form():
+    return redirect('/#change_password')
+
 
 @app.route('/set/<query>')
 def set(query):

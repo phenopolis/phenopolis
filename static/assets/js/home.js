@@ -66,16 +66,17 @@ if (!PP) {
         PP.submitChangePassword();
     });
 
-    $(document).ready(function () {
-        if (window.location.href.indexOf('#login') != -1) {
-            $('#login_modal').modal('open');
-        }
-        if (window.location.href.indexOf('#change_password') != -1) {
-            $('#login_modal').modal('open');
-            PP.showChangePasswordForm();
-        }
-        $("#new_password_1, #new_password_2").keyup(PP.checkPasswordMatch);
-    });
+    // Open the login modal or the change password modal, if requested by the url.
+    if (window.location.href.indexOf('#login') != -1) {
+        $('#login_modal').modal('open');
+    }
+    else if (window.location.href.indexOf('#change_password') != -1) {
+        $('#login_modal').modal('open');
+        PP.showChangePasswordForm();
+    }
+
+    // Change password modal - check the re-typing of the new password.
+    $("#new_password_1, #new_password_2").keyup(PP.checkPasswordMatch);
 
   };
 
