@@ -66,6 +66,10 @@ if (!PP) {
         PP.submitChangePassword();
     });
 
+    $('#search_btn').on('click', function () {
+        window.location.href = '/search';
+    });
+
     // Open the login modal or the change password modal, if requested by the url.
     if (window.location.href.indexOf('#login') != -1) {
         $('#login_modal').modal('open');
@@ -111,6 +115,7 @@ if (!PP) {
     $('#change_password_btn').hide();
     $('#register_btn').hide();
     $('#submit_change_password_btn').hide();
+    $('#search_btn').hide();
 
     $('#login_btn').hide();
     $('#demo_login_btn').hide();
@@ -132,6 +137,7 @@ if (!PP) {
 
       $('#login_btn').hide();
       $('#demo_login_btn').hide();
+      $('#search_btn').hide();
 
       $('#register_content').hide();
       $('#submit_register_btn').hide();
@@ -155,6 +161,7 @@ if (!PP) {
     $('#enter_login_btn').hide();
     $('#submit_register_btn').hide();
     $('#submit_change_password_btn').hide();
+    $('#search_btn').hide();
   };
 
   //
@@ -204,6 +211,7 @@ if (!PP) {
               $('#auth_modal').modal('close');
               $('#change_password_successful').show();
               $("#change_password_successful").text(data.success);
+              $('#search_btn').show();
           },
           error: function (data, msg) {
               $('#auth_modal').modal('close');
