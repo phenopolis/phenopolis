@@ -182,7 +182,10 @@ def login():
 # 
 @app.route('/login', methods=['GET'])
 def login_form():
-    return redirect('/#login')
+    if config.LOCAL:
+        return redirect('/#login')
+    else:
+        return redirect('https://uclex.cs.ucl.ac.uk/#login')
 
 # 
 @app.route('/logout')
@@ -218,7 +221,10 @@ def change_password():
 #
 @app.route('/change_password', methods=['GET'])
 def change_password_form():
-    return redirect('/#change_password')
+    if config.LOCAL:
+        return redirect('/#change_password')
+    else:
+        return redirect('https://uclex.cs.ucl.ac.uk/#change_password')
 
 
 @app.route('/set/<query>')
