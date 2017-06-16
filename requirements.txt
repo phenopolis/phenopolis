@@ -13,15 +13,12 @@ hgvs==1.0.0a1
 mygene==3.0.0
 myvariant==0.3.1
 neo4j-driver==1.0.2
-pandas==0.19.1
-phizz==0.2.3
 plotly==1.12.12
 primer3-py==0.5.1 		# Can't be installed on Windows.
 psycopg2==2.6.2
 pycrypto==2.6.1
 pygr==0.8.2
 pymongo==3.4.0
-pysam==0.9.1.4 			# Can't be installed on Windows.
 python-bencode==1.0.2
 scipy==0.18.1 			# This will fail for Travis or Windows, they use alternative means of installation.
 django-htmlmin==0.10.0

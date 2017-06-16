@@ -100,6 +100,7 @@ def gene_page(gene_id):
         pli=pli['pLI']
     else:
         pli=-1
+    print('all done for gene page')
     return render_template('gene.html', 
             title=gene['gene_name'],
             gene=gene,
