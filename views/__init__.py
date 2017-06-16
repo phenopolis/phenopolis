@@ -83,6 +83,16 @@ from lookups import *
 from config import config
 import regex
 import requests
+import json
+import py2neo
+from json import dumps
+
+global graph
+
+#py2neo.authenticate("bigtop:57474", "neo4j", "1")
+#graph = py2neo.Graph('http://bigtop:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
+py2neo.authenticate("localhost:57474", "neo4j", "1")
+graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
