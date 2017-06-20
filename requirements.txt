@@ -13,6 +13,8 @@ hgvs==1.0.0a1
 mygene==3.0.0
 myvariant==0.3.1
 neo4j-driver==1.0.2
+pandas==0.19.1
+phizz==0.2.3
 plotly==1.12.12
 primer3-py==0.5.1 		# Can't be installed on Windows.
 psycopg2==2.6.2
