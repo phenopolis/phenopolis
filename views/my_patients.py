@@ -45,7 +45,7 @@ def individuals_update(external_ids):
     return individuals
 
 
-def get_individuals(build_cache=False):
+def get_individuals():
     #hpo_db=get_db(app.config['DB_NAME_HPO'])
     users_db=get_db(app.config['DB_NAME_USERS'])
     user=users_db.users.find_one({'user':session['user']})
@@ -56,18 +56,18 @@ def get_individuals(build_cache=False):
     p.gender as gender,
     collect(DISTINCT t) as phenotypes,
     p.score as phenotypeScore,
-    size((p)<-[:HomVariantToPerson]-()) as rare_hom_count,
-    size((p)<-[:HetVariantToPerson]-()) as rare_het_count,
-    collect(DISTINCT g.gene_name) as gene_name;
+    size((p)<-[:HomVariantToPerson]-()) as hom_count,
+    size((p)<-[:HetVariantToPerson]-()) as het_count,
+    collect(DISTINCT g.gene_name) as genes;
     """ % user['user']
+    print(s)
     data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s})
     return data.json()
 
 @app.route('/my_patients_json')
 @requires_auth
 def my_patients_json():
-    build_cache=str(request.args.get('build_cache')).lower()=='true'
-    individuals=get_individuals(build_cache)
+    individuals=get_individuals()
     return(jsonify(result=individuals))
 
 

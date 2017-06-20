@@ -36,10 +36,9 @@ if (!PP) {
             $('<td>').text( patients[i][ idx.gender ] ), // gender
             $('<td>').html(PP.generatePhenotypesHtml( patients[i][ idx.phenotypes ] )), // phenotypes
             $('<td>').text( +patients[i][ idx.phenotypeScore ].toFixed(2) ), // phenotypeScore
-            $('<td>').text( +patients[i][ idx.rare_hom_count ].toFixed(2) ), // rare_hom_count
-            $('<td>').text( +patients[i][ idx.rare_het_count ].toFixed(2) ), // rare_het_count
-            $('<td>').text(' '), // rare_count
-            $('<td>').text(' ') // candidate_genes - PP.generateGeneHtml(patients[i].genes)
+            $('<td>').text( +patients[i][ idx.hom_count ].toFixed(2) ), // hom_count
+            $('<td>').text( +patients[i][ idx.het_count ].toFixed(2) ), // het_count
+            $('<td>').html(PP.generateGeneHtml(patients[i][idx.genes])) // candidate_genes
           ).appendTo('#my_patients_table_body');
         }
         PP.showNumberOfPatients(patients.length);
@@ -58,10 +57,9 @@ if (!PP) {
     idx.gender          = columns.indexOf('gender');
     idx.phenotypes      = columns.indexOf('phenotypes');
     idx.phenotypeScore  = columns.indexOf('phenotypeScore');
-    idx.rare_hom_count  = columns.indexOf('rare_hom_count');
-    idx.rare_het_count  = columns.indexOf('rare_het_count');
-    idx.rare_count      = columns.indexOf('rare_count');
-    idx.candidate_genes = columns.indexOf('candidate_genes');
+    idx.hom_count  = columns.indexOf('hom_count');
+    idx.het_count  = columns.indexOf('het_count');
+    idx.genes = columns.indexOf('genes');
     return (idx);
   };
 
