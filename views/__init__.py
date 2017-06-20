@@ -33,8 +33,6 @@ import math
 from Bio import Entrez
 from bson.json_util import loads
 from mongodb import *
-# fizz: hpo lookup
-import phizz
 import itertools
 import json
 import os
