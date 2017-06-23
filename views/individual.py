@@ -186,28 +186,23 @@ def individual_page(individual):
 
 
 def get_feature_venn(patient):
-    hpo_ids=[feature['id'] for feature in patient.observed_features]
-    hpo_db=get_db(app.config['DB_NAME_HPO'])
-    #hpo_terms = [(i, hpo_db.hpo.find_one({'id':i})['name'][0]) for i in hpo_ids]
-    hpo_terms = [(feature['id'], feature['label']) for feature in patient.observed_features]
-    # this has missing HPO ids. see IRDC_batch2_OXF_3001 and #HP:0000593
+    s="""
+    MATCH (p:Person)-[:PersonToObservedTerm]->(t:Term)--(g:Gene)
+    WHERE p.personId='%s'
+    RETURN t.termId, t.name, g.gene_id, g.gene_name
+    """ % patient
+    print(s)
+    data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    hpo_terms=[(k,v,) for k, v, in dict([(x[0],x[1],) for x in data]).items()]
     hpo_gene=dict()
-    for hpo_id,hpo_term, in hpo_terms:
-        hpo_gene[hpo_id] = []
-        for gene_name in [x['Gene-Name'] for x in hpo_db.ALL_SOURCES_ALL_FREQUENCIES_phenotype_to_genes.find({'HPO-ID':hpo_id},{'Gene-Name':1,'_id':0})]:
-            #gene_hpo[gene_name]=gene_hpo.get(gene_name,[])+[{'hpo_id':hpo_id,'hpo_term':hpo_term}]
-            hpo_gene[hpo_id]=hpo_gene.get(hpo_id,[])+[gene_name]
-    for k in hpo_gene: hpo_gene[k]=list(frozenset(list(hpo_gene[k])))
-    print '========'
-    #print hpo_gene
-    print '========'
+    for hpo_id,hpo_term,gene_id,gene_name, in data:
+        hpo_gene[hpo_id]=hpo_gene.get(hpo_id,[])+[gene_name]
     genes = {}
-    # get combinatorics of features to draw venn diagram
     feature_combo = []
     feature_venn = []
+    print "get combinatorics of features to draw venn diagram"
     for i in range(len(hpo_terms[:5])):
         feature_combo.extend(itertools.combinations(range(len(hpo_terms)), i+1))
-    #venn_ind = -1
     print 'calculate Venn diagram'
     for combo in feature_combo:
         # construct features_venn key
@@ -227,8 +222,7 @@ def get_feature_venn(patient):
 @app.route('/venn_json/<individual>')
 @requires_auth
 def venn_json(individual):
-    patient=Patient(individual,get_db(app.config['DB_NAME_PATIENTS']))
-    feature_venn=get_feature_venn(patient)
+    feature_venn=get_feature_venn(individual)
     return jsonify(result=feature_venn)
 
 
