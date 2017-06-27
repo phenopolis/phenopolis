@@ -85,12 +85,13 @@ import json
 import py2neo
 from json import dumps
 
-global graph
+if config.USE_NEO4J :
+    global graph
 
-#py2neo.authenticate("bigtop:57474", "neo4j", "1")
-#graph = py2neo.Graph('http://bigtop:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
-py2neo.authenticate("localhost:57474", "neo4j", "1")
-graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
+    #py2neo.authenticate("bigtop:57474", "neo4j", "1")
+    #graph = py2neo.Graph('http://bigtop:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
+    py2neo.authenticate("localhost:57474", "neo4j", "1")
+    graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -138,12 +139,18 @@ def check_auth(username, password):
     """
     This function is called to check if a username / password combination is valid.
     """
-    q={'statements':[{'statement': "MATCH (u:User {user:'%s'}) RETURN u" % username}]}
-    print(q)
-    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=q)
-    if not resp: return False
-    r=resp.json()['results'][0]['data'][0]['row'][0]
-    print(r)
+    if config.USE_NEO4J:
+        q={'statements':[{'statement': "MATCH (u:User {user:'%s'}) RETURN u" % username}]}
+        print(q)
+        resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=q)
+        if not resp: return False
+        r=resp.json()['results'][0]['data'][0]['row'][0]
+        print(r)
+    else:
+        db_users=get_db(app.config['DB_NAME_USERS'])
+        r=db_users.users.find_one({'user':username})
+        if not r: return False
+
     session['user']=username
     return argon2.verify(password, r['argon_password'])
 
@@ -214,14 +221,13 @@ def change_password():
     else:
         print 'LOGIN SUCCESS, CHANGING PASSWORD'
         argon_password = argon2.hash(new_password_1)
-        db_users = get_db(app.config['DB_NAME_USERS'])
-        #db_users.users.update_one({'user':username},{'$set':{'password':hash}})
-        q={'query':'MATCH (u:User {user: $user}) SET u.password=$password','parameters':{'user':username,'password':password}}
-        resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
-        print(resp.json())
-        #db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
-        q={'query':'MATCH (u:User {user: $user}) SET u.argon_password=$password','parameters':{'user':username,'password':argon_password}}
-        resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
+        if config.USE_NEO4J:
+            q={'query':'MATCH (u:User {user: $user}) SET u.argon_password=$password','parameters':{'user':username,'password':argon_password}}
+            resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
+        else:
+            db_users = get_db(app.config['DB_NAME_USERS'])
+            db_users.users.update_one({'user':username},{'$set':{'password':argon_password}})
+            db_users.users.update_one({'user':username},{'$set':{'argon_password':argon_password}})
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
         return jsonify(success=msg), 200
 

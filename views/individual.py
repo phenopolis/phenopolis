@@ -18,7 +18,6 @@ import sys
 import re
 import itertools
 from urllib2 import HTTPError, URLError
-import pysam
 import csv
 from collections import defaultdict, Counter
 #import rest as annotation
