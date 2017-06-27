@@ -222,10 +222,6 @@ def change_password():
         print 'LOGIN SUCCESS, CHANGING PASSWORD'
         argon_password = argon2.hash(new_password_1)
         if config.USE_NEO4J:
-            # TODO - the line below is for testing only, to be removed.
-            q={'query':'MATCH (u:User {user: $user}) SET u.password=$password','parameters':{'user':username,'password':password}}
-            resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
-            print(resp.json())
             q={'query':'MATCH (u:User {user: $user}) SET u.argon_password=$password','parameters':{'user':username,'password':argon_password}}
             resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
         else:
