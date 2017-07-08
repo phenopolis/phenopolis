@@ -13,23 +13,6 @@ if (!PP) {
 
 // PP module
 (function() {
-  PP.equalizeAboutBoxes = function() {
-    PP.equalSizeDiv('.collection');
-    $(window).resize(function() {
-      $('.collection').css('height', 'auto');
-      PP.equalSizeDiv('.collection');
-    });
-  };
-
-  PP.equalSizeDiv = function(div) {
-    if ($(div).length === 0) return;
-    var maxHeight = 0;
-    $(div).each(function() {
-      if ($(this).height() > maxHeight) { maxHeight = $(this).height(); }
-    });
-    $(div).css('height', maxHeight);
-  };
-
   PP.initLogin = function() {
     PP.openLoginModelOnClick('#enter_login_btn');
 
