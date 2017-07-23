@@ -27,6 +27,8 @@ import lookups
 from orm import Patient
 import requests
 
+from neo4j.v1 import GraphDatabase, basic_auth
+
 def individuals_update(external_ids):
     patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     users_db=get_db(app.config['DB_NAME_USERS'])
@@ -122,6 +124,11 @@ def update_patient_data(individual):
 @requires_auth
 def individual_json(individual):
     patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']))
+    #PP.addPatientGenderInfo(data.result.sex); 
+    #PP.addPatientFeaturesInfo(data.result.observed_features);
+    #PP.addPatientConsanguinityInfo(data.result.family_history);
+    #PP.addPatientGenesInfo(data.result.genes);
+    #PP.submitEditedIndividual(patientId);
     return patient.json()
 
 
@@ -327,16 +334,45 @@ def homozgous_variants(individual):
     return jsonify(result=patient.homozygous_variants)
 
 
+def merge_dicts(*dict_args):
+    """
+    Given any number of dicts, shallow copy and merge into a new dict,
+    precedence goes to key value pairs in latter dicts.
+    """
+    result = {}
+    for dictionary in dict_args:
+        result.update(dictionary)
+    return result
+
 @app.route('/homozygous_variants_json2/<individual>')
 @requires_auth
-def homozgous_variants2(individual):
+def homozygous_variants2(individual):
     allele_freq=float(request.args.get('allele_freq',0.001))
     kaviar_AF=float(request.args.get('kaviar_AF',0.001))
-    s=""" MATCH (gv:GeneticVariant)-[:HomVariantToPerson]->(p:Person)
-    WHERE p.personId={personId} and gv.kaviar_AF < {kaviar_AF}
-    and gv.allele_freq < {allele_freq}
-    RETURN gv """
-    return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
+    s=""" MATCH
+    (p)-[:PersonToObservedTerm]-(t:Term),
+    (t)--(g:Gene)--(gv:GeneticVariant)-[:HomVariantToPerson]-(p:Person), 
+    (gv)--(tv:TranscriptVariant)
+    WHERE p.personId='%s' and gv.kaviar_AF < %f
+    and gv.allele_freq < %f
+    RETURN gv,
+    collect(distinct g),
+    collect(distinct t),
+    collect(distinct tv)
+    """ % (individual,kaviar_AF,allele_freq,)
+    print(s)
+    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    #return jsonify(result=[merge_dicts(x[0]['data'],dict([y['data'] for y in x[1]]),dict([y['data'] for y in x[2]])) for x in data])
+    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
+    db_session = driver.session()
+    result=db_session.run(s)
+    return jsonify(result=[merge_dicts(dict(r[0]),
+        {'genes':[dict(x) for x in r[1]]},
+        {'terms':[dict(x) for x in r[2]]},
+        {'transcript_variants':[dict(x) for x in r[3]]}
+        ) for r in result])
+    #return jsonify(result=data)
+    #return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
     
 
 @app.route('/compound_het_variants_json2/<individual>',methods=['GET','POST'])
@@ -345,15 +381,30 @@ def compound_het_variants2(individual):
     kaviar_AF=float(request.args.get('kaviar_AF',0.01))
     allele_freq=float(request.args.get('allele_freq',0.01))
     s="""
-    MATCH (g:Gene)-[]->(gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
-    WHERE p.personId={personId} AND gv.kaviar_AF<{kaviar_AF} and gv.allele_freq < {allele_freq}
+    MATCH
+    (p)-[:PersonToObservedTerm]-(t:Term),
+    (g:Gene)--(gv:GeneticVariant)-[:HetVariantToPerson]-(p:Person)
+    WHERE p.personId='%s' AND gv.kaviar_AF<%f and gv.allele_freq < %f
     WITH g, collect(distinct gv) AS cgv
     WHERE length(cgv) > 1
-    RETURN cgv ;
-    """
-    return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
-
-
+    UNWIND cgv as v
+    RETURN v,
+    collect(distinct g)
+    """ % (individual,kaviar_AF,allele_freq)
+    print(s)
+    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    #return jsonify(result=[x[0]['data'] for x in data])
+    #return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
+    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
+    db_session = driver.session()
+    result=db_session.run(s)
+    return jsonify(result=[ merge_dicts(
+        dict(r[0]),
+        {'terms':[]},
+        {'genes':[dict(x) for x in r[1]]},
+        {'transcript_variants':[]}
+        ) for r in result])
+ 
 @app.route('/compound_het_variants_json/<individual>')
 @requires_auth
 def compound_het_variants(individual):
@@ -365,12 +416,28 @@ def compound_het_variants(individual):
 def rare_variants2(individual):
     kaviar_AF=float(request.args.get('kaviar_AF',0.01))
     allele_freq=float(request.args.get('allele_freq',0.01))
-    s="""
-    MATCH (gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
-    WHERE p.personId={personId} and gv.kaviar_AF < {kaviar_AF} and gv.allele_freq < {allele_freq}
-    RETURN gv
-    """
-    return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
+    s=""" MATCH
+    (p)-[:PersonToObservedTerm]-(t:Term),
+    (t)--(g:Gene)--(gv:GeneticVariant)-[:HetVariantToPerson]-(p:Person), 
+    (gv)--(tv:TranscriptVariant)
+    WHERE p.personId='%s' and gv.kaviar_AF < %f
+    and gv.allele_freq < %f
+    RETURN gv,
+    collect(distinct g),
+    collect(distinct t),
+    collect(distinct tv)
+    """ % (individual,kaviar_AF,allele_freq,)
+    print(s)
+    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
+    db_session = driver.session()
+    result=db_session.run(s)
+    return jsonify(result=[ merge_dicts(
+        dict(r[0]),
+        {'genes':[dict(x) for x in r[1]]},
+        {'terms':[dict(x) for x in r[2]]},
+        {'transcript_variants':[dict(x) for x in r[3]]}
+        ) for r in result])
+ 
 
 
 def load_patient(individual,auth,pubmed_key,hpo='HP:0000001'):
