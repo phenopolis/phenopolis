@@ -12,7 +12,7 @@ Flask-Session==0.3.0
 hgvs==1.0.0a1
 mygene==3.0.0
 myvariant==0.3.1
-neo4j-driver==1.0.2
+neo4j-driver==1.4.0
 pandas==0.19.1
 phizz==0.2.3
 plotly==1.12.12
