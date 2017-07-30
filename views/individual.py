@@ -353,12 +353,20 @@ def homozygous_variants2(individual):
     (p)-[:PersonToObservedTerm]-(t:Term),
     (t)--(g:Gene)--(gv:GeneticVariant)-[:HomVariantToPerson]-(p:Person), 
     (gv)--(tv:TranscriptVariant)
-    WHERE p.personId='%s' and gv.kaviar_AF < %f
-    and gv.allele_freq < %f
+    WHERE p.personId='%s' AND gv.kaviar_AF < %f AND gv.allele_freq < %f
+    WITH gv, g, t, tv
+    OPTIONAL
+    MATCH
+    (gv)-[:HetVariantToPerson]-(p2:Person)
+    OPTIONAL
+    MATCH
+    (gv)-[:HomVariantToPerson]-(p3:Person)
     RETURN gv,
     collect(distinct g),
     collect(distinct t),
-    collect(distinct tv)
+    collect(distinct tv),
+    collect(distinct p2),
+    collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq,)
     print(s)
     #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
@@ -369,7 +377,9 @@ def homozygous_variants2(individual):
     return jsonify(result=[merge_dicts(dict(r[0]),
         {'genes':[dict(x) for x in r[1]]},
         {'terms':[dict(x) for x in r[2]]},
-        {'transcript_variants':[dict(x) for x in r[3]]}
+        {'transcript_variants':[dict(x) for x in r[3]]},
+        {'het_individuals':[dict(x) for x in r[4]]},
+        {'hom_individuals':[dict(x) for x in r[5]]}
         ) for r in result])
     #return jsonify(result=data)
     #return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
@@ -388,8 +398,16 @@ def compound_het_variants2(individual):
     WITH g, collect(distinct gv) AS cgv
     WHERE length(cgv) > 1
     UNWIND cgv as v
+    OPTIONAL
+    MATCH
+    (v)-[:HetVariantToPerson]-(p2:Person)
+    OPTIONAL
+    MATCH
+    (v)-[:HomVariantToPerson]-(p3:Person)
     RETURN v,
-    collect(distinct g)
+    collect(distinct g),
+    collect(distinct p2),
+    collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq)
     print(s)
     #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
@@ -402,7 +420,9 @@ def compound_het_variants2(individual):
         dict(r[0]),
         {'terms':[]},
         {'genes':[dict(x) for x in r[1]]},
-        {'transcript_variants':[]}
+        {'transcript_variants':[]},
+        {'het_individuals':[dict(x) for x in r[2]]},
+        {'hom_individuals':[dict(x) for x in r[3]]}
         ) for r in result])
  
 @app.route('/compound_het_variants_json/<individual>')
@@ -420,12 +440,20 @@ def rare_variants2(individual):
     (p)-[:PersonToObservedTerm]-(t:Term),
     (t)--(g:Gene)--(gv:GeneticVariant)-[:HetVariantToPerson]-(p:Person), 
     (gv)--(tv:TranscriptVariant)
-    WHERE p.personId='%s' and gv.kaviar_AF < %f
-    and gv.allele_freq < %f
+    WHERE p.personId='%s' AND gv.kaviar_AF < %f AND gv.allele_freq < %f
+    WITH gv, g, t, tv
+    OPTIONAL
+    MATCH
+    (gv)-[:HetVariantToPerson]-(p2:Person)
+    OPTIONAL
+    MATCH
+    (gv)-[:HomVariantToPerson]-(p3:Person)
     RETURN gv,
     collect(distinct g),
     collect(distinct t),
-    collect(distinct tv)
+    collect(distinct tv),
+    collect(distinct p2),
+    collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq,)
     print(s)
     driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
@@ -435,7 +463,9 @@ def rare_variants2(individual):
         dict(r[0]),
         {'genes':[dict(x) for x in r[1]]},
         {'terms':[dict(x) for x in r[2]]},
-        {'transcript_variants':[dict(x) for x in r[3]]}
+        {'transcript_variants':[dict(x) for x in r[3]]},
+        {'het_individuals':[dict(x) for x in r[4]]},
+        {'hom_individuals':[dict(x) for x in r[5]]}
         ) for r in result])
  
 
@@ -494,6 +524,39 @@ def pubmedbatch_getcache(pubmedkey):
     result = db.cache.find_one({'key':pubmedkey},{'_id':False})
     if result: return jsonify(result)
     else: return jsonify('')
+
+
+@app.route('/homozygous_individuals_json/<variant_id>')
+@requires_auth
+def get_homozygous_individuals(variant_id):
+    s="""
+    MATCH
+    (v)-[:HomVariantToPerson]-(p:Person)
+    WHERE v.variantId='%s'
+    RETURN p
+    """ % variant_id
+    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
+    db_session = driver.session()
+    result=db_session.run(s)
+    return jsonify(result=[ merge_dicts(
+        dict(r[0])) for r in result])
+
+
+@app.route('/heterozygous_individuals_json/<variant_id>')
+@requires_auth
+def get_heterozygous_individuals(variant_id):
+    s="""
+    MATCH
+    (v)-[:HetVariantToPerson]-(p:Person)
+    WHERE v.variantId='%s'
+    RETURN p
+    """ % variant_id
+    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
+    db_session = driver.session()
+    result=db_session.run(s)
+    return jsonify(result=[ merge_dicts(
+        dict(r[0])) for r in result])
+
 
 
 
