@@ -35,8 +35,8 @@ if (!PP) {
 
   //
   PP.PatientFeatureSuccess = function(data, patientId) {
-    PP.addPatientGenderInfo(data.result.sex); // Or observed_features
-    PP.addPatientFeaturesInfo(data.result.observed_features); // Or observed_features
+    PP.addPatientGenderInfo(data.result.sex); 
+    PP.addPatientFeaturesInfo(data.result.observed_features);
     PP.addPatientConsanguinityInfo(data.result.family_history);
     PP.addPatientGenesInfo(data.result.genes);
     PP.submitEditedIndividual(patientId);
@@ -298,23 +298,30 @@ if (!PP) {
   PP.variantTableSuccess = function(data,table_name) {
     var d = data.result;
     for (var i = 0; i < d.length; i++) {
+        console.log(d[i]);
       // generate tr
       $('<tr>').append(
-        $('<td>').html(PP.generateGeneNames(d[i].transcript_consequences)),
-        $('<td>').text(' '),
-        $('<td>').text(' '),
-        $('<td>').html(PP.generateHpoLinks(d[i].HPO)),
-        $('<td>').text(' '),
-        $('<td>').html(PP.generateVariantHtml(d[i].synonym_variant_id)),
-        $('<td>').text(' '),
-        $('<td>').text(' '),
-        $('<td>').text(' '),
+        $('<td>').html(PP.generateGeneNames(d[i].genes)),
+        $('<td>').html(PP.generateHpoLinks(d[i].terms)),
+        $('<td>').html(PP.generateVariantHtml(d[i].variantId)),
         $('<td>').text(d[i].most_severe_consequence),
-        $('<td>').html(PP.createHgvspTd(d[i].canonical_hgvsp, d[i].canonical_hgvsc)),
-        $('<td>').text(' '),
-        $('<td>').text(' '),
-        $('<td>').html(PP.generateIndividualHtml(d[i].hom_samples)),
-        $('<td>').text()
+        $('<td>').text(PP.formatNumber(d[i].allele_freq,3) + ' ('+d[i].AC+'/'+d[i].AN+')'),
+        $('<td>').text(PP.formatNumber(d[i].gnomad_genomes_AF_raw,4)),
+        $('<td>').text(PP.formatNumber(d[i].gnomad_exomes_AF_raw,4)),
+        $('<td>').text(PP.formatNumber(d[i].kaviar_AF,4)),
+        $('<td>').text(PP.formatNumber(d[i].cadd_phred,2)),
+        $('<td>').html(PP.generateTranscriptVariants(d[i].transcript_variants)),
+        //$('<td>').html(PP.generateVariantHtml(d[i].synonym_variant_id)),
+        $('<td>').html(PP.generateIndividualHtml(d[i].het_individuals)),
+        $('<td>').html(PP.generateIndividualHtml(d[i].hom_individuals))
+        //$('<td>').text(' '),
+        //$('<td>').text(' '),
+        //$('<td>').html(PP.createHgvspTd(d[i].canonical_hgvsp, d[i].canonical_hgvsc)),
+        //$('<td>').text(' '),
+        //$('<td>').text(' '),
+        //$('<td>').html(PP.generateIndividualHtml(d[i].hom_samples)),
+        //$('<td>').text(' '),
+        //$('<td>').text()
       ).appendTo('#'+table_name+'_table_body');
     }
     $('#'+table_name+'_tab #progress_row').remove();
@@ -322,10 +329,10 @@ if (!PP) {
     PP.initTableSorter('#'+table_name+'_table');
   };
 
-  PP.generateGeneNames = function(transcript_consequences) {
+  PP.generateGeneNames = function(genes) {
     geneNames = [];
-    for (var i = 0; i < transcript_consequences.length; i++) {
-      url = PP.create_url('/gene', transcript_consequences[i].gene_symbol);
+    for (var i = 0; i < genes.length; i++) {
+      url = PP.create_url('/gene', genes[i].gene_name);
       if (geneNames.indexOf(url) === -1) {
         geneNames.push(url);
       }
@@ -333,10 +340,21 @@ if (!PP) {
     return (geneNames.join('<br>'));
   };
 
+  PP.generateTranscriptVariants = function(tv) {
+    hgvs = [];
+    for (var i = 0; i < tv.length; i++) {
+      url = tv[i].hgvsc+" "+ tv[i].hgvsp;
+      if (hgvs.indexOf(url) === -1) {
+        hgvs.push(url);
+      }
+    }
+    return (hgvs.join('<br>'));
+  }
+
   PP.generateHpoLinks = function(hpoTerms) {
     hpoHtml = '';
     for (var i = 0; i < hpoTerms.length; i++) {
-      hpoHtml = hpoHtml + PP.create_url('/hpo', hpoTerms[i].hpo_term, hpoTerms[i].hpo_id, 'chip');
+      hpoHtml = hpoHtml + PP.create_url('/hpo', hpoTerms[i].name, hpoTerms[i].termId, 'chip');
     }
     return (hpoHtml);
   };
@@ -346,7 +364,12 @@ if (!PP) {
   };
 
   PP.generateIndividualHtml = function(individuals) {
-    return individuals.join(' ');
+      individuals_html='';
+      if (individuals === undefined) return (individuals_html);
+      for (var i=0; i<individuals.length; i++) {
+      individuals_html = individuals_html + PP.create_url('/individual', individuals[i].personId, individuals[i].personId, 'chip');
+      }
+      return (individuals_html);
   };
 
   PP.createHgvspTd = function(hgvsp, hgvsc) {
@@ -355,6 +378,13 @@ if (!PP) {
     return '<span data="' + hgvsc[0] + '">' + hgvsp[0].split(':')[1] + '</span>';
   };
 
+  PP.formatNumber = function(variable, n) {
+      if (typeof variable !== 'undefined') {
+          return variable.toFixed(n)
+      } else {
+          return '';
+      }
+  };
 
   PP.initExomiserTab = function(patientId) {
     // $.ajax({
