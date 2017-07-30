@@ -144,10 +144,14 @@
             <div id="exomiser_tab">
                 <h4 style="font-weight:300;">Exomiser</h4>
                 <p>These are the result files of running <a href="http://www.sanger.ac.uk/science/tools/exomiser">Exomiser prioritisation</a> on the variants of these individuals under different inheritance modes.</p>
-                {% include "components/loading_from_server.html" %}
                 <div class="exomiser_content">
+                    <ul>
+                    <li><a href="/static/Exomiser/{{external_id}}/exomiser-7-2-1-AUTOSOMAL_DOMINANT.html">Exomiser Autosomal Dominant</a></li>
+                    <li><a href="/static/Exomiser/{{external_id}}/exomiser-7-2-1-AUTOSOMAL_RECESSIVE.html">Exomiser Autosomal Recessive</a></li>
+                    <li><a href="/static/Exomiser/{{external_id}}/exomiser-7-2-1-X_RECESSIVE.html">Exomiser X-linked</a></li>
+                    </ul>
                 </div>
-            </div>
+                </div>
         </div>
     </div>
 </div>
