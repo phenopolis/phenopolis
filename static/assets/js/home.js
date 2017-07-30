@@ -49,17 +49,9 @@ if (!PP) {
         PP.submitChangePassword();
     });
 
-    // Open the login modal or the change password modal, if requested by the url.
-    if (window.location.href.indexOf('#login') != -1) {
-        $('#login_modal').modal('open');
-    }
-    else if (window.location.href.indexOf('#change_password') != -1) {
-        $('#login_modal').modal('open');
-        PP.showChangePasswordForm();
-    }
-
-    // Change password modal - check the re-typing of the new password.
-    $("#new_password_1, #new_password_2").keyup(PP.checkPasswordMatch);
+    $(document).ready(function () {
+        $("#new_password_1, #new_password_2").keyup(PP.checkPasswordMatch);
+    });
 
   };
 
@@ -94,7 +86,6 @@ if (!PP) {
     $('#change_password_btn').hide();
     $('#register_btn').hide();
     $('#submit_change_password_btn').hide();
-    $('#search_btn').hide();
 
     $('#login_btn').hide();
     $('#demo_login_btn').hide();
@@ -116,7 +107,6 @@ if (!PP) {
 
       $('#login_btn').hide();
       $('#demo_login_btn').hide();
-      $('#search_btn').hide();
 
       $('#register_content').hide();
       $('#submit_register_btn').hide();
@@ -140,7 +130,6 @@ if (!PP) {
     $('#enter_login_btn').hide();
     $('#submit_register_btn').hide();
     $('#submit_change_password_btn').hide();
-    $('#search_btn').hide();
   };
 
   //
@@ -190,7 +179,6 @@ if (!PP) {
               $('#auth_modal').modal('close');
               $('#change_password_successful').show();
               $("#change_password_successful").text(data.success);
-              $('#search_btn').show();
           },
           error: function (data, msg) {
               $('#auth_modal').modal('close');

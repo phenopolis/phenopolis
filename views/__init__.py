@@ -180,14 +180,6 @@ def login():
         return jsonify(success="Authenticated"), 200
 
 # 
-@app.route('/login', methods=['GET'])
-def login_form():
-    if config.LOCAL:
-        return redirect('/#login')
-    else:
-        return redirect('https://uclex.cs.ucl.ac.uk/#login')
-
-# 
 @app.route('/logout')
 def logout():
     print('DELETE SESSION')
@@ -217,15 +209,6 @@ def change_password():
         db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
         return jsonify(success=msg), 200
-
-#
-@app.route('/change_password', methods=['GET'])
-def change_password_form():
-    if config.LOCAL:
-        return redirect('/#change_password')
-    else:
-        return redirect('https://uclex.cs.ucl.ac.uk/#change_password')
-
 
 @app.route('/set/<query>')
 def set(query):
