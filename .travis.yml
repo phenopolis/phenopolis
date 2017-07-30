@@ -1,6 +1,7 @@
 language: python
 python:
   - "2.7"
+dist: trusty  
 cache: pip
 # submodules is set to false to overcome a problem on Travis, we use the git line below instead.  
 git:
@@ -40,7 +41,7 @@ install:
 services:
   - mongodb
   - neo4j
-  - sleep 10
+
 script:
 # command to run coveralls (test coverage) and run tests 
   - coverage run --omit=*/site-packages/*,*/tests/* -m unittest discover -s tests
