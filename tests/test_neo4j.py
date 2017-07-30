@@ -1,4 +1,4 @@
-# Uncomment to run this module directly. TODO LMTW comment out.
+# Uncomment to run this module directly. TODO comment out.
 # import sys, os
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 # End of uncomment.
@@ -24,7 +24,7 @@ class Neo4jTestCase(unittest.TestCase):
         # Password handling taken from https://github.com/robinedwards/django-neomodel
         try:
             result = session.run("MATCH (a:Person) WHERE a.name = {name} "
-                                "RETURN a.name AS name, a.title AS title",
+                                "RETURN a",
                                 {"name": "Crick"})
         except CypherError as ce:
             if 'The credentials you provided were valid, but must be changed before you can use this instance' in str(ce):
