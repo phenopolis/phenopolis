@@ -82,15 +82,17 @@ from config import config
 import regex
 import requests
 import json
-import py2neo
+import py2neo#TODO LMTW remove
+from neo4j.v1 import GraphDatabase, basic_auth
 from json import dumps
 
-global graph
+global graph #TODO LMTW remove
 
 #py2neo.authenticate("bigtop:57474", "neo4j", "1")
 #graph = py2neo.Graph('http://bigtop:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
-py2neo.authenticate("localhost:57474", "neo4j", "1")
-graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
+#TODO LMTW remove py2neo.authenticate("localhost:57474", "neo4j", "1")
+#TODO LMTW remove graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
+
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -134,13 +136,23 @@ else:
     from minify_output import prettify
     render_template = prettify(render_template)
 
+# neo4j
+uri = "bolt://"+app.config['NEO4J_HOST']+":"+str(app.config['NEO4J_PORT'])
+print uri
+neo4j_driver=GraphDatabase.driver(uri, auth=basic_auth(app.config['NEO4J_USER'], app.config['NEO4J_PWD']))
+            
+
 def check_auth(username, password):
     """
     This function is called to check if a username / password combination is valid.
     """
     q={'statements':[{'statement': "MATCH (u:User {user:'%s'}) RETURN u" % username}]}
+    print("q is -")
     print(q)
-    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=q)
+    #neo4j=connect_db('neo4j')
+    with neo4j_driver.session() as session:
+        resp=session.run(q)
+    #TODO LMTW remove resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=q)
     if not resp: return False
     r=resp.json()['results'][0]['data'][0]['row'][0]
     print(r)
@@ -262,9 +274,9 @@ def connect_db(dbname=None):
     Connects to the specific database.
     """
     if dbname=='neo4j':
-        from neo4j.v1 import GraphDatabase, basic_auth
-        neo4j=GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
-        return neo4j.session()
+        with neo4j_driver.session() as session:
+            return session
+
     print(app.config['DB_HOST'], app.config['DB_PORT'])
     client = pymongo.MongoClient(host=app.config['DB_HOST'], port=app.config['DB_PORT'])
     print(client)
