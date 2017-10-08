@@ -15,6 +15,7 @@ class GenePageTestCase(unittest.TestCase):
         runserver.app.config['DB_NAME_PATIENTS'] = 'test_patients'
         runserver.app.config['DB_NAME_USERS'] = 'test_users'
         self.app = runserver.app.test_client()
+        helper.create_neo4j_demo_user()
         helper.login(self.app)
 
     def tearDown(self):

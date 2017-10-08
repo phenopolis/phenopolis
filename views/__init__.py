@@ -83,6 +83,7 @@ import requests
 import json
 import py2neo
 from neo4j.v1 import GraphDatabase, basic_auth
+import neo4j_setup
 from json import dumps
 
 global graph
@@ -137,9 +138,9 @@ else:
     render_template = prettify(render_template)
 
 # neo4j using neo4j-driver as opposed to py2neo
-uri = "bolt://"+app.config['NEO4J_HOST']+":"+str(app.config['NEO4J_PORT'])
-neo4j_driver=GraphDatabase.driver(uri, auth=basic_auth(app.config['NEO4J_USER'], app.config['NEO4J_PWD']))
-  
+global neo4j_driver
+neo4j_driver = neo4j_setup.setup_neo4j_driver()
+
 def check_auth(username, password): 
     """
     This function is called to check if a username / password combination is valid.
