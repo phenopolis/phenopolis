@@ -9,7 +9,7 @@ import subprocess
 import ConfigParser
 import os
 from io import StringIO
-#import runserver
+import runserver
 
 from neo4j.v1 import GraphDatabase, basic_auth, CypherError
 from passlib.hash import argon2
@@ -19,11 +19,12 @@ class Neo4jTestCase(unittest.TestCase):
     def setUp(self):
         self.setup_driver()
         self.load_neo4j_test_data()
-        #runserver.app.config['TESTING'] = True
-        #self.app = runserver.app.test_client()
+        runserver.app.config['TESTING'] = True
+        self.app = runserver.app.test_client()
 
     def tearDown(self):
         self.delete_neo4j_test_data()
+        self.driver.close()
 
     def setup_driver(self):
         default_password = 'neo4j' # Travis will use a fresh Neo4j, with the default password.
@@ -74,13 +75,13 @@ class Neo4jTestCase(unittest.TestCase):
             assert result['argon_password'] == '$argon2i$v=19$m=512,t=2,p=2$n1PK2XvvXcs5h/Aewzjn3A$PxZq8Hwae2EZ4RZX204qsQ'
             assert(argon2.verify('demo123', result['argon_password']))
 
-    def do_not_test_login_logout(self):
-        #rv = self.login('demox', 'demo123')
-        #assert rv.status_code == 401
-        #assert 'Invalid Credentials. Please try again.' in rv.data
-        #rv = self.login('demo', 'demo123x')
-        #assert rv.status_code == 401
-        #assert 'Invalid Credentials. Please try again' in rv.data
+    def test_login_logout(self):
+        rv = self.login('Testx', 'demo123')
+        assert rv.status_code == 401
+        assert 'Invalid Credentials. Please try again.' in rv.data
+        rv = self.login('Test Suite', 'demo123x')
+        assert rv.status_code == 401
+        assert 'Invalid Credentials. Please try again' in rv.data
         rv = self.login('Test Suite', 'demo123')
         assert rv.status_code == 200
         assert 'Authenticated' in rv.data
