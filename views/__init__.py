@@ -1008,7 +1008,15 @@ def about_page():
     female_patients=patients_db.patients.find( {'sex':'F'}).count()
     print('female_patients',female_patients,)
     unknown_patients=patients_db.patients.find( {'sex':'U'}).count()
-    return render_template('about.html',total_patients=total_patients)
+    try:
+        version_number = subprocess.check_output(['git', 'describe', '--exact-match'])
+    except:
+        try:
+            version_number = subprocess.check_output(['git', 'log', '-1', '--format=%cd', '--date=local'])
+        except:
+            version_number = None
+    print('Version number is:-',version_number,)
+    return render_template('about.html',total_patients=total_patients,version_number=version_number)
 
 
 @app.route('/participants')
