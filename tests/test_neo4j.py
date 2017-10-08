@@ -1,7 +1,7 @@
 from __future__ import print_function
 # Uncomment to run this module directly. TODO comment out.
-#import sys, os
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 # End of uncomment.
 
 import unittest
@@ -68,10 +68,10 @@ class Neo4jTestCase(unittest.TestCase):
             assert(not result)
 
             # Test known user
-            results = session.run("MATCH (u:User {user : 'Test Suite'}) RETURN u.user AS user, u.argon_password AS argon_password")
+            results = session.run("MATCH (u:User {user : 'testSuite'}) RETURN u.user AS user, u.argon_password AS argon_password")
             result = results.single()
             assert(result)
-            assert result['user'] == 'Test Suite'
+            assert result['user'] == 'testSuite'
             assert result['argon_password'] == '$argon2i$v=19$m=512,t=2,p=2$n1PK2XvvXcs5h/Aewzjn3A$PxZq8Hwae2EZ4RZX204qsQ'
             assert(argon2.verify('demo123', result['argon_password']))
 
@@ -79,28 +79,53 @@ class Neo4jTestCase(unittest.TestCase):
         rv = self.login('Testx', 'demo123')
         assert rv.status_code == 401
         assert 'Invalid Credentials. Please try again.' in rv.data
-        rv = self.login('Test Suite', 'demo123x')
+        rv = self.login('testSuite', 'demo123x')
         assert rv.status_code == 401
         assert 'Invalid Credentials. Please try again' in rv.data
-        rv = self.login('Test Suite', 'demo123')
+        rv = self.login('testSuite', 'demo123')
         assert rv.status_code == 200
         assert 'Authenticated' in rv.data
         rv = self.logout()
         assert rv.status_code == 200
         assert 'Please login' and 'username' and 'password' in rv.data
 
+    def test_change_password(self):
+        rv = self.login('testSuite', 'demo123')
+        assert rv.status_code == 200
+        assert 'Authenticated' in rv.data
+
+        rv = self.change_password('testSuite', 'demo123', 'demo456')
+        assert rv.status_code == 200
+        print(rv.data)
+        assert 'Password for username \'testSuite\' changed' in rv.data
+
+        rv = self.login('testSuite', 'demo456')
+        assert rv.status_code == 200
+
+        rv = self.login('testSuite', 'demo123')
+        assert rv.status_code == 401
+
+        rv = self.change_password('testSuite', 'demo456', 'demo123')
+        assert rv.status_code == 200
+
+        rv = self.change_password('x', 'demo123', 'demo456')
+        assert rv.status_code == 401
+
+        rv = self.change_password('testSuite', 'x', 'demo456')
+        assert rv.status_code == 401
+
     # We won't load from csv file because Neo4j is set up by default to load only from 
     # folder <neo4j-home>\import and we don't have access to change this on Travis-CI.
     def load_neo4j_test_data(self):  
         with self.driver.session() as session:
             session.run("CREATE (a:User {user: {username}, argon_password: {hash}})",
-                        {"username": "Test Suite", "hash": '$argon2i$v=19$m=512,t=2,p=2$n1PK2XvvXcs5h/Aewzjn3A$PxZq8Hwae2EZ4RZX204qsQ'})
+                        {"username": "testSuite", "hash": '$argon2i$v=19$m=512,t=2,p=2$n1PK2XvvXcs5h/Aewzjn3A$PxZq8Hwae2EZ4RZX204qsQ'})
 
     def delete_neo4j_test_data(self):
         with self.driver.session() as session:
             session.run("MATCH (a:User) WHERE a.user = {username} "
                         "DETACH DELETE a",
-                        {"username": "Test Suite"})
+                        {"username": "testSuite"})
 
     def login(self, username, password):
         return self.app.post('/login', data=dict(
@@ -110,6 +135,13 @@ class Neo4jTestCase(unittest.TestCase):
 
     def logout(self):
         return self.app.get('/logout', follow_redirects=True)
+
+    def change_password(self, username, password, new_pass_1):
+        return self.app.post('/change_password', data=dict(
+            change_pwd_name=username,
+            current_password=password,
+            new_password_1=new_pass_1,
+        ), follow_redirects=True)
 
 if __name__ == '__main__':
     unittest.main()

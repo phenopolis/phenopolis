@@ -81,8 +81,18 @@ from config import config
 import regex
 import requests
 import json
+import py2neo
 from neo4j.v1 import GraphDatabase, basic_auth
 from json import dumps
+
+global graph
+
+if config.USE_PY2NEO:
+    #py2neo.authenticate("bigtop:57474", "neo4j", "1")
+    #graph = py2neo.Graph('http://bigtop:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
+    py2neo.authenticate("localhost:57474", "neo4j", "1")
+    graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
+
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -126,7 +136,7 @@ else:
     from minify_output import prettify
     render_template = prettify(render_template)
 
-# neo4j
+# neo4j using neo4j-driver as opposed to py2neo
 uri = "bolt://"+app.config['NEO4J_HOST']+":"+str(app.config['NEO4J_PORT'])
 neo4j_driver=GraphDatabase.driver(uri, auth=basic_auth(app.config['NEO4J_USER'], app.config['NEO4J_PWD']))
   
@@ -210,13 +220,14 @@ def change_password():
     else:
         print 'LOGIN SUCCESS, CHANGING PASSWORD'
         argon_password = argon2.hash(new_password_1)
-        db_users = get_db(app.config['DB_NAME_USERS'])
-        #db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
-        q={'query':'MATCH (u:User {user: $user}) SET u.argon_password=$password','parameters':{'user':username,'password':argon_password}}
-        resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
+
+        with neo4j_driver.session() as neo4j_session:
+            query = '''MATCH (u:User) WHERE u.user = {user} 
+                SET u.argon_password=$password'''
+            results = neo4j_session.run(query, {"user": username, 'password':argon_password})
+        
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
         return jsonify(success=msg), 200
-
 
 @app.route('/set/<query>')
 def set(query):
