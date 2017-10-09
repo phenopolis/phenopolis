@@ -81,19 +81,9 @@ from config import config
 import regex
 import requests
 import json
-import py2neo
 from neo4j.v1 import GraphDatabase, basic_auth
 import neo4j_setup
 from json import dumps
-
-global graph
-
-if config.USE_PY2NEO:
-    #py2neo.authenticate("bigtop:57474", "neo4j", "1")
-    #graph = py2neo.Graph('http://bigtop:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
-    py2neo.authenticate("localhost:57474", "neo4j", "1")
-    graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
-
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -137,7 +127,7 @@ else:
     from minify_output import prettify
     render_template = prettify(render_template)
 
-# neo4j using neo4j-driver as opposed to py2neo
+# neo4j 
 global neo4j_driver
 neo4j_driver = neo4j_setup.setup_neo4j_driver()
 
