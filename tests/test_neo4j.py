@@ -1,7 +1,7 @@
 from __future__ import print_function
 # Uncomment to run this module directly. TODO comment out.
-#import sys, os
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 # End of uncomment.
 
 import unittest

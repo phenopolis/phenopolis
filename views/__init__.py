@@ -129,7 +129,7 @@ else:
 
 # neo4j 
 global neo4j_driver
-neo4j_driver = neo4j_setup.setup_neo4j_driver()
+neo4j_driver = neo4j_setup.setup_neo4j_driver(app.config['NEO4J_HOST'],app.config['NEO4J_PORT'],app.config['NEO4J_PWD'])
 
 def check_auth(username, password): 
     """
