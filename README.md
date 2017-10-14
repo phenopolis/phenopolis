@@ -38,6 +38,8 @@ When this is installed you should be able to browse to:
 
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
 
+Set your Neo4j uri and password in [easy_install.sh](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh).
+
 ### Windows - additional steps
 Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.
 * pip - make sure it is up to date by running ```python -m pip install -U pip```
@@ -63,6 +65,7 @@ The example dataset covers only gene TTLL5. Web pages for other genes will show 
 
 Phenopolis requires:
 * a running mongo database
+* a running neo4j database
 * (optionally) a running Exomiser stand-alone server, which can be obtained on request as it being developed separately by [Julius Jacobsen](https://github.com/julesjacobsen).
 
 You will then be able to run ```phenopolis.py```, the python Flask server.
