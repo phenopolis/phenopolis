@@ -1,4 +1,5 @@
 from views import neo4j_driver
+from views.neo4j_setup import create_demo_user
 from passlib.hash import argon2
 
 
@@ -26,10 +27,8 @@ def delete_neo4j_test_data():
 
 def create_neo4j_demo_user():  
     with neo4j_driver.session() as session:
-        results = session.run("MATCH (u:User {user : 'demo'}) RETURN u")
-        result = results.single()
-        if not result:
-            print("Adding user 'demo' to the neo4j database.")
-            session.run("CREATE (a:User {user: {username}, argon_password: {hash}})",
-                        {"username": "demo", "hash": argon2.hash("demo123")})
+        create_demo_user(session)
+
+
+ 
 

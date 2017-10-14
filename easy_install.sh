@@ -80,6 +80,11 @@ mongo patients --eval "db.patients.createIndex({'specificity.score' : 1})"
 
 mongoimport --db users --collection users --file tests/data/users.json --drop
 
+# Neo4j - add demo user.
+# Neo4j needs to be running. Set your uri and password here.
+NEO4J_URI=bolt://localhost:7687
+NEO4J_PWD=1
+python views/neo4j_setup.py $NEO4J_URI $NEO4J_PWD
 
 # Run server 
 python runserver.py
