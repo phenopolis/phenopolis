@@ -30,6 +30,5 @@ bs4==0.0.1
 passlib==1.7.1
 argon2_cffi==16.3.0
 regex==2017.6.23 
-py2neo==3.1.2
 
 

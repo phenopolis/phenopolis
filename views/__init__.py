@@ -1,4 +1,3 @@
-
 #flask import
 from flask import Flask
 from flask import session
@@ -82,15 +81,9 @@ from config import config
 import regex
 import requests
 import json
-import py2neo
+from neo4j.v1 import GraphDatabase, basic_auth
+import neo4j_setup
 from json import dumps
-
-global graph
-
-#py2neo.authenticate("bigtop:57474", "neo4j", "1")
-#graph = py2neo.Graph('http://bigtop:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
-py2neo.authenticate("localhost:57474", "neo4j", "1")
-graph = py2neo.Graph('http://localhost:57474/db/data/',secure=False,bolt=None, bolt_port=57687)
 
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.getLogger().setLevel(logging.INFO)
@@ -134,18 +127,22 @@ else:
     from minify_output import prettify
     render_template = prettify(render_template)
 
-def check_auth(username, password):
+# neo4j 
+global neo4j_driver
+neo4j_driver = neo4j_setup.setup_neo4j_driver(app.config['NEO4J_HOST'],app.config['NEO4J_PORT'],app.config['NEO4J_PWD'])
+
+def check_auth(username, password): 
     """
     This function is called to check if a username / password combination is valid.
     """
-    q={'statements':[{'statement': "MATCH (u:User {user:'%s'}) RETURN u" % username}]}
-    print(q)
-    resp=requests.post('http://localhost:57474/db/data/transaction/commit',auth=('neo4j', '1'),json=q)
-    if not resp: return False
-    r=resp.json()['results'][0]['data'][0]['row'][0]
-    print(r)
-    session['user']=username
-    return argon2.verify(password, r['argon_password'])
+    with neo4j_driver.session() as neo4j_session:
+        query = '''MATCH (u:User) WHERE u.user = {user} 
+            RETURN u.user AS user, u.argon_password AS argon_password'''
+        results = neo4j_session.run(query, {"user": username})
+        result = results.single()
+        if not result: return False
+        session['user']=username
+        return argon2.verify(password, result['argon_password'])
 
 
 def authenticate():
@@ -214,13 +211,14 @@ def change_password():
     else:
         print 'LOGIN SUCCESS, CHANGING PASSWORD'
         argon_password = argon2.hash(new_password_1)
-        db_users = get_db(app.config['DB_NAME_USERS'])
-        #db_users.users.update_one({'user':username},{'$set':{'argon_password':hash}})
-        q={'query':'MATCH (u:User {user: $user}) SET u.argon_password=$password','parameters':{'user':username,'password':argon_password}}
-        resp=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json=q)
+
+        with neo4j_driver.session() as neo4j_session:
+            query = '''MATCH (u:User) WHERE u.user = {user} 
+                SET u.argon_password=$password'''
+            results = neo4j_session.run(query, {"user": username, 'password':argon_password})
+        
         msg = 'Password for username \''+username+'\' changed. You are logged in as \''+username+'\'.' 
         return jsonify(success=msg), 200
-
 
 @app.route('/set/<query>')
 def set(query):
@@ -279,7 +277,6 @@ def parse_tabix_file_subset(tabix_filenames, subset_i, subset_n, record_parser):
     Returns a generator of parsed record objects (as returned by record_parser) for the i'th out n subset of records
     across all the given tabix_file(s). The records are split by files and contigs within files, with 1/n of all contigs
     from all files being assigned to this the i'th subset.
-
     Args:
         tabix_filenames: a list of one or more tabix-indexed files. These will be opened using pysam.Tabixfile
         subset_i: zero-based number
@@ -1001,7 +998,15 @@ def about_page():
     female_patients=patients_db.patients.find( {'sex':'F'}).count()
     print('female_patients',female_patients,)
     unknown_patients=patients_db.patients.find( {'sex':'U'}).count()
-    return render_template('about.html',total_patients=total_patients)
+    try:
+        version_number = subprocess.check_output(['git', 'describe', '--exact-match'])
+    except:
+        try:
+            version_number = subprocess.check_output(['git', 'log', '-1', '--format=%cd', '--date=local'])
+        except:
+            version_number = None
+    print('Version number is:-',version_number,)
+    return render_template('about.html',total_patients=total_patients,version_number=version_number)
 
 
 @app.route('/participants')
@@ -1626,6 +1631,4 @@ import views.home
 import views.exomiser
 # work in progress, comment out if not needed
 import views.pheno4j
-
-
 

@@ -4,7 +4,7 @@
 
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
 
-![alt tag](https://github.com/pontikos/phenopolis/blob/master/static/phenopolis-pipeline.png)
+![alt tag](https://github.com/phenopolis/phenopolis/blob/master/static/phenopolis-pipeline.png)
 
 Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
 
@@ -28,14 +28,17 @@ This section includes guides to a quick install and a full installation.
 ## Prerequisites
 * Python 2 - you will need to use python2 as we are not python3 compatible since packages such as pygr which use the old ```print``` syntax are not compatible with python3. https://www.python.org/downloads/
 * MongoDB - https://www.mongodb.com/download-center#community
+* Neo4j - https://neo4j.com/download/
 
 ## Quick Install Demo for Coders
 
-I have a written as [shell script for quick installation](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
+I have a written as [shell script for quick installation](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
 When this is installed you should be able to browse to:
 [http://localhost:8000/gene/TTLL5](http://localhost:8000/gene/TTLL5)
 
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
+
+Set your Neo4j uri and password in [easy_install.sh](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh).
 
 ### Windows - additional steps
 Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.
@@ -45,10 +48,10 @@ Phenopolis can be developed under Windows but requires some additional steps and
  * pip install numpy-1.11.3+mkl-cp27-cp27m-win32.whl –user
  * pip install scipy-0.18.1-cp27-cp27m-win32.whl –user
  * pip install biopython-1.68-cp27-cp27m-win32.whl –user
-* Execute [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) 
+* Execute [the shell script](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh) 
 * pysam and primer3 - disable the install, these packages won't install on Windows.
-* In [config.py](https://github.com/pontikos/phenopolis/blob/master/config/config.py) set ```IMPORT_PYSAM_PRIMER3 = False```
-* Rerun [the shell script](https://github.com/pontikos/phenopolis/blob/master/easy_install.sh) (you may disable the commands ```git clone```, ```wget```, ```mongoimport``` and ```mongo```).
+* In [config.py](https://github.com/phenopolis/phenopolis/blob/master/config/config.py) set ```IMPORT_PYSAM_PRIMER3 = False```
+* Rerun [the shell script](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh) (you may disable the commands ```git clone```, ```wget```, ```mongoimport``` and ```mongo```).
 
 To debug in Visual Studio, first turn off the Flask debug by setting ```app.run(..,..,..,debug=False)``` in ```runserver.py```.
 
@@ -62,6 +65,7 @@ The example dataset covers only gene TTLL5. Web pages for other genes will show 
 
 Phenopolis requires:
 * a running mongo database
+* a running neo4j database
 * (optionally) a running Exomiser stand-alone server, which can be obtained on request as it being developed separately by [Julius Jacobsen](https://github.com/julesjacobsen).
 
 You will then be able to run ```phenopolis.py```, the python Flask server.
@@ -69,7 +73,7 @@ You will then be able to run ```phenopolis.py```, the python Flask server.
 The first step is to clone the repository.
 
 ```
-git clone git@github.com:pontikos/phenopolis.git
+git clone git@github.com:phenopolis/phenopolis.git
 ```
 
 If you wish to download the Exomiser stand-alone server, please get in touch with [Julius Jacobsen](https://github.com/julesjacobsen).
