@@ -370,7 +370,7 @@ def homozygous_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq,)
     print(s)
-    #data=requests.post('http://localhost:7474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
     #return jsonify(result=[merge_dicts(x[0]['data'],dict([y['data'] for y in x[1]]),dict([y['data'] for y in x[2]])) for x in data])
     db_session = neo4j_driver.session()
     result=db_session.run(s)
@@ -410,7 +410,7 @@ def compound_het_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq)
     print(s)
-    #data=requests.post('http://localhost:7474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
     #return jsonify(result=[x[0]['data'] for x in data])
     #return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
     db_session = neo4j_driver.session()
