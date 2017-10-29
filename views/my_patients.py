@@ -60,7 +60,6 @@ def get_individuals():
     collect(DISTINCT g.gene_name) as genes;
     """ % user['user']
     print(s)
-
     uri='http://'+app.config['NEO4J_HOST']+':'+str(app.config['NEO4J_PORT'])+'/db/data/cypher'
     data=requests.post(uri,auth=('neo4j',app.config['NEO4J_PWD']),json={'query':s})
     return data.json()

@@ -198,7 +198,8 @@ def get_feature_venn(patient):
     RETURN t.termId, t.name, g.gene_id, g.gene_name
     """ % patient
     print(s)
-    data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    uri='http://'+app.config['NEO4J_HOST']+':'+str(app.config['NEO4J_PORT'])+'/db/data/cypher'
+    data=requests.post(uri,auth=('neo4j',app.config['NEO4J_PWD']),json={'query':s}).json()['data']
     hpo_terms=[(k,v,) for k, v, in dict([(x[0],x[1],) for x in data]).items()]
     hpo_gene=dict()
     for hpo_id,hpo_term,gene_id,gene_name, in data:
@@ -369,10 +370,9 @@ def homozygous_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq,)
     print(s)
-    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    #data=requests.post('http://localhost:7474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
     #return jsonify(result=[merge_dicts(x[0]['data'],dict([y['data'] for y in x[1]]),dict([y['data'] for y in x[2]])) for x in data])
-    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
-    db_session = driver.session()
+    db_session = neo4j_driver.session()
     result=db_session.run(s)
     return jsonify(result=[merge_dicts(dict(r[0]),
         {'genes':[dict(x) for x in r[1]]},
@@ -410,11 +410,10 @@ def compound_het_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq)
     print(s)
-    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
+    #data=requests.post('http://localhost:7474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
     #return jsonify(result=[x[0]['data'] for x in data])
     #return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
-    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
-    db_session = driver.session()
+    db_session = neo4j_driver.session()
     result=db_session.run(s)
     return jsonify(result=[ merge_dicts(
         dict(r[0]),
@@ -456,8 +455,7 @@ def rare_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq,)
     print(s)
-    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
-    db_session = driver.session()
+    db_session = neo4j_driver.session()
     result=db_session.run(s)
     return jsonify(result=[ merge_dicts(
         dict(r[0]),
@@ -535,8 +533,7 @@ def get_homozygous_individuals(variant_id):
     WHERE v.variantId='%s'
     RETURN p
     """ % variant_id
-    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
-    db_session = driver.session()
+    db_session = neo4j_driver.session()
     result=db_session.run(s)
     return jsonify(result=[ merge_dicts(
         dict(r[0])) for r in result])
@@ -551,8 +548,7 @@ def get_heterozygous_individuals(variant_id):
     WHERE v.variantId='%s'
     RETURN p
     """ % variant_id
-    driver = GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
-    db_session = driver.session()
+    db_session = neo4j_driver.session()
     result=db_session.run(s)
     return jsonify(result=[ merge_dicts(
         dict(r[0])) for r in result])

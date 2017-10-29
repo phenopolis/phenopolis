@@ -30,24 +30,13 @@ class MyPatientsPageTestCase(unittest.TestCase):
         self.app.get('/logout', follow_redirects=True)
 
 
-    def test_my_patients_page(self): # TODO LMTW comment in
+    def test_my_patients_page(self): 
         page = self.app.get('/my_patients', follow_redirects=True)
         assert page.status_code == 200
-        # Need to wait for data before it can be checked. TODO LMTW
-        #assert 'person1' in page.data 
-        #assert 'M' in page.data 
-        #assert '0.69' in page.data 
-        #assert 'Visual impairment' in page.data
-        #assert 'TTLL5' in page.data
+        # NB this test doesn't wait for the data to load.
 
-    def test_get_individuals(self):
-        #app = Flask(__name__)
-        #with app.test_request_context():
-        #    with self.app.session_transaction() as session:
-        #        session['user']='demo'
-        #        #print('#####################')
-        #        #print(temp)
 
+    def workInProgress_test_get_individuals(self): # TODO LMTW
         app = Flask(__name__)
         with app.test_request_context():
             data = my_patients.get_individuals()
