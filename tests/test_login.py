@@ -1,7 +1,7 @@
 from __future__ import print_function
 # Uncomment to run this module directly. TODO comment out.
-#import sys, os
-#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 # End of uncomment.
 
 import unittest
@@ -25,18 +25,17 @@ class Neo4jTestCase(unittest.TestCase):
 
 
     def test_users_data(self):
-       with neo4j_driver.session() as session:
+       with neo4j_driver.session() as neo4j_session:
             # Test unknown user
-            results = session.run("MATCH (u:User {user : 'xxx'}) RETURN u.user AS user, u.argon_password AS argon_password")
+            results = neo4j_session.run("MATCH (u:User {user : 'xxx'}) RETURN u.user AS user, u.argon_password AS argon_password")
             result = results.single()
             assert(not result)
 
             # Test known user
-            results = session.run("MATCH (u:User {user : 'testSuite'}) RETURN u.user AS user, u.argon_password AS argon_password")
+            results = neo4j_session.run("MATCH (u:User {user : 'testSuite'}) RETURN u.user AS user, u.argon_password AS argon_password")
             result = results.single()
             assert(result)
             assert result['user'] == 'testSuite'
-            #assert result['argon_password'] == '$argon2i$v=19$m=512,t=2,p=2$n1PK2XvvXcs5h/Aewzjn3A$PxZq8Hwae2EZ4RZX204qsQ'
             assert(argon2.verify('demo123', result['argon_password']))
 
 

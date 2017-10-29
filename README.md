@@ -38,7 +38,7 @@ When this is installed you should be able to browse to:
 
 This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
 
-Set your Neo4j uri and password in [easy_install.sh](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh).
+Start Neo4j and, if this is the first time you've run Neo4j, log in and change the password. Set your Neo4j uri and password in [easy_install.sh](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh).
 
 ### Windows - additional steps
 Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.

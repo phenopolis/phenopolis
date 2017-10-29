@@ -46,7 +46,6 @@ def individuals_update(external_ids):
 
 
 def get_individuals():
-    #hpo_db=get_db(app.config['DB_NAME_HPO'])
     users_db=get_db(app.config['DB_NAME_USERS'])
     user=users_db.users.find_one({'user':session['user']})
     s="""
@@ -61,7 +60,9 @@ def get_individuals():
     collect(DISTINCT g.gene_name) as genes;
     """ % user['user']
     print(s)
-    data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s})
+
+    uri='http://'+app.config['NEO4J_HOST']+':'+str(app.config['NEO4J_PORT'])+'/db/data/cypher'
+    data=requests.post(uri,auth=('neo4j',app.config['NEO4J_PWD']),json={'query':s})
     return data.json()
 
 @app.route('/my_patients_json')
