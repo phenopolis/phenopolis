@@ -32,19 +32,20 @@ class MyPatientsPageTestCase(unittest.TestCase):
 
     def test_my_patients_page(self): 
         page = self.app.get('/my_patients', follow_redirects=True)
-        assert page.status_code == 200
-        # NB this test doesn't wait for the data to load.
+        assert page.status_code == 200 # NB this test doesn't wait for the data to load.
+        
 
-
-    def workInProgress_test_get_individuals(self): # TODO LMTW
+    def test_get_individuals(self): 
         app = Flask(__name__)
         with app.test_request_context():
-            data = my_patients.get_individuals()
-            assert 'person1' in data 
-            assert 'M' in data 
-            assert '0.69' in data 
-            assert 'Visual impairment' in data
-            assert 'TTLL5' in data
+            data = my_patients.get_individuals('demo')
+            assert data['data'][0][0] == 'person1' 
+            assert data['data'][0][1] == 'M' 
+            assert data['data'][0][3] == 0.69 
+            assert data['data'][0][6][0] == 'TTLL5' 
+            assert data['data'][0][2][0]['data']['name'] == 'Visual impairment'
+  
+      
 
 if __name__ == '__main__':
     unittest.main()

@@ -45,9 +45,7 @@ def individuals_update(external_ids):
     return individuals
 
 
-def get_individuals():
-    users_db=get_db(app.config['DB_NAME_USERS'])
-    user=users_db.users.find_one({'user':session['user']})
+def get_individuals(user):
     s="""
     MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term),
     (p)-[:CandidateGene]-(g:Gene)
@@ -58,7 +56,7 @@ def get_individuals():
     size((p)<-[:HomVariantToPerson]-()) as hom_count,
     size((p)<-[:HetVariantToPerson]-()) as het_count,
     collect(DISTINCT g.gene_name) as genes;
-    """ % user['user']
+    """ % user
     print(s)
     uri='http://'+app.config['NEO4J_HOST']+':'+str(app.config['NEO4J_PORT'])+'/db/data/cypher'
     data=requests.post(uri,auth=('neo4j',app.config['NEO4J_PWD']),json={'query':s})
@@ -67,7 +65,9 @@ def get_individuals():
 @app.route('/my_patients_json')
 @requires_auth
 def my_patients_json():
-    individuals=get_individuals()
+    users_db=get_db(app.config['DB_NAME_USERS'])
+    user=users_db.users.find_one({'user':session['user']})
+    individuals=get_individuals(user['user'])
     return(jsonify(result=individuals))
 
 
