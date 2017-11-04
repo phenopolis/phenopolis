@@ -11,6 +11,7 @@ import csv
 #hpo lookup
 import orm
 
+
 def individuals_update(external_ids):
     patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     users_db=get_db(app.config['DB_NAME_USERS'])
@@ -44,8 +45,17 @@ def individuals_update(external_ids):
     users_db.users.update_one({'user':session['user']},{'$set':{'individuals':individuals}})
     return individuals
 
+def merge_dicts(*dict_args): # TODO LMTW use common function
+    """
+    Given any number of dicts, shallow copy and merge into a new dict,
+    precedence goes to key value pairs in latter dicts.
+    """
+    result = {}
+    for dictionary in dict_args:
+        result.update(dictionary)
+    return result
 
-def get_individuals(user):
+def old_get_individuals(user):
     s="""
     MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term),
     (p)-[:CandidateGene]-(g:Gene)
@@ -60,7 +70,53 @@ def get_individuals(user):
     print(s)
     uri='http://'+app.config['NEO4J_HOST']+':'+str(app.config['NEO4J_PORT'])+'/db/data/cypher'
     data=requests.post(uri,auth=('neo4j',app.config['NEO4J_PWD']),json={'query':s})
+    temp = data.json() # TODO LMTW remove
+    print('######################### data.json() ###############')
+    print(temp)
+
+
     return data.json()
+
+def get_individuals(user):
+    s="""
+    MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term),
+    (p)-[:CandidateGene]-(g:Gene)
+    RETURN p.personId as individual,
+    p.gender as gender,
+    collect(DISTINCT t) as phenotypes,
+    p.score as phenotypeScore,
+    size((p)<-[:HomVariantToPerson]-()) as hom_count,
+    size((p)<-[:HetVariantToPerson]-()) as het_count,
+    collect(DISTINCT g.gene_name) as genes;
+    """ % user
+
+    db_session = neo4j_driver.session()
+    #TODO LMTW result=db_session.run(s)
+    #print('######################### start res $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    #records = []
+    #for r in result:
+    #    print(r['individual'])
+    #    print(r['gender'])
+    #    records.append({
+    #        'individual': r['individual'],
+    #        'gender': r['gender']})
+
+
+    d=[]
+    d.append( {
+        'first_name': 'Jodi',
+        'second_name': 'Hunt',
+        'titles': ['Dr', 'Developer'],
+    })
+    d.append( {
+        'first_name': 'Lou',
+        'second_name': 'Sams',
+        'titles': ['Dr', 'Developer'],
+    })
+
+    j=(jsonify(result=d))
+    return j#jsonify(records)
+
 
 @app.route('/my_patients_json')
 @requires_auth

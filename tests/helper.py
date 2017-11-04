@@ -46,6 +46,21 @@ def my_patients_neo4j_data():
         print(s)
         result = neo4j_session.run(s)
 
+        # person2
+        s="""
+        MATCH (u:User {user:'%s'})
+        MERGE (u)-[r:WRITES]->(p:Person {personId:"person2", gender:"F", score:0.69})
+        MERGE (t:Term {termId:"HP:0000505", name:"Visual impairment"})
+        MERGE (p)-[:PersonToObservedTerm]->(t)
+        MERGE (p)-[:CandidateGene]->(g:Gene {gene_name:"DRAM2"})
+        MERGE (gv:GeneticVariant {variantId:"22-38212762-A-G"})
+        MERGE (gv14:GeneticVariant {variantId:"14-76201609-C-G"})
+        MERGE (p)<-[:HomVariantToPerson]-(gv)
+        MERGE (p)<-[:HetVariantToPerson]-(gv14);
+        """ % (user)
+        print(s)
+        result = neo4j_session.run(s)
+
 
  
 
