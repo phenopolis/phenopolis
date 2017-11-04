@@ -46,17 +46,19 @@ class MyPatientsPageTestCase(unittest.TestCase):
             data=jsonify(result=records)
             assert data.status == '200 OK'
             parsed_json = json.loads(data.data)
+            # First person.
             i=0
             assert parsed_json['result'][i]['individual'] == 'person2'
             assert parsed_json['result'][i]['gender'] == 'F'
-            assert parsed_json['result'][i]['phenotypes'][0]['name'] == 'Abnormality of the retina'
-            assert parsed_json['result'][i]['phenotypes'][1]['name'] == 'Visual impairment'
+            for pheno in parsed_json['result'][i]['phenotypes'] :
+                assert (pheno['name'] == 'Abnormality of the retina' or 
+                    pheno['name'] == 'Visual impairment')
             assert parsed_json['result'][i]['phenotypeScore'] == 0.69
             assert parsed_json['result'][i]['hom_count'] == 1
             assert parsed_json['result'][i]['het_count'] == 2
-            assert parsed_json['result'][i]['genes'][0] == 'RPGR'
-            assert parsed_json['result'][i]['genes'][1] == 'TTLL5'
-            assert parsed_json['result'][i]['genes'][2] == 'DRAM2'
+            for gene in parsed_json['result'][i]['genes'] :
+                assert gene == 'RPGR' or gene == 'TTLL5' or gene == 'DRAM2'
+            # Next person.
             i=1
             assert parsed_json['result'][i]['individual'] == 'person1'
             assert parsed_json['result'][i]['gender'] == 'M'
