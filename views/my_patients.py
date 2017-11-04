@@ -59,8 +59,8 @@ def get_individuals(user):
     collect(DISTINCT g.gene_name) as genes;
     """ % user
 
-    db_session = neo4j_driver.session()
-    result=db_session.run(s)
+    with neo4j_driver.session() as db_session: 
+        result=db_session.run(s)
     data = []
     for r in result:
         data.append({

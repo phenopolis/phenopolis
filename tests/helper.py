@@ -43,7 +43,6 @@ def my_patients_neo4j_data():
         MERGE (p)<-[:HomVariantToPerson]-(gv)
         MERGE (p)<-[:HetVariantToPerson]-(gv14);
         """ % (user)
-        print(s)
         result = neo4j_session.run(s)
 
         # person2
@@ -64,7 +63,6 @@ def my_patients_neo4j_data():
         MERGE (p)<-[:HetVariantToPerson]-(gv1)
         MERGE (p)<-[:HetVariantToPerson]-(gv2);
         """ % (user)
-        print(s)
         result = neo4j_session.run(s)
 
 
