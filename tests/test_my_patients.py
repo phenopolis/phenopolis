@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import unittest
 import subprocess
 import runserver
-from flask import Flask, current_app
+from flask import Flask, current_app, jsonify
 from views import neo4j_driver
 from views import my_patients
 from views import session
@@ -49,7 +49,8 @@ class MyPatientsPageTestCase(unittest.TestCase):
     def test_temp_get_individuals(self): 
         app = Flask(__name__)
         with app.test_request_context():
-            data = my_patients.get_individuals('demo')
+            records = my_patients.get_individuals('demo')
+            data=jsonify(result=records)
             assert data.status == '200 OK'
             parsed_json = json.loads(data.data)
             i=0
