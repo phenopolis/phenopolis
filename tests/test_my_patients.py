@@ -1,7 +1,7 @@
 from __future__ import print_function
 # Uncomment to run this module directly. TODO comment out.
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+#import sys, os
+#sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 # End of uncomment.
 
 import unittest
@@ -34,22 +34,15 @@ class MyPatientsPageTestCase(unittest.TestCase):
     def test_my_patients_page(self): 
         page = self.app.get('/my_patients', follow_redirects=True)
         assert page.status_code == 200 # NB this test doesn't wait for the data to load.
-        
 
-    def commetn_in_test_get_individuals(self): #TODO LMTW
-        app = Flask(__name__)
-        with app.test_request_context():
-            data = my_patients.get_individuals('demo')
-            assert data['data'][1][0] == 'person1' 
-            assert data['data'][1][1] == 'M' 
-            assert data['data'][1][3] == 0.69 
-            assert data['data'][1][6][0] == 'TTLL5' 
-            assert data['data'][1][2][0]['data']['name'] == 'Visual impairment'
   
-    def test_temp_get_individuals(self): 
+    def test_my_patients_functionality(self): 
         app = Flask(__name__)
         with app.test_request_context():
             records = my_patients.get_individuals('demo')
+            # Here we create the Flask Response object, containing json, 
+            # that the /my_patients page receives. We then test 
+            # that the expected data is available.
             data=jsonify(result=records)
             assert data.status == '200 OK'
             parsed_json = json.loads(data.data)

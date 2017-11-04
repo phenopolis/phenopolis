@@ -21,34 +21,32 @@ if (!PP) {
     // Cry & scream...
   };
 
-  PP.fetchPatients = function() {
-    $.ajax({
-      type: 'GET',
-      url: '/my_patients_json',
-      dataType: 'json',
-      success: function(data) {
-        var patients = data.result.data;
-        var columns  = data.result.columns;
-        var idx      = PP.generateIndexes(columns);
-        for (var i = 0; i < patients.length; i++) {
-          $('<tr>').append(
-            $('<td>').html(PP.create_url('/individual', patients[i][ idx.individual ] )), // individual
-            $('<td>').text( patients[i][ idx.gender ] ), // gender
-            $('<td>').html(PP.generatePhenotypesHtml( patients[i][ idx.phenotypes ] )), // phenotypes
-            $('<td>').text( +patients[i][ idx.phenotypeScore ].toFixed(2) ), // phenotypeScore
-            $('<td>').text( +patients[i][ idx.hom_count ].toFixed(2) ), // hom_count
-            $('<td>').text( +patients[i][ idx.het_count ].toFixed(2) ), // het_count
-            $('<td>').html(PP.generateGeneHtml(patients[i][idx.genes])) // candidate_genes
-          ).appendTo('#my_patients_table_body');
-        }
-        PP.showNumberOfPatients(patients.length);
-        $('#my_patients #progress_row').remove();
-        $('#my_patients_table').show();
-        PP.initTableSorter('#my_patients_table');
-        $('#my_patients_table').on('filterEnd', PP.showNumberOfPatients(patients.length) );
-      },
-      error: function(error, msg) { PP.ajaxError(error, msg); }
-    });
+  PP.fetchPatients = function () {
+      $.ajax({
+          type: 'GET',
+          url: '/my_patients_json',
+          dataType: 'json',
+          success: function (data) {
+              var patients = data.result;
+              for (var i = 0; i < patients.length; i++) {
+                  $('<tr>').append(
+                    $('<td>').html(PP.create_url('/individual', patients[i].individual)), 
+                    $('<td>').text(patients[i].gender), 
+                    $('<td>').html(PP.generatePhenotypesHtml(patients[i].phenotypes)),
+                    $('<td>').text(+patients[i].phenotypeScore.toFixed(2)), 
+                    $('<td>').text(+patients[i].hom_count.toFixed(2)), 
+                    $('<td>').text(+patients[i].het_count.toFixed(2)),
+                    $('<td>').html(PP.generateGeneHtml(patients[i].genes)) // candidate_genes
+                  ).appendTo('#my_patients_table_body');
+              }
+              PP.showNumberOfPatients(patients.length);
+              $('#my_patients #progress_row').remove();
+              $('#my_patients_table').show();
+              PP.initTableSorter('#my_patients_table');
+              $('#my_patients_table').on('filterEnd', PP.showNumberOfPatients(patients.length));
+          },
+          error: function (error, msg) { PP.ajaxError(error, msg); }
+      });
   };
 
   PP.generateIndexes = function(columns) {
@@ -66,7 +64,7 @@ if (!PP) {
   PP.generatePhenotypesHtml = function(features) {
     phenotypesHtml = '';
     for (var i = 0; i < features.length; i++) {
-      phenotypesHtml = phenotypesHtml + ' ' + PP.create_url('/hpo', features[i].data.name, features[i].data.termId, 'chip');
+      phenotypesHtml = phenotypesHtml + ' ' + PP.create_url('/hpo', features[i].name, features[i].termId, 'chip');
     }
     return (phenotypesHtml);
   };

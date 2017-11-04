@@ -42,7 +42,7 @@ class GenePageTestCase(unittest.TestCase):
         assert 'Abnormality of the posterior segment of the globe' in page.data
         assert 'Abnormality of the globe' in page.data
         assert 'Abnormal eye morphology' in page.data
-        #assert 'Abnormality of the eye' in page.data
+        assert 'Abnormality of the eye' in page.data
         assert 'Phenotypic abnormality' in page.data
         assert 'All' in page.data
 

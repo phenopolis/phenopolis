@@ -45,37 +45,6 @@ def individuals_update(external_ids):
     users_db.users.update_one({'user':session['user']},{'$set':{'individuals':individuals}})
     return individuals
 
-def merge_dicts(*dict_args): # TODO LMTW use common function
-    """
-    Given any number of dicts, shallow copy and merge into a new dict,
-    precedence goes to key value pairs in latter dicts.
-    """
-    result = {}
-    for dictionary in dict_args:
-        result.update(dictionary)
-    return result
-
-def old_get_individuals(user):
-    s="""
-    MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term),
-    (p)-[:CandidateGene]-(g:Gene)
-    RETURN p.personId as individual,
-    p.gender as gender,
-    collect(DISTINCT t) as phenotypes,
-    p.score as phenotypeScore,
-    size((p)<-[:HomVariantToPerson]-()) as hom_count,
-    size((p)<-[:HetVariantToPerson]-()) as het_count,
-    collect(DISTINCT g.gene_name) as genes;
-    """ % user
-    print(s)
-    uri='http://'+app.config['NEO4J_HOST']+':'+str(app.config['NEO4J_PORT'])+'/db/data/cypher'
-    data=requests.post(uri,auth=('neo4j',app.config['NEO4J_PWD']),json={'query':s})
-    temp = data.json() # TODO LMTW remove
-    print('######################### data.json() ###############')
-    print(temp)
-
-
-    return data.json()
 
 def get_individuals(user):
     s="""
