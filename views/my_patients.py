@@ -91,17 +91,21 @@ def get_individuals(user):
     """ % user
 
     db_session = neo4j_driver.session()
-    #TODO LMTW result=db_session.run(s)
-    #print('######################### start res $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-    #records = []
-    #for r in result:
-    #    print(r['individual'])
-    #    print(r['gender'])
-    #    records.append({
-    #        'individual': r['individual'],
-    #        'gender': r['gender']})
+    result=db_session.run(s)
+    print('######################### start res $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    records = []
+    for r in result:
+        records.append({
+            'individual': r['individual'],
+            'gender': r['gender'],
+            'phenotypes': [dict(x) for x in r['phenotypes']],
+            'phenotypeScore': r['phenotypeScore'],
+            'hom_count': r['hom_count'],
+            'het_count': r['het_count'],
+            'genes': [y for y in r['genes']]
+        })
 
-
+    print(records)
     d=[]
     d.append( {
         'first_name': 'Jodi',
@@ -115,7 +119,7 @@ def get_individuals(user):
     })
 
     j=(jsonify(result=d))
-    return j#jsonify(records)
+    return jsonify(result=records)
 
 
 @app.route('/my_patients_json')

@@ -52,7 +52,20 @@ class MyPatientsPageTestCase(unittest.TestCase):
             data = my_patients.get_individuals('demo')
             assert data.status == '200 OK'
             parsed_json = json.loads(data.data)
-            assert parsed_json['result'][0]['first_name'] == 'Jodi'
+            i=0
+            assert parsed_json['result'][i]['individual'] == 'person2'
+            assert parsed_json['result'][i]['gender'] == 'F'
+            assert parsed_json['result'][i]['phenotypes'][0]['name'] == 'Abnormality of the retina'
+            assert parsed_json['result'][i]['phenotypes'][1]['name'] == 'Visual impairment'
+            assert parsed_json['result'][i]['phenotypeScore'] == 0.69
+            assert parsed_json['result'][i]['hom_count'] == 1
+            assert parsed_json['result'][i]['het_count'] == 2
+            assert parsed_json['result'][i]['genes'][0] == 'DRAM2'
+            assert parsed_json['result'][i]['genes'][1] == 'RPGR'
+            assert parsed_json['result'][i]['genes'][2] == 'TTLL5'
+            i=1
+            assert parsed_json['result'][i]['individual'] == 'person1'
+            assert parsed_json['result'][i]['gender'] == 'M'
 
      
 
