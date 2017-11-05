@@ -11,6 +11,7 @@ import csv
 #hpo lookup
 import orm
 
+
 def individuals_update(external_ids):
     patients_db=get_db(app.config['DB_NAME_PATIENTS'])
     users_db=get_db(app.config['DB_NAME_USERS'])
@@ -45,10 +46,7 @@ def individuals_update(external_ids):
     return individuals
 
 
-def get_individuals():
-    #hpo_db=get_db(app.config['DB_NAME_HPO'])
-    users_db=get_db(app.config['DB_NAME_USERS'])
-    user=users_db.users.find_one({'user':session['user']})
+def get_individuals(user):
     s="""
     MATCH (u:User {user:'%s'})--(p:Person)-[:PersonToObservedTerm]->(t:Term),
     (p)-[:CandidateGene]-(g:Gene)
@@ -59,15 +57,30 @@ def get_individuals():
     size((p)<-[:HomVariantToPerson]-()) as hom_count,
     size((p)<-[:HetVariantToPerson]-()) as het_count,
     collect(DISTINCT g.gene_name) as genes;
-    """ % user['user']
-    print(s)
-    data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s})
-    return data.json()
+    """ % user
+
+    with neo4j_driver.session() as db_session: 
+        result=db_session.run(s)
+    data = []
+    for r in result:
+        data.append({
+            'individual': r['individual'],
+            'gender': r['gender'],
+            'phenotypes': [dict(x) for x in r['phenotypes']],
+            'phenotypeScore': r['phenotypeScore'],
+            'hom_count': r['hom_count'],
+            'het_count': r['het_count'],
+            'genes': [y for y in r['genes']]
+        })
+    return data
+
 
 @app.route('/my_patients_json')
 @requires_auth
 def my_patients_json():
-    individuals=get_individuals()
+    users_db=get_db(app.config['DB_NAME_USERS'])
+    user=users_db.users.find_one({'user':session['user']})
+    individuals=get_individuals(user['user'])
     return(jsonify(result=individuals))
 
 

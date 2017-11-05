@@ -21,15 +21,15 @@ def setup_neo4j_driver(host, port, password):
     # Try default_password.
     # Password handling from https://github.com/robinedwards/django-neomodel
     driver = GraphDatabase.driver(uri, auth=basic_auth("neo4j", default_password))
-    with driver.session() as session:
+    with driver.session() as neo4j_session:
         try:
-            result = session.run("MATCH (a:Person) WHERE a.name = {name} RETURN a", {"name": "Crick"})
+            result = neo4j_session.run("MATCH (a:Person) WHERE a.name = {name} RETURN a", {"name": "Crick"})
 
         except CypherError as ce:
             if 'The credentials you provided were valid, but must be changed before you can use this instance' in str(ce):
-                session.run("CALL dbms.changePassword({password})", {'password': local_password})
+                neo4j_session.run("CALL dbms.changePassword({password})", {'password': local_password})
                 print("New database with no password set, setting password to '", local_password, "'.")
-                session.close()
+                neo4j_session.close()
             else:
                 raise ce
     return driver

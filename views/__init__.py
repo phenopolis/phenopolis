@@ -129,7 +129,7 @@ else:
 
 # neo4j 
 global neo4j_driver
-neo4j_driver = neo4j_setup.setup_neo4j_driver(app.config['NEO4J_HOST'],app.config['NEO4J_PORT'],app.config['NEO4J_PWD'])
+neo4j_driver = neo4j_setup.setup_neo4j_driver(app.config['NEO4J_HOST'],app.config['NEO4J_BOLT_PORT'],app.config['NEO4J_PWD'])
 
 def check_auth(username, password): 
     """
@@ -260,9 +260,7 @@ def connect_db(dbname=None):
     Connects to the specific database.
     """
     if dbname=='neo4j':
-        from neo4j.v1 import GraphDatabase, basic_auth
-        neo4j=GraphDatabase.driver("bolt://localhost:57687", auth=basic_auth("neo4j", "1"))
-        return neo4j.session()
+        return neo4j_driver.session()
     print(app.config['DB_HOST'], app.config['DB_PORT'])
     client = pymongo.MongoClient(host=app.config['DB_HOST'], port=app.config['DB_PORT'])
     print(client)
