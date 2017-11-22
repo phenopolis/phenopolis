@@ -32,39 +32,6 @@ def create_neo4j_demo_user():
 def my_patients_neo4j_data():
     user='demo'
     with neo4j_driver.session() as neo4j_session:
-
-
-
-        ## genes
-        #s="""
-        #MERGE (g:Gene {gene_name:"TTLL5"})
-        #MERGE (g1:Gene {gene_name:"DRAM2"})
-        #MERGE (g2:Gene {gene_name:"RPGR"});
-        #""" 
-        #result = neo4j_session.run(s)
-
-        ## person1
-        #s="""
-        #MATCH (u:User {user:'%s'})
-        #MERGE (u)-[r:WRITES]->(p:Person {personId:"person1", gender:"M", score:0.69});
-        #""" % (user)
-        #result = neo4j_session.run(s)
-
-        ## person2
-        #s="""
-        #MATCH (u:User {user:'%s'})
-        #MERGE (u)-[r:WRITES]->(p:Person {personId:"person2", gender:"F", score:0.69})
-        #""" % (user)
-        #result = neo4j_session.run(s)
-
-        ## Person to Gene
-        #s="""
-        #MATCH (p:Person {personId:"person1"}), (g:Gene {gene_name:"TTLL5"})
-        #MERGE (p)-[:CandidateGene]->(g);
-        #"""
-        #result = neo4j_session.run(s)
-
-
         # person1
         s="""
         MATCH (u:User {user:'%s'})

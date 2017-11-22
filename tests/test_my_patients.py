@@ -51,12 +51,13 @@ class MyPatientsPageTestCase(unittest.TestCase):
             assert parsed_json['result'][i]['gender'] == 'F'
             for pheno in parsed_json['result'][i]['phenotypes'] :
                 assert (pheno['name'] == 'Abnormality of the retina' or 
-                    pheno['name'] == 'Visual impairment')
+                        pheno['name'] == 'Visual impairment' or 
+                        pheno['name'] == 'Macular dystrophy')            
             assert parsed_json['result'][i]['phenotypeScore'] == 0.69
             assert parsed_json['result'][i]['hom_count'] == 1
             assert parsed_json['result'][i]['het_count'] == 2
             for gene in parsed_json['result'][i]['genes'] :
-                assert gene == 'RPGR' or gene == 'TTLL5' or gene == 'DRAM2'
+                assert gene == 'RPGR' or gene == 'TTLL5' or gene == 'DRAM2' or gene == 'TRIM32'
             # Next person.
             i=1
             assert parsed_json['result'][i]['individual'] == 'person1'
