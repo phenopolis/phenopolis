@@ -110,8 +110,9 @@ def my_patients_neo4j_data():
             (t7754:Term {termId:"HP:0007754", name:"Macular dystrophy"})
         MERGE (g1)-[:GeneToTerm]->(t505)
         MERGE (g1)-[:GeneToTerm]->(t479)
+        MERGE (g2)-[:GeneToTerm]->(t505)
         MERGE (g2)-[:GeneToTerm]->(t479)
-        MERGE (g3)-[:GeneToTerm]->(t479)
+        MERGE (g3)-[:GeneToTerm]->(t505)
         MERGE (g3)-[:GeneToTerm]->(t7754);
         """ 
         result = neo4j_session.run(s)
