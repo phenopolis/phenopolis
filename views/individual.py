@@ -198,12 +198,23 @@ def get_feature_venn(patient):
     RETURN t.termId, t.name, g.gene_id, g.gene_name
     """ % patient
     print(s)
-    uri='http://'+app.config['NEO4J_HOST']+':'+str(app.config['NEO4J_PORT'])+'/db/data/cypher'
-    data=requests.post(uri,auth=('neo4j',app.config['NEO4J_PWD']),json={'query':s}).json()['data']
-    hpo_terms=[(k,v,) for k, v, in dict([(x[0],x[1],) for x in data]).items()]
+    with neo4j_driver.session() as neo4j_session:
+        result=neo4j_session.run(s)
+
+    data = []
+    for r in result:
+        data.append({
+            'hpo_id': r['t.termId'],
+            'hpo_term': r['t.name'],
+            'gene_id': r['g.gene_id'],
+            'gene_name': r['g.gene_name']
+        })
+
+    hpo_terms=[(k,v,) for k, v, in dict([(x['hpo_id'],x['hpo_term'],) for x in data]).items()]
     hpo_gene=dict()
-    for hpo_id,hpo_term,gene_id,gene_name, in data:
-        hpo_gene[hpo_id]=hpo_gene.get(hpo_id,[])+[gene_name]
+    for x in data:
+        hpo_gene[x['hpo_id']]=hpo_gene.get(x['hpo_id'],[])+[x['gene_name']]
+
     genes = {}
     feature_combo = []
     feature_venn = []
@@ -370,10 +381,8 @@ def homozygous_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq,)
     print(s)
-    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
-    #return jsonify(result=[merge_dicts(x[0]['data'],dict([y['data'] for y in x[1]]),dict([y['data'] for y in x[2]])) for x in data])
-    db_session = neo4j_driver.session()
-    result=db_session.run(s)
+    with neo4j_driver.session() as neo4j_session: 
+        result=neo4j_session.run(s)
     return jsonify(result=[merge_dicts(dict(r[0]),
         {'genes':[dict(x) for x in r[1]]},
         {'terms':[dict(x) for x in r[2]]},
@@ -381,9 +390,7 @@ def homozygous_variants2(individual):
         {'het_individuals':[dict(x) for x in r[4]]},
         {'hom_individuals':[dict(x) for x in r[5]]}
         ) for r in result])
-    #return jsonify(result=data)
-    #return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
-    
+
 
 @app.route('/compound_het_variants_json2/<individual>',methods=['GET','POST'])
 @requires_auth
@@ -410,11 +417,8 @@ def compound_het_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq)
     print(s)
-    #data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s}).json()['data']
-    #return jsonify(result=[x[0]['data'] for x in data])
-    #return dumps(graph.run(s,personId=individual,kaviar_AF=kaviar_AF,allele_freq=allele_freq).data())
-    db_session = neo4j_driver.session()
-    result=db_session.run(s)
+    with neo4j_driver.session() as neo4j_session:
+        result=neo4j_session.run(s)
     return jsonify(result=[ merge_dicts(
         dict(r[0]),
         {'terms':[]},
@@ -455,8 +459,8 @@ def rare_variants2(individual):
     collect(distinct p3)
     """ % (individual,kaviar_AF,allele_freq,)
     print(s)
-    db_session = neo4j_driver.session()
-    result=db_session.run(s)
+    with neo4j_driver.session() as neo4j_session:
+        result=neo4j_session.run(s)
     return jsonify(result=[ merge_dicts(
         dict(r[0]),
         {'genes':[dict(x) for x in r[1]]},
@@ -533,8 +537,8 @@ def get_homozygous_individuals(variant_id):
     WHERE v.variantId='%s'
     RETURN p
     """ % variant_id
-    db_session = neo4j_driver.session()
-    result=db_session.run(s)
+    with neo4j_driver.session() as neo4j_session:
+        result=neo4j_session.run(s)
     return jsonify(result=[ merge_dicts(
         dict(r[0])) for r in result])
 
