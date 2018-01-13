@@ -12,7 +12,7 @@ Phenopolis is used for research into the molecular diagnosis of rare genetic dis
 
 ## The Phenopolis Website 
 You can access a demo version of the server at:
-https://phenopolis.github.io
+https://phenopolis.org
 username/password:
 demo/demo123
 
