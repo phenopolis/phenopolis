@@ -2,6 +2,7 @@ language: python
 python:
   - "2.7"
 dist: trusty  
+group: deprecated-2017Q4
 cache: pip
 # submodules is set to false to overcome a problem on Travis, we use the git line below instead.  
 git:
