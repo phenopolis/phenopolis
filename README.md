@@ -32,13 +32,17 @@ This section includes guides to a quick install and a full installation.
 
 ## Quick Install Demo for Coders
 
-I have a written as [shell script for quick installation](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh) on some example data that is downloadable from our website.  This will only take ~256M of disk space.
-When this is installed you should be able to browse to:
+This quick install is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
+
+I have a written a shell script for quick installation, easy_install.sh, on some example data that is downloadable from our website.  This will only take ~256M of disk space. Download easy_install.sh (https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh).
+
+Start Neo4j and, if this is the first time you've run Neo4j, log in and change the password. Set your Neo4j uri and password in easy_install.sh.
+
+Run easy_install.sh. This will clone the phenopolis Git repo, install packages and get data. When complete, you should be able to browse to:
 [http://localhost:8000/gene/TTLL5](http://localhost:8000/gene/TTLL5)
 
-This is for people who want to get a local version up and running quickly to contribute to the codebase of the project.
+The example dataset covers only gene TTLL5. Web pages for other genes will show no information.
 
-Start Neo4j and, if this is the first time you've run Neo4j, log in and change the password. Set your Neo4j uri and password in [easy_install.sh](https://github.com/phenopolis/phenopolis/blob/master/easy_install.sh).
 
 ### Windows - additional steps
 Phenopolis can be developed under Windows but requires some additional steps and some lesser-used functionality will not be available.
