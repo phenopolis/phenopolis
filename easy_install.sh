@@ -1,14 +1,14 @@
 # Get phenopolis and its submodule.
-git clone https://github.com/pontikos/phenopolis.git
-cd phenopolis
+#git clone https://github.com/pontikos/phenopolis.git
+#cd phenopolis
 git submodule update --init --recursive
 cd varnorm
-python setup.py install --user
+python setup.py install 
 cd ../..
 
 # python packages required
-pip install Cython==0.25.2 --install-option="--no-cython-compile" --user 
-pip install -r phenopolis/requirements.txt --user
+pip install Cython==0.25.2 --install-option="--no-cython-compile" 
+pip install -r phenopolis/requirements.txt 
 
 # Make sure mongodb is running
 DBPATH=db
