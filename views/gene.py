@@ -4,9 +4,6 @@ from orm import *
 import rest as annotation
 import requests
 from config import config
-if config.IMPORT_PYSAM_PRIMER3:
-    import primer3
-import myvariant
 from vcf import vcf_query
 import hashlib
 from bson.json_util import dumps
@@ -269,4 +266,4 @@ def test():
     return render_template('test.html', relations = json.dumps(relations), genes = json.dumps(list(set(genes))), omims = json.dumps(list(set(omims))))
 
 
-
+    
