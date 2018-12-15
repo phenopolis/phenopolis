@@ -246,7 +246,13 @@ def gene_phenogenon_json(gene_id):
     del gene['_id']
     return json.dumps(gene)
 
-
+@app.route('/gene/',methods=['GET'])
+@requires_auth
+def gene():
+   gene_id=request.args.get('id')
+   x=json.loads(file('tests/data/TTLL5.json','r').read())
+   return json.dumps(x)
+    
 # test
 @app.route('/test')
 def test():

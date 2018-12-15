@@ -58,6 +58,7 @@ def get_individuals(build_cache=False):
     size((p)<-[:HomVariantToPerson]-()) as rare_hom_count,
     size((p)<-[:HetVariantToPerson]-()) as rare_het_count;
     """ % user['user']
+    print s
     data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j','1'),json={'query':s})
     return data.json()
 

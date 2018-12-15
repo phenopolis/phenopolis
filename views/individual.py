@@ -379,13 +379,15 @@ def compound_het_variants(individual):
 def rare_variants2(individual):
     #patient=Patient(individual,patient_db=get_db(app.config['DB_NAME_PATIENTS']),variant_db=get_db(app.config['DB_NAME']),hpo_db=get_db(app.config['DB_NAME_HPO']))
     #return jsonify(result=patient.rare_variants)
+    print 'rare_variants2'
     s="""
     MATCH (gv:GeneticVariant)-[:HetVariantToPerson]->(p:Person)
     WHERE p.personId="%s" and gv.kaviar_AF < 0.0001 and gv.allele_freq < 0.001
     RETURN gv.variantId ;
     """%individual
     data=requests.post('http://localhost:57474/db/data/cypher',auth=('neo4j', '1'),json={'query':s})
-    variants=[v[0] for v in data]
+    data=data.json()
+    variants=[v[0] for v in data['data']]
     print(len(variants))
     #variants=[r['row'][0] for r in resp.json()['results'][0]['data']]
     #variants=[get_db().variants.find_one({'variant_id':v},{'_id':False}).get('canonical_gene_name_upper','') for v in variants]
