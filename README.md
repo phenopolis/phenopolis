@@ -2,7 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/phenopolis/phenopolis/badge.svg?branch=master)](https://coveralls.io/github/phenopolis/phenopolis?branch=master)
 
 ```
-Here is the original version of Phenopolis, we are now working on the much improved 2019 version.
+Note this is the original version of Phenopolis, we are now working on the much improved 2019 version.
 ```
 
 
@@ -12,16 +12,22 @@ Here is the original version of Phenopolis, we are now working on the much impro
 
 Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582). Published in [Bioinformatics](https://www.ncbi.nlm.nih.gov/pubmed/28334266).
 
-Phenopolis is used for research into the molecular diagnosis of rare genetic diseases by clinicians, geneticists and bioinformaticians at UCL, University of Leeds, University of Manchester and University of Oxford.
+Phenopolis is used for research into the molecular diagnosis of rare genetic diseases by clinicians, geneticists and bioinformaticians at:
+* UCL
+* QMUL
+* University of Leeds
+* University of Manchester
+* University of Oxford
+* Keio University
 
 ## The Phenopolis Website 
-You can access a demo version of the server at: https://phenopolis.org
-
+You can access a demo version of the server at: https://www.phenopolis.org
 
 # Contributors
 We are especially interested in contributions to the UI (html, css, js) which could be greatly refactored and vastly improved.
 Also any performance improvements to the db queries would be also greatly appreciated.
-Let us know if you run into difficulties getting the code running!  Our goal is to make it easy for you to contribute so the project continues to grow!
+Let us know if you run into difficulties getting the code running!
+Our goal is to make it easy for you to contribute so the project continues to grow!
 ​
 # Installation
 This section includes guides to a quick install and a full installation.
