@@ -6,15 +6,16 @@
 
 ![alt tag](https://github.com/phenopolis/phenopolis/blob/master/static/phenopolis-pipeline.png)
 
-Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582).
+```
+Here is the original version of Phenopolis, we are now working on the much improved 2019 version.
+```
+
+Preprint on [biorxiv](http://biorxiv.org/content/early/2016/10/31/084582). Published in [Bioinformatics](https://www.ncbi.nlm.nih.gov/pubmed/28334266).
 
 Phenopolis is used for research into the molecular diagnosis of rare genetic diseases by clinicians, geneticists and bioinformaticians at UCL, University of Leeds, University of Manchester and University of Oxford.
 
 ## The Phenopolis Website 
-You can access a demo version of the server at:
-https://phenopolis.org
-username/password:
-demo/demo123
+You can access a demo version of the server at: https://phenopolis.org
 
 
 # Contributors
