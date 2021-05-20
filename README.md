@@ -2,7 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/phenopolis/phenopolis/badge.svg?branch=master)](https://coveralls.io/github/phenopolis/phenopolis?branch=master)
 
 
-Note this is the original version of Phenopolis, we are working on the much improved 2021 version that you can find at https://github.com/phenopolis/phenopolis_browser
+Note this is the original version of Phenopolis Browser, we are working on the much improved 2021 version that you can find at https://github.com/phenopolis/phenopolis_browser
 
 
 
