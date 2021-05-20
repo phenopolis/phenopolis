@@ -25,7 +25,7 @@ pysam==0.9.1.4 			# Can't be installed on Windows.
 python-bencode==1.0.2
 scipy==0.18.1 			# This will fail for Travis or Windows, they use alternative means of installation.
 django-htmlmin==0.10.0
-lxml==3.7.3
+lxml==4.6.3
 bs4==0.0.1
 passlib==1.7.1
 argon2_cffi==16.3.0
