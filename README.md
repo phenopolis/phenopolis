@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/phenopolis/phenopolis.svg?branch=master)](https://travis-ci.org/phenopolis/phenopolis)
 [![Coverage Status](https://coveralls.io/repos/github/phenopolis/phenopolis/badge.svg?branch=master)](https://coveralls.io/github/phenopolis/phenopolis?branch=master)
 
-```
-Note this is the original version of Phenopolis, we are now working on the much improved 2019 version.
-```
+
+Note this is the original version of Phenopolis, we are working on the much improved 2021 version that you can find at https://github.com/phenopolis/phenopolis_browser
+
 
 
 # Phenopolis: an open platform for harmonization and analysis of sequencing and phenotype data
